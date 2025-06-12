@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Segoe", "Segoe UI", "Arial", "sans-serif";
+  font-size: 14px;
+  overflow: hidden;
+  cursor: default;
+  user-select: none;
+}
