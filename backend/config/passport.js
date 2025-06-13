@@ -25,7 +25,7 @@ passport.use(new GoogleStrategy({
                     googleId: profile.id,
                     username: profile.displayName, // Google 프로필에서 이름 가져오기
                     email: profile.emails[0].value, // Google 프로필에서 이메일 가져오기
-                    profilePicture: profile.photos[0].value, // Google 프로필에서 사진 가져오기
+                    profileImage: profile.photos[0].value, // Google 프로필에서 사진 가져오기
                     // role은 기본값 'user'로 설정됩니다.
                 });
                 return done(null, user);

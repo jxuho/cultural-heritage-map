@@ -1,73 +1,47 @@
-import { useLocation } from "react-router";
-import useAuthStore from "../store/authStore";
-import useModalStore from "../store/modalStore";
+import useUiStore from "../store/uiStore";
+import { CgProfile } from "react-icons/cg";
 
-function Header() {
-  const location = useLocation();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const logout = useAuthStore((state) => state.logout);
-  const openModal = useModalStore((state) => state.openModal);
-  const closeModal = useModalStore((state) => state.closeModal);
+const Header = () => {
+  const isAccountManagerOpen = useUiStore(
+    (state) => state.isAccountManagerOpen
+  );
+  const openAccountManager = useUiStore((state) => state.openAccountManager);
+  const closeAccountManager = useUiStore((state) => state.closeAccountManager);
 
-  const signInClickHandler = () => {
-    window.location.href = "http://localhost:5000/api/v1/auth/google";
-  };
-
-  const onSignOutClickHandler = () => {
-    closeModal();
-    logout();
-  };
-
-  const signOutModalOpenHandler = () => {
-    openModal(
-      <div>
-        <h3 className="text-lg font-bold mb-2">Sign Out?</h3>
-        <p>Are you sure you want to sign out of your account?</p>
-        <button
-          onClick={onSignOutClickHandler}
-          className="mt-3 px-3 py-1.5 bg-red-500 text-white rounded hover:cursor-pointer font-semibold"
-        >
-          Sign Out
-        </button>
-      </div>
-    );
+  const headerButtonsClickHandler = (option) => {
+    switch (option) {
+      case "accountManager":
+        if (isAccountManagerOpen) {
+          closeAccountManager();
+        } else {
+          openAccountManager();
+        }
+        break;
+      default:
+        break;
+    }
   };
 
   return (
-    <header className="flex flex-row justify-between items-center h-12 text-white-text bg-blue-600">
+    <header className="flex flex-row justify-between items-center h-12 text-white-text bg-chemnitz-blue">
       <nav className="container mx-auto flex justify-between items-center">
         <a
           href="/"
-          className="text-2xl font-bold text-white hover:cursor-pointer"
+          className="text-2xl font-bold text-white hover:cursor-pointer pl-4 "
         >
-          Chemnitz Cultural Sites
+          Chemnitz Culture Finder
         </a>
-        {location.pathname !== "/auth" && (
-          <ul className="flex space-x-6">
-            {isAuthenticated ? (
-              <li>
-                <button
-                  onClick={signOutModalOpenHandler}
-                  className="bg-blue-700 hover:bg-blue-800 hover:cursor-pointer text-white font-bold py-1.5 px-3 rounded text-sm"
-                >
-                  Sign out
-                </button>
-              </li>
-            ) : (
-              <li>
-                <button
-                  onClick={signInClickHandler}
-                  className="bg-blue-700 hover:bg-blue-800 hover:cursor-pointer text-white font-bold py-1.5 px-3 rounded text-sm"
-                >
-                  Sign in
-                </button>
-              </li>
-            )}
-          </ul>
-        )}
+        <div
+          id="accountManagerButton"
+          className={`flex justify-center items-center h-12 w-12 hover:bg-[#44a1bd] transition ease-in-out duration-100 hover:cursor-pointer`}
+          onClick={() => headerButtonsClickHandler("accountManager")}
+          title="Account manager"
+        >
+          <CgProfile size="20px" className="text-white" />
+        </div>
       </nav>
     </header>
   );
-}
+};
 
 export default Header;

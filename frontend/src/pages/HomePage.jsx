@@ -1,7 +1,7 @@
 import MapComponent from "../components/MapComponent.jsx";
-import SidePanel from "../components/SidePanel.jsx";
+import SidePanel from "../components/SidePanel/SidePanel.jsx";
 
-function HomePage() {
+const HomePage = () => {
   return (
     <>
       <MapComponent />

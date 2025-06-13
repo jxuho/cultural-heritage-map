@@ -40,7 +40,7 @@ const googleAuthCallback = asyncHandler(async (req, res, next) => {
     createSendToken(req.user, 200, res);
 
     // 로그인 후 리다이렉트할 프론트엔드 URL (필요에 따라 설정)
-    return res.redirect('http://localhost:3000'); // 예시: 프론트엔드 대시보드 페이지로 리다이렉트
+    return res.redirect('http://localhost:3000/');
 });
 
 // 사용자 인증 미들웨어 (JWT 검증)

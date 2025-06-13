@@ -32,7 +32,10 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'CulturalSite'
     }],
-    bio: String, // 자기소개 등
+    bio: {
+        type: String,
+        maxlength: [200, 'bio must be under 200 characters']
+    },
 }, {
     timestamps: true
 });

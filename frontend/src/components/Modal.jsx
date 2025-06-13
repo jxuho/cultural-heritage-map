@@ -1,14 +1,14 @@
 import { useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
-import useModalStore from "../store/modalStore"; // Zustand 스토어 경로를 맞게 설정하세요.
+import useUiStore from "../store/uiStore"; // Zustand 스토어 경로를 맞게 설정하세요.
 
 const Modal = () => {
-  const { isOpen, modalContent, closeModal } = useModalStore();
+  const { isModalOpen, modalContent, closeModal } = useUiStore();
   const modalRef = useRef(null);
 
   // 모달이 열릴 때 body 스크롤 방지
   useEffect(() => {
-    if (isOpen) {
+    if (isModalOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -16,7 +16,7 @@ const Modal = () => {
     return () => {
       document.body.style.overflow = "unset"; // 클린업 함수
     };
-  }, [isOpen]);
+  }, [isModalOpen]);
 
   // ESC 키로 모달 닫기
   useEffect(() => {
@@ -25,15 +25,15 @@ const Modal = () => {
         closeModal();
       }
     };
-    if (isOpen) {
+    if (isModalOpen) {
       document.addEventListener("keydown", handleEscapeKey);
     }
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
     };
-  }, [isOpen, closeModal]);
+  }, [isModalOpen, closeModal]);
 
-  if (!isOpen) return null;
+  if (!isModalOpen) return null;
 
   // Portal을 사용하여 body 직계 자식으로 렌더링
   return ReactDOM.createPortal(
@@ -50,7 +50,7 @@ const Modal = () => {
       <div
         ref={modalRef}
         className="relative bg-white p-6 rounded-lg shadow-xl max-w-lg w-full transform transition-all duration-300 ease-out scale-95 opacity-0 data-[state=open]:scale-100 data-[state=open]:opacity-100"
-        data-state={isOpen ? "open" : "closed"} // Tailwind transition을 위한 data 속성
+        data-state={isModalOpen ? "open" : "closed"} // Tailwind transition을 위한 data 속성
       >
         {/* 닫기 버튼 (선택 사항) */}
         <button

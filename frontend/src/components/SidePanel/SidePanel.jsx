@@ -1,5 +1,5 @@
-import useSidePanelStore from "../store/sidePanelStore";
-import useViewport from "../hooks/useViewPort";
+import useSidePanelStore from "../../store/sidePanelStore";
+import useViewport from "../../hooks/useViewPort";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const SidePanel = () => {
@@ -101,9 +101,18 @@ const SidePanel = () => {
           style={{ right: resizerPosition, zIndex: "200" }}
         ></div>
 
-        <button onClick={() => closeSidePanel()}>close sidebar</button>
-        
         <div className="flex flex-col before:content-[''] before:h-[0.5px] before:w-full before:bg-ms-bg-border before:top-0 before:left-0">
+            <div className="flex items-center justify-between px-0 my-0 mx-6">
+              <button
+                className="text-gray-500 hover:text-gray-700 text-4xl font-bold hover:cursor-pointer"
+                onClick={() => closeSidePanel()}
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+
+          
           <div className="space-y-4">
             <p>
               <strong>이름:</strong> {selectedPlace.name}
@@ -127,7 +136,6 @@ const SidePanel = () => {
             )}
           </div>
         </div>
-      </div>
     )
   );
 };
