@@ -1,8 +1,9 @@
 // SidePanel.jsx
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import useSidePanelStore from "../../store/sidePanelStore";
 import useViewport from "../../hooks/useViewPort";
+import useAuthStore from "../../store/authStore";
 import StarIcon from '../StarIcon';
 import ReviewForm from '../Review/ReviewForm';
 import ReviewDisplay from '../Review/ReviewDisplay';
@@ -11,18 +12,23 @@ const SidePanel = () => {
   const isSidePanelOpen = useSidePanelStore((state) => state.isSidePanelOpen);
   const selectedPlace = useSidePanelStore((state) => state.selectedPlace);
   const closeSidePanel = useSidePanelStore((state) => state.closeSidePanel);
-  const sidePanelWidth = useSidePanelStore((state) => state.sidePanelWidth);
+  const sidePanelWidth = useSidePanelStore(
+    (state) => state.sidePanelWidth
+  );
   const setSidePanelWidth = useSidePanelStore(
     (state) => state.setSidePanelWidth
   );
   const { width: viewportWidth } = useViewport();
+
+  const currentUser = useAuthStore((state) => state.user); // 현재 로그인 사용자 정보 가져오기
 
   const detailRef = useRef();
   const [isResizing, setIsResizing] = useState(false);
   const [isHover, setIsHover] = useState(false);
   const [resizerPosition, setResizerPosition] = useState(360);
 
-  const [fullReviewsData, setFullReviewsData] = useState(null);
+  const [userReview, setUserReview] = useState(null);
+  const [otherReviews, setOtherReviews] = useState([]); // 로그인 상태에 따라 '모든 리뷰' 또는 '다른 사용자 리뷰'가 될 수 있음
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [reviewError, setReviewError] = useState(null);
   const [isReviewsExpanded, setIsReviewsExpanded] = useState(false);
@@ -33,7 +39,7 @@ const SidePanel = () => {
 
   const resizerMouseUpHandler = useCallback(() => {
     setIsResizing(false);
-  }, []);
+  });
 
   useEffect(() => {
     if (!isResizing) {
@@ -78,7 +84,8 @@ const SidePanel = () => {
 
   useEffect(() => {
     if (!isSidePanelOpen || !selectedPlace?._id) {
-      setFullReviewsData(null);
+      setUserReview(null);
+      setOtherReviews([]);
       setIsReviewsExpanded(false);
       setLoadingReviews(false);
       setReviewError(null);
@@ -92,18 +99,35 @@ const SidePanel = () => {
     setReviewError(null);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/v1/cultural-sites/${selectedPlace._id}`
+        `http://localhost:5000/api/v1/cultural-sites/${selectedPlace._id}/reviews`
       );
-      setFullReviewsData(response.data.data.culturalSite.reviews);
+      const reviews = response.data.data.reviews;
+
+      // ★★★ 로그인 상태에 따라 리뷰 분리 로직 변경 ★★★
+      if (currentUser?._id) {
+        const userReviewFound = reviews.find(
+          (review) => review.user?._id === currentUser._id
+        );
+        const filteredOtherReviews = reviews.filter(
+          (review) => review.user?._id !== currentUser._id
+        );
+        setUserReview(userReviewFound || null);
+        setOtherReviews(filteredOtherReviews); // 로그인 시: 다른 사용자 리뷰만
+      } else {
+        setUserReview(null); // 로그인 안 했으므로 사용자 리뷰 없음
+        setOtherReviews(reviews); // 로그인 안 한 경우: 모든 리뷰 표시
+      }
+
       setIsReviewsExpanded(true);
     } catch (err) {
       console.error("Failed to fetch reviews:", err);
       setReviewError("리뷰를 불러오는 데 실패했습니다.");
-      setFullReviewsData([]);
+      setUserReview(null);
+      setOtherReviews([]);
     } finally {
       setLoadingReviews(false);
     }
-  }, [selectedPlace?._id, loadingReviews]);
+  }, [selectedPlace?._id, loadingReviews, currentUser?._id]);
 
   const toggleReviewsExpansion = useCallback(() => {
     if (!isReviewsExpanded) {
@@ -113,7 +137,7 @@ const SidePanel = () => {
     }
   }, [isReviewsExpanded, fetchReviews]);
 
-  const handleReviewSubmitted = useCallback(() => {
+  const handleReviewActionCompleted = useCallback(() => {
     fetchReviews();
   }, [fetchReviews]);
 
@@ -121,8 +145,6 @@ const SidePanel = () => {
   if (!isSidePanelOpen || !selectedPlace) {
     return null;
   }
-
-  const reviewsToDisplay = fullReviewsData || [];
 
   return (
     <div
@@ -192,7 +214,7 @@ const SidePanel = () => {
                       rating={selectedPlace.averageRating}
                       index={i}
                       className="w-5 h-5"
-                      displayMode="averageRating" // ★★★ 여기를 추가했습니다 ★★★
+                      displayMode="averageRating"
                     />
                   ))}
                 </div>
@@ -211,14 +233,23 @@ const SidePanel = () => {
       {/* Panel Content - Conditional Rendering based on isReviewsExpanded */}
       {isReviewsExpanded ? (
         <div className="flex-grow overflow-y-auto">
-          {/* Review Form Component */}
-          <ReviewForm
-            placeId={selectedPlace._id}
-            onReviewSubmitted={handleReviewSubmitted}
-          />
-          {/* Review Display Component */}
+          {/* ★★★ currentUser가 있을 때만 ReviewForm 렌더링 ★★★ */}
+          {currentUser ? (
+            <ReviewForm
+              placeId={selectedPlace._id}
+              userReview={userReview}
+              onReviewActionCompleted={handleReviewActionCompleted}
+              currentUser={currentUser}
+            />
+          ) : (
+            <div className="p-4 bg-white border-b border-gray-200">
+              <p className="text-gray-700 text-center font-medium">리뷰를 작성하려면 로그인해주세요.</p>
+            </div>
+          )}
+
+          {/* ★★★ ReviewDisplay에 전달되는 reviews prop은 otherReviews (로그인 시) 또는 all reviews (로그인 안 한 경우) ★★★ */}
           <ReviewDisplay
-            reviews={reviewsToDisplay}
+            reviews={otherReviews}
             loading={loadingReviews}
             error={reviewError}
           />

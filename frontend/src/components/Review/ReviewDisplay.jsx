@@ -1,5 +1,4 @@
 // ReviewDisplay.jsx
-import React from 'react';
 import StarIcon from '../StarIcon';
 
 const ReviewDisplay = ({ reviews, loading, error }) => {
@@ -12,7 +11,7 @@ const ReviewDisplay = ({ reviews, loading, error }) => {
   }
 
   if (reviews.length === 0) {
-    return <p className="text-gray-600 text-center py-4">아직 리뷰가 없습니다.</p>;
+    return <p className="text-gray-600 text-center py-4">아직 다른 사용자의 리뷰가 없습니다.</p>;
   }
 
   return (
@@ -40,7 +39,7 @@ const ReviewDisplay = ({ reviews, loading, error }) => {
                   rating={review.rating}
                   index={i}
                   className="w-4 h-4"
-                  displayMode="reviewForm" // ★★★ 여기를 추가했습니다 ★★★
+                  displayMode="reviewForm" // 개별 리뷰는 정수 단위로 표시
                 />
               ))}
             </div>
