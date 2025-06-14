@@ -20,7 +20,7 @@ const SidePanel = () => {
   );
   const { width: viewportWidth } = useViewport();
 
-  const currentUser = useAuthStore((state) => state.user); // 현재 로그인 사용자 정보 가져오기
+  const currentUser = useAuthStore((state) => state.user);
 
   const detailRef = useRef();
   const [isResizing, setIsResizing] = useState(false);
@@ -28,10 +28,10 @@ const SidePanel = () => {
   const [resizerPosition, setResizerPosition] = useState(360);
 
   const [userReview, setUserReview] = useState(null);
-  const [otherReviews, setOtherReviews] = useState([]); // 로그인 상태에 따라 '모든 리뷰' 또는 '다른 사용자 리뷰'가 될 수 있음
+  const [otherReviews, setOtherReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [reviewError, setReviewError] = useState(null);
-  const [isReviewsExpanded, setIsReviewsExpanded] = useState(false);
+  const [isReviewsExpanded, setIsReviewsExpanded] = useState(false); // Default to false
 
   const resizerMouseDownHandler = useCallback(() => {
     setIsResizing(true);
@@ -39,7 +39,7 @@ const SidePanel = () => {
 
   const resizerMouseUpHandler = useCallback(() => {
     setIsResizing(false);
-  });
+  }, []);
 
   useEffect(() => {
     if (!isResizing) {
@@ -82,16 +82,6 @@ const SidePanel = () => {
     }
   }, [viewportWidth, sidePanelWidth, setSidePanelWidth]);
 
-  useEffect(() => {
-    if (!isSidePanelOpen || !selectedPlace?._id) {
-      setUserReview(null);
-      setOtherReviews([]);
-      setIsReviewsExpanded(false);
-      setLoadingReviews(false);
-      setReviewError(null);
-    }
-  }, [isSidePanelOpen, selectedPlace?._id]);
-
   const fetchReviews = useCallback(async () => {
     if (!selectedPlace?._id || loadingReviews) return;
 
@@ -103,7 +93,6 @@ const SidePanel = () => {
       );
       const reviews = response.data.data.reviews;
 
-      // ★★★ 로그인 상태에 따라 리뷰 분리 로직 변경 ★★★
       if (currentUser?._id) {
         const userReviewFound = reviews.find(
           (review) => review.user?._id === currentUser._id
@@ -112,13 +101,11 @@ const SidePanel = () => {
           (review) => review.user?._id !== currentUser._id
         );
         setUserReview(userReviewFound || null);
-        setOtherReviews(filteredOtherReviews); // 로그인 시: 다른 사용자 리뷰만
+        setOtherReviews(filteredOtherReviews);
       } else {
-        setUserReview(null); // 로그인 안 했으므로 사용자 리뷰 없음
-        setOtherReviews(reviews); // 로그인 안 한 경우: 모든 리뷰 표시
+        setUserReview(null);
+        setOtherReviews(reviews);
       }
-
-      setIsReviewsExpanded(true);
     } catch (err) {
       console.error("Failed to fetch reviews:", err);
       setReviewError("리뷰를 불러오는 데 실패했습니다.");
@@ -129,12 +116,37 @@ const SidePanel = () => {
     }
   }, [selectedPlace?._id, loadingReviews, currentUser?._id]);
 
-  const toggleReviewsExpansion = useCallback(() => {
-    if (!isReviewsExpanded) {
-      fetchReviews();
+  // ★★★ MODIFICATION HERE ★★★
+  // This useEffect will reset review states when the place changes or panel closes,
+  // but it will NOT collapse the review section automatically.
+  // The expansion will be controlled by toggleReviewsExpansion.
+  useEffect(() => {
+    // 사이드 패널이 닫히거나 선택된 장소가 없을 경우 모든 리뷰 관련 상태를 초기화하고 확장 상태를 false로 설정합니다.
+    if (!isSidePanelOpen || !selectedPlace?._id) {
+      setUserReview(null);
+      setOtherReviews([]);
+      setIsReviewsExpanded(false); // ★★★ 여기가 수정된 부분입니다. ★★★
+      setLoadingReviews(false);
+      setReviewError(null);
     } else {
-      setIsReviewsExpanded(false);
+      // 새로운 장소가 선택되고 패널이 열려 있는 경우
+      // 리뷰 데이터를 초기화하고, 리뷰 섹션을 접습니다.
+      setUserReview(null);
+      setOtherReviews([]);
+      setIsReviewsExpanded(false); // ★★★ 여기가 수정된 부분입니다. ★★★
+      setLoadingReviews(false);
+      setReviewError(null);
+      // fetchReviews는 toggleReviewsExpansion이 호출될 때만 실행됩니다.
     }
+  }, [isSidePanelOpen, selectedPlace?._id]); 
+
+
+  const toggleReviewsExpansion = useCallback(() => {
+    setIsReviewsExpanded((prev) => !prev); // Simply toggle the state
+    if (!isReviewsExpanded) { // If it's about to expand, fetch reviews
+      fetchReviews();
+    }
+    // If it's about to collapse, no need to fetch, state will be reset by the useEffect above
   }, [isReviewsExpanded, fetchReviews]);
 
   const handleReviewActionCompleted = useCallback(() => {
@@ -153,19 +165,19 @@ const SidePanel = () => {
       style={
         viewportWidth - sidePanelWidth < 560
           ? {
-              width: sidePanelWidth,
-              transition: "width 180ms ease",
-              position: "absolute",
-              right: "0",
-              boxShadow:
-                "0px 1.2px 3.6px rgba(0,0,0,0.1), 0px 6.4px 14.4px rgba(0,0,0,0.1)",
-            }
+            width: sidePanelWidth,
+            transition: "width 180ms ease",
+            position: "absolute",
+            right: "0",
+            boxShadow:
+              "0px 1.2px 3.6px rgba(0,0,0,0.1), 0px 6.4px 14.4px rgba(0,0,0,0.1)",
+          }
           : {
-              width: sidePanelWidth,
-              transition: "width 180ms ease",
-              boxShadow:
-                "0px 1.2px 3.6px rgba(0,0,0,0.1), 0px 6.4px 14.4px rgba(0,0,0,0.1)",
-            }
+            width: sidePanelWidth,
+            transition: "width 180ms ease",
+            boxShadow:
+              "0px 1.2px 3.6px rgba(0,0,0,0.1), 0px 6.4px 14.4px rgba(0,0,0,0.1)",
+          }
       }
     >
       {/* resizer */}
@@ -188,52 +200,50 @@ const SidePanel = () => {
           className="text-gray-500 hover:text-gray-700 text-4xl font-bold hover:cursor-pointer p-1"
           onClick={() => {
             closeSidePanel();
-            setIsReviewsExpanded(false);
+            setIsReviewsExpanded(false); // Ensure reviews are collapsed on panel close
           }}
         >
           &times;
         </button>
       </div>
 
-      {/* Review Summary and Expansion Section */}
-      {selectedPlace.reviewCount > 0 && (
-        <div className="border-b border-gray-200">
-          <div
-            className="flex items-center justify-between p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors duration-200 mx-4 my-2"
-            onClick={toggleReviewsExpansion}
-          >
-            <h3 className="text-lg font-semibold text-blue-800 flex-grow">
-              리뷰 ({selectedPlace.reviewCount})
-            </h3>
-            {selectedPlace.averageRating !== undefined && selectedPlace.averageRating !== null && (
-              <div className="flex items-center">
-                <div className="flex text-yellow-500 text-base mr-2">
-                  {[...Array(5)].map((_, i) => (
-                    <StarIcon
-                      key={i}
-                      rating={selectedPlace.averageRating}
-                      index={i}
-                      className="w-5 h-5"
-                      displayMode="averageRating"
-                    />
-                  ))}
-                </div>
-                <span className="text-blue-800 font-bold">
-                  {selectedPlace.averageRating.toFixed(1)}
-                </span>
+      {/* Always display Review Summary and Expansion Section */}
+      <div className="border-b border-gray-200">
+        <div
+          className="flex items-center justify-between p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors duration-200 mx-4 my-2"
+          onClick={toggleReviewsExpansion}
+        >
+          <h3 className="text-lg font-semibold text-blue-800 flex-grow">
+            리뷰 ({selectedPlace.reviewCount})
+          </h3>
+          {selectedPlace.averageRating !== undefined && selectedPlace.averageRating !== null && selectedPlace.reviewCount > 0 && (
+            <div className="flex items-center">
+              <div className="flex text-yellow-500 text-base mr-2">
+                {[...Array(5)].map((_, i) => (
+                  <StarIcon
+                    key={i}
+                    rating={selectedPlace.averageRating}
+                    index={i}
+                    className="w-5 h-5"
+                    displayMode="averageRating"
+                  />
+                ))}
               </div>
-            )}
-            <span className="ml-4 text-gray-500">
-              {isReviewsExpanded ? "▲" : "▼"}
-            </span>
-          </div>
+              <span className="text-blue-800 font-bold">
+                {selectedPlace.averageRating.toFixed(1)}
+              </span>
+            </div>
+          )}
+          <span className="ml-4 text-gray-500">
+            {isReviewsExpanded ? "▲" : "▼"}
+          </span>
         </div>
-      )}
+      </div>
 
       {/* Panel Content - Conditional Rendering based on isReviewsExpanded */}
       {isReviewsExpanded ? (
         <div className="flex-grow overflow-y-auto">
-          {/* ★★★ currentUser가 있을 때만 ReviewForm 렌더링 ★★★ */}
+          {/* currentUser가 있을 때만 ReviewForm 렌더링 */}
           {currentUser ? (
             <ReviewForm
               placeId={selectedPlace._id}
@@ -247,11 +257,12 @@ const SidePanel = () => {
             </div>
           )}
 
-          {/* ★★★ ReviewDisplay에 전달되는 reviews prop은 otherReviews (로그인 시) 또는 all reviews (로그인 안 한 경우) ★★★ */}
+          {/* ReviewDisplay에 전달되는 reviews prop은 otherReviews (로그인 시) 또는 all reviews (로그인 안 한 경우) */}
           <ReviewDisplay
             reviews={otherReviews}
             loading={loadingReviews}
             error={reviewError}
+            currentUser={currentUser}
           />
         </div>
       ) : (

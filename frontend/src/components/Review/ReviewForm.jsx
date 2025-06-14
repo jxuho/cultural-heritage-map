@@ -1,4 +1,3 @@
-// ReviewForm.jsx
 import { useCallback, useState, useEffect } from 'react';
 import axios from 'axios';
 import StarIcon from '../StarIcon';

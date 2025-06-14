@@ -1,7 +1,6 @@
-// ReviewDisplay.jsx
 import StarIcon from '../StarIcon';
 
-const ReviewDisplay = ({ reviews, loading, error }) => {
+const ReviewDisplay = ({ reviews, loading, error, currentUser }) => { // Receive currentUser prop
   if (loading) {
     return <p className="text-gray-600 text-center py-4">리뷰를 불러오는 중입니다...</p>;
   }
@@ -11,7 +10,11 @@ const ReviewDisplay = ({ reviews, loading, error }) => {
   }
 
   if (reviews.length === 0) {
-    return <p className="text-gray-600 text-center py-4">아직 다른 사용자의 리뷰가 없습니다.</p>;
+    if (currentUser) {
+      return <p className="text-gray-600 text-center py-4">아직 다른 사용자의 리뷰가 없습니다.</p>;
+    } else {
+      return <p className="text-gray-600 text-center py-4">아직 작성된 리뷰가 없습니다.</p>; // More general message
+    }
   }
 
   return (
@@ -39,7 +42,7 @@ const ReviewDisplay = ({ reviews, loading, error }) => {
                   rating={review.rating}
                   index={i}
                   className="w-4 h-4"
-                  displayMode="reviewForm" // 개별 리뷰는 정수 단위로 표시
+                  displayMode="reviewForm"
                 />
               ))}
             </div>
