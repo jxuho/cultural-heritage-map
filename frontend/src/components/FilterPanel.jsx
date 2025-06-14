@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import useFilterStore from '../store/filterStore';
 
-function FilterPanel() {
+const FilterPanel = () => {
   const selectedCategories = useFilterStore((state) => state.selectedCategories);
   const toggleCategory = useFilterStore((state) => state.toggleCategory);
 

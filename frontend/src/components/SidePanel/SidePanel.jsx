@@ -160,7 +160,7 @@ const SidePanel = () => {
 
   return (
     <div
-      className="absolute z-[1001] right-0 top-0 h-full shadow-lg bg-white max-w-[700px] flex flex-col"
+      className="absolute z-30 right-0 top-0 h-full shadow-lg bg-white max-w-[700px] flex flex-col"
       ref={detailRef}
       style={
         viewportWidth - sidePanelWidth < 560
