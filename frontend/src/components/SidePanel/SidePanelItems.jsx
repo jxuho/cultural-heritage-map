@@ -1,37 +1,125 @@
-// src/components/SideePanel/SidePanelItems.jsx
-import StarIcon from '../StarIcon'; 
-import ReviewForm from '../Review/ReviewForm'; 
-import ReviewDisplay from '../Review/ReviewDisplay'; 
+import StarIcon from "../StarIcon";
+import ReviewForm from "../Review/ReviewForm";
+import ReviewDisplay from "../Review/ReviewDisplay";
+import { BsStar, BsStarFill } from "react-icons/bs";
+import useAuthStore from "../../store/authStore";
+import { useCallback } from "react";
+import {
+  useCulturalSiteDetail,
+  useFavoriteMutation,
+  useMyFavorites,
+  usePlaceReviews,
+  useReviewMutation,
+} from "../../hooks/useCulturalSitesQueries";
+import useUiStore from "../../store/uiStore";
+import ErrorMessage from "../ErrorMessage"; // ErrorDisplay 대신 ErrorMessage 사용
 
-const SidePanelItems = ({
-  currentPlace,
-  isReviewsExpanded,
-  toggleReviewsExpansion,
-  currentUser,
-  userReview,
-  handleReviewActionCompleted,
-  loadingReviews,
-  reviewFetchError,
-  reviewsError,
-  closeSidePanel, // SidePanelItems 내에서 패널 닫기 버튼이 있으므로 필요
-  otherReviews
-}) => {
-  if (!currentPlace) {
-    return <p className="p-4 text-gray-600 text-center">선택된 장소 정보가 없습니다.</p>;
+const SidePanelItems = ({ isReviewsExpanded, toggleReviewsExpansion }) => {
+  // --- Zustand (UI State Management) ---
+  const currentUser = useAuthStore((state) => state.user);
+  const uiSelectedPlace = useUiStore((state) => state.selectedPlace);
+  const closeSidePanel = useUiStore((state) => state.closeSidePanel);
+
+  // --- TanStack Query: Data Fetching Hooks (Local to SidePanelItems) ---
+  // SidePanel에서 이미 로딩/에러를 처리했으므로, 여기서는 데이터 자체에 집중합니다.
+  const { data: selectedPlaceData } = useCulturalSiteDetail(
+    uiSelectedPlace?._id
+  );
+
+  const {
+    data: reviews = [],
+    isLoading: loadingReviews,
+    isError: reviewFetchError,
+    error: reviewsError,
+  } = usePlaceReviews(uiSelectedPlace?._id, isReviewsExpanded);
+
+  const { data: myFavorites = [] } = useMyFavorites(currentUser?._id);
+
+  // --- TanStack Query: Mutation Hooks ---
+  const reviewMutation = useReviewMutation();
+  const favoriteMutation = useFavoriteMutation();
+
+  // --- Derived State ---
+  const userReview =
+    reviews.find((review) => review.user?._id === currentUser?._id) || null;
+  const otherReviews = reviews.filter(
+    (review) => review.user?._id !== currentUser?._id
+  );
+  const isSelectedPlaceFavorite = myFavorites.some(
+    (obj) => obj._id === uiSelectedPlace?._id
+  );
+
+  // --- Callbacks for Child Components ---
+  const handleFavoriteChange = useCallback(
+    async (newStatus) => {
+      if (!currentUser) {
+        alert("로그인 후 즐겨찾기를 사용할 수 있습니다.");
+        return;
+      }
+      // favoriteMutation 훅 내부에서 에러 처리 및 캐시 업데이트가 이루어짐
+      await favoriteMutation.mutateAsync({
+        actionType: newStatus ? "add" : "delete",
+        culturalSiteId: uiSelectedPlace._id,
+      });
+    },
+    [favoriteMutation, uiSelectedPlace?._id, currentUser]
+  );
+
+  const handleReviewActionCompleted = useCallback(
+    async (actionType, newRating, oldRating, comment) => {
+      if (!currentUser) {
+        alert("리뷰를 작성/수정/삭제하려면 로그인해주세요.");
+        return;
+      }
+      // reviewMutation 훅 내부에서 에러 처리 및 캐시 업데이트가 이루어짐
+      await reviewMutation.mutateAsync({
+        actionType,
+        placeId: uiSelectedPlace._id,
+        reviewId: actionType === "create" ? undefined : userReview?._id,
+        reviewData:
+          actionType === "delete"
+            ? undefined
+            : { rating: newRating, comment: comment },
+        oldRating: oldRating,
+      });
+    },
+    [reviewMutation, uiSelectedPlace?._id, userReview, currentUser]
+  );
+
+  // --- Loading / Error / No Data Handling (within SidePanelItems) ---
+  // SidePanel에서 이미 초기 로딩/에러/선택된 장소 없음 상태를 처리했으므로,
+  // 여기 `SidePanelItems`는 `selectedPlaceData`가 유효하다는 전제 하에 렌더링됩니다.
+  // 그럼에도 불구하고 방어적인 코딩을 위해 `!selectedPlaceData` 체크는 유지합니다.
+  if (!selectedPlaceData) {
+    return <ErrorMessage message="선택된 장소 데이터를 찾을 수 없습니다." />;
   }
 
   return (
     <>
       {/* Header Section */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        {/* 즐겨찾기 버튼 */}
+        {currentUser && (
+          <button
+            onClick={() => handleFavoriteChange(!isSelectedPlaceFavorite)}
+            className={`text-xl p-1 hover:cursor-pointer ${
+              favoriteMutation.isPending ? "opacity-50 cursor-not-allowed" : ""
+            } ${
+              isSelectedPlaceFavorite
+                ? "text-yellow-400"
+                : "text-gray-400 hover:text-yellow-300"
+            }`}
+            disabled={favoriteMutation.isPending}
+          >
+            {isSelectedPlaceFavorite ? <BsStarFill /> : <BsStar />}
+          </button>
+        )}
         <h2 className="text-2xl font-bold text-gray-800 break-words pr-2">
-          {currentPlace.name}
+          {selectedPlaceData.name}
         </h2>
         <button
           className="text-gray-500 hover:text-gray-700 text-4xl font-bold hover:cursor-pointer p-1"
-          onClick={() => {
-            closeSidePanel(); // prop으로 받은 closeSidePanel 사용
-          }}
+          onClick={closeSidePanel}
         >
           &times;
         </button>
@@ -44,26 +132,28 @@ const SidePanelItems = ({
           onClick={toggleReviewsExpansion}
         >
           <h3 className="text-lg font-semibold text-blue-800 flex-grow">
-            리뷰 ({currentPlace.reviewCount || 0})
+            리뷰 ({selectedPlaceData.reviewCount || 0})
           </h3>
-          {currentPlace.averageRating !== undefined && currentPlace.averageRating !== null && currentPlace.reviewCount > 0 && (
-            <div className="flex items-center">
-              <div className="flex text-yellow-500 text-base mr-2">
-                {[...Array(5)].map((_, i) => (
-                  <StarIcon
-                    key={i}
-                    rating={currentPlace.averageRating}
-                    index={i}
-                    className="w-5 h-5"
-                    displayMode="averageRating"
-                  />
-                ))}
+          {selectedPlaceData.averageRating !== undefined &&
+            selectedPlaceData.averageRating !== null &&
+            selectedPlaceData.reviewCount > 0 && (
+              <div className="flex items-center">
+                <div className="flex text-yellow-500 text-base mr-2">
+                  {[...Array(5)].map((_, i) => (
+                    <StarIcon
+                      key={i}
+                      rating={selectedPlaceData.averageRating}
+                      index={i}
+                      className="w-5 h-5"
+                      displayMode="averageRating"
+                    />
+                  ))}
+                </div>
+                <span className="text-blue-800 font-bold">
+                  {selectedPlaceData.averageRating.toFixed(1)}
+                </span>
               </div>
-              <span className="text-blue-800 font-bold">
-                {currentPlace.averageRating.toFixed(1)}
-              </span>
-            </div>
-          )}
+            )}
           <span className="ml-4 text-gray-500">
             {isReviewsExpanded ? "▲" : "▼"}
           </span>
@@ -75,32 +165,56 @@ const SidePanelItems = ({
         <div className="flex-grow overflow-y-auto">
           {currentUser ? (
             <ReviewForm
-              placeId={currentPlace._id}
+              placeId={selectedPlaceData._id}
               userReview={userReview}
               onReviewActionCompleted={handleReviewActionCompleted}
               currentUser={currentUser}
+              isSubmitting={reviewMutation.isPending}
+              submitError={
+                reviewMutation.isError ? reviewMutation.error?.message : null
+              }
             />
           ) : (
             <div className="p-4 bg-white border-b border-gray-200">
-              <p className="text-gray-700 text-center font-medium">리뷰를 작성하려면 로그인해주세요.</p>
+              <p className="text-gray-700 text-center font-medium">
+                리뷰를 작성하려면 로그인해주세요.
+              </p>
             </div>
           )}
 
+          {/* 리뷰 로딩 및 에러 상태는 ReviewDisplay에 직접 전달하는 대신, SidePanelItems에서 처리하거나 
+              ReviewDisplay 내부에서 자체적으로 처리하도록 유도할 수 있습니다. 
+              여기서는 SidePanelItems에서 직접 처리하는 방식으로 유지합니다. */}
+          {loadingReviews && (
+            <div className="p-4 text-center text-gray-500">리뷰 로딩 중...</div>
+          )}
+          {reviewFetchError && (
+            <ErrorMessage
+              message={
+                reviewsError?.message || "리뷰를 불러오는데 실패했습니다."
+              }
+            />
+          )}
+          {!loadingReviews && !reviewFetchError && reviews.length === 0 && (
+            <p className="p-4 text-center text-gray-500">
+              아직 작성된 리뷰가 없습니다.
+            </p>
+          )}
           <ReviewDisplay
             reviews={otherReviews}
-            loading={loadingReviews} 
-            error={reviewFetchError?.message || reviewsError?.message}
             currentUser={currentUser}
+            // ReviewDisplay에 loading, error props는 더 이상 전달하지 않습니다.
           />
         </div>
       ) : (
         <div className="flex-grow p-4 overflow-y-auto">
+          {/* ... (기존 사진, 기본 정보, 설명 섹션 - 변경 없음) */}
           {/* 사진 업로드 해결될 때까지는 주석처리. */}
-          {/* {currentPlace.imageUrl && (
+          {/* {selectedPlaceData.imageUrl && (
             <div className="mb-4">
               <img
-                src={'currentPlace.imageUrl'}
-                alt={currentPlace.name}
+                src={'selectedPlaceData.imageUrl'}
+                alt={selectedPlaceData.name}
                 className="w-full h-48 object-cover rounded-lg shadow-sm"
               />
             </div>
@@ -110,23 +224,23 @@ const SidePanelItems = ({
           <div className="mb-6">
             <p className="text-sm text-gray-500 mb-1">
               <span className="font-semibold text-gray-700">카테고리:</span>{" "}
-              {currentPlace.category
+              {selectedPlaceData.category
                 ?.replace(/_/g, " ")
                 .split(" ")
                 .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                 .join(" ") || "N/A"}
             </p>
-            {currentPlace.address && (
+            {selectedPlaceData.address && (
               <p className="text-gray-700 mb-1">
                 <span className="font-semibold">주소:</span>{" "}
-                {currentPlace.address}
+                {selectedPlaceData.address}
               </p>
             )}
-            {currentPlace.website && (
+            {selectedPlaceData.website && (
               <p className="text-gray-700 mb-1">
                 <span className="font-semibold">웹사이트:</span>{" "}
                 <a
-                  href={currentPlace.website}
+                  href={selectedPlaceData.website}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline"
@@ -135,28 +249,33 @@ const SidePanelItems = ({
                 </a>
               </p>
             )}
-            {currentPlace.openingHours && (
+            {selectedPlaceData.openingHours && (
               <p className="text-gray-700 mb-1">
                 <span className="font-semibold">영업 시간:</span>{" "}
-                {currentPlace.openingHours}
+                {selectedPlaceData.openingHours}
               </p>
             )}
           </div>
 
           {/* Description Section */}
-          {currentPlace.description && (
+          {selectedPlaceData.description && (
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">설명</h3>
               <p className="text-gray-700 leading-relaxed">
-                {currentPlace.description}
+                {selectedPlaceData.description}
               </p>
             </div>
           )}
 
           {/* Message if no additional info */}
-          {!currentPlace.description && !currentPlace.website && !currentPlace.openingHours && currentPlace.reviewCount === 0 && (
-            <p className="text-gray-600 text-center py-8">추가 정보가 없습니다.</p>
-          )}
+          {!selectedPlaceData.description &&
+            !selectedPlaceData.website &&
+            !selectedPlaceData.openingHours &&
+            selectedPlaceData.reviewCount === 0 && (
+              <p className="text-gray-600 text-center py-8">
+                추가 정보가 없습니다.
+              </p>
+            )}
         </div>
       )}
     </>

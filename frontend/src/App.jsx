@@ -10,6 +10,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import UpdateProfile from "./components/MyAccount/UpdateProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProfileView from "./components/MyAccount/ProfileView";
+import MyReviews from "./components/MyAccount/MyReviews";
 
 const App = () => {
   const checkAuthStatus = useAuthStore((state) => state.checkAuthStatus);
@@ -36,6 +37,7 @@ const App = () => {
             <Route path="my-account" element={<MyAccountPage />}>
               <Route index element={<ProfileView />} />
               <Route path="update-profile" element={<UpdateProfile />} />
+              <Route path="reviews" element={<MyReviews/>}/>
             </Route>
           </Route>
 
