@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { MapContainer, TileLayer, Marker, ZoomControl } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, ZoomControl, useMapEvents } from "react-leaflet"; // useMapEvents 임포트 추가
 import "leaflet/dist/leaflet.css"; // Leaflet 기본 CSS
 
 // Leaflet 마커 아이콘 깨짐 방지 (기존 코드 유지)
@@ -33,6 +33,17 @@ import useUiStore from "../store/uiStore";
 
 // TanStack Query 훅 임포트
 import { useAllCulturalSites } from '../hooks/useCulturalSitesQueries'; // 새롭게 추가
+
+// MapEventsHandler 컴포넌트 추가
+const MapEventsHandler = () => {
+  useMapEvents({
+    contextmenu: (e) => {
+      e.originalEvent.preventDefault(); // 기본 브라우저 contextmenu 방지
+      console.log("Right-clicked at:", e.latlng);
+    },
+  });
+  return null; // 이 컴포넌트는 UI를 렌더링하지 않습니다.
+};
 
 // MapComponent는 이제 culturalSites를 props로 받지 않습니다.
 const MapComponent = () => { // props 제거
@@ -95,7 +106,9 @@ const MapComponent = () => { // props 제거
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <ZoomControl position="bottomleft" /> {/* 줌 컨트롤 위치 조정 */}
+        <ZoomControl position="bottomleft" />
+        {/* MapEventsHandler 컴포넌트를 MapContainer 내부에 추가 */}
+        <MapEventsHandler />
         {/* --- MarkerClusterGroup 추가 --- */}
         <MarkerClusterGroup
           chunkedLoading // 대량의 마커를 효율적으로 로드 (선택 사항이지만 권장)
