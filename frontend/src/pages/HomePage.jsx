@@ -1,7 +1,7 @@
-import MapComponent from "../components/MapComponent.jsx";
+import MapComponent from "../components/Map/MapComponent.jsx";
 import SidePanel from "../components/SidePanel/SidePanel.jsx";
 import FilterPanel from "../components/FilterPanel.jsx";
-import MapContextMenu from "../components/MapContextMenu.jsx";
+import MapContextMenu from "../components/Map/MapContextMenu.jsx";
 
 
 const HomePage = () => {

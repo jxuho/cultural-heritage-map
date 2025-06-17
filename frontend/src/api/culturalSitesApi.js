@@ -153,3 +153,19 @@ export const deleteFavorite = async (culturalSiteId) => {
     throw error;
   }
 };
+
+
+export const getNearbyOsm = async (lat, lon) => {
+  if (!lat || !lon) {
+    const error = new Error("Latitude and Longitude are required to fetch nearby OSM sites.");
+    console.error(error.message);
+    throw error;
+  }
+  try {
+    const response = await axios.get(`${API_BASE_URL}/cultural-sites/nearby-osm?lat=${lat}&lon=${lon}`, { withCredentials: true });
+    return response.data.data.osmCulturalSites || []; // 데이터 구조에 따라 수정
+  } catch (error) {
+    console.error(`Error fetching nearby OSM sites for lat: ${lat}, lon: ${lon}:`, error);
+    throw error;
+  }
+};

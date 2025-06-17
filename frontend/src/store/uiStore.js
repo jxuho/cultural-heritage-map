@@ -20,11 +20,22 @@ const useUiStore = create(devtools((set) => ({
   setSidePanelWidth: (width) => set({sidePanelWidth: width}),
   openSidePanel: (placeInfo) => set({ isSidePanelOpen: true, selectedPlace: placeInfo }),
   closeSidePanel: () => set({ isSidePanelOpen: false, selectedPlace: null }),
+  clearSelectedPlace: () => set({selectedPlace: null}),
 
   isContextMenuOpen: false,
   openContextMenu: () => set({isContextMenuOpen: true}),
   closeContextMenu: () => set({isContextMenuOpen: false}),
 
+  selectedLatLng: null,
+  setSelectedLatLng: (LatLng) => set({selectedLatLng: LatLng}),
+
+  nearbySites: [],
+  nearbySitesLoading: false,
+  nearbySitesError: null,
+  setNearbySites: (sites) => set({ nearbySites: sites, selectedPlace: null }),
+  clearNearbySites: () => set({ nearbySites: [] }),
+  setNearbySitesLoading: (isLoading) => set({ nearbySitesLoading: isLoading }),
+  setNearbySitesError: (error) => set({ nearbySitesError: error }),
 
 })));
 

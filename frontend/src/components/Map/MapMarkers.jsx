@@ -14,7 +14,7 @@ L.Icon.Default.mergeOptions({
 });
 
 // 전역 스토어 임포트
-import useUiStore from "../store/uiStore";
+import useUiStore from "../../store/uiStore";
 
 /**
  * 지도에 개별 마커들을 렌더링하는 컴포넌트입니다.

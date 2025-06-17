@@ -27,21 +27,25 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 // --- 클러스터링 관련 추가/수정 끝 ---
 
 // 필터 스토어 임포트 (선택된 카테고리 가져오기 위함)
-import useFilterStore from "../store/filterStore";
+import useFilterStore from "../../store/filterStore";
 // ui 스토어 임포트
-import useUiStore from "../store/uiStore";
+import useUiStore from "../../store/uiStore";
 
 // TanStack Query 훅 임포트
-import { useAllCulturalSites } from '../hooks/useCulturalSitesQueries'; // 새롭게 추가
+import { useAllCulturalSites } from '../../hooks/useCulturalSitesQueries'; // 새롭게 추가
 
 // MapEventsHandler 컴포넌트 추가
 const MapEventsHandler = () => {
   const openContextMenu = useUiStore((state) => state.openContextMenu);
+  const setSelectedLatLng = useUiStore(state => state.setSelectedLatLng)
   useMapEvents({
+    // 우클릭
     contextmenu: (e) => {
+      console.log(e.latlng);
+      
       e.originalEvent.preventDefault(); // 기본 브라우저 contextmenu 방지
       openContextMenu();
-      console.log("Right-clicked at:", e.latlng);
+      setSelectedLatLng(e.latlng);
     },
   });
   return null; // 이 컴포넌트는 UI를 렌더링하지 않습니다.
