@@ -21,6 +21,10 @@ const useUiStore = create(devtools((set) => ({
   openSidePanel: (placeInfo) => set({ isSidePanelOpen: true, selectedPlace: placeInfo }),
   closeSidePanel: () => set({ isSidePanelOpen: false, selectedPlace: null }),
 
+  isContextMenuOpen: false,
+  openContextMenu: () => set({isContextMenuOpen: true}),
+  closeContextMenu: () => set({isContextMenuOpen: false}),
+
 
 })));
 

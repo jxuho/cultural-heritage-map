@@ -1,6 +1,7 @@
 import MapComponent from "../components/MapComponent.jsx";
 import SidePanel from "../components/SidePanel/SidePanel.jsx";
 import FilterPanel from "../components/FilterPanel.jsx";
+import MapContextMenu from "../components/MapContextMenu.jsx";
 
 
 const HomePage = () => {
@@ -12,6 +13,7 @@ const HomePage = () => {
         <FilterPanel />
       </div>
       <SidePanel />
+      <MapContextMenu/>
     </>
   );
 };
