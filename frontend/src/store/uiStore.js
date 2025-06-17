@@ -37,6 +37,22 @@ const useUiStore = create(devtools((set) => ({
   setNearbySitesLoading: (isLoading) => set({ nearbySitesLoading: isLoading }),
   setNearbySitesError: (error) => set({ nearbySitesError: error }),
 
+    // --- NEW STATES FOR PROPOSAL FORM ---
+  isProposalFormOpen: false,
+  proposalFormData: null, // Holds the data to pre-fill the form
+  // ------------------------------------
+  // --- NEW ACTIONS FOR PROPOSAL FORM ---
+  openProposalForm: (data) => set({
+    isSidePanelOpen: true, // Open side panel if not already open
+    isProposalFormOpen: true,
+    proposalFormData: data,
+    selectedPlace: null, // Ensure no single cultural site is selected
+    nearbySites: [], // Clear nearby sites list
+  }),
+  closeProposalForm: () => set({ isProposalFormOpen: false, proposalFormData: null }),
+  // ------------------------------------
+
+
 })));
 
 export default useUiStore;

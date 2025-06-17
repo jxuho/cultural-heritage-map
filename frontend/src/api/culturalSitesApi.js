@@ -169,3 +169,14 @@ export const getNearbyOsm = async (lat, lon) => {
     throw error;
   }
 };
+
+
+export const submitProposal = async (proposalData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/proposals`, proposalData, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    // It's good practice to re-throw with a more specific error or process it
+    throw error.response?.data?.message || 'Failed to submit proposal';
+  }
+};

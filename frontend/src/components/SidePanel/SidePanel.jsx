@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import useUiStore from "../../store/uiStore";
-import { useQueryClient } from "@tanstack/react-query"; // Import useQueryClient
+import { useQueryClient } from "@tanstack/react-query";
 
 import Resizer from "./SidePanelResizer";
 import useSidePanelResizer from "../../hooks/useSidePanelResizer";
@@ -11,6 +11,7 @@ import SidePanelItems from "./SidePanelItems";
 import SidePanelSkeleton from "./SidePanelSkeleton";
 import ErrorMessage from "../ErrorMessage";
 import NearbySitesList from "./NearbySitesList";
+import ProposalForm from "./ProposalForm"; // Import the ProposalForm component
 
 const SidePanel = () => {
   // --- Zustand (UI State Management) ---
@@ -22,10 +23,12 @@ const SidePanel = () => {
   const nearbySitesLoading = useUiStore((state) => state.nearbySitesLoading);
   const nearbySitesError = useUiStore((state) => state.nearbySitesError);
   const closeSidePanel = useUiStore((state) => state.closeSidePanel);
-  const clearSelectedPlace = useUiStore((state) => state.clearSelectedPlace); // Make sure this function exists in your store
+  const clearSelectedPlace = useUiStore((state) => state.clearSelectedPlace);
+
+  const isProposalFormOpen = useUiStore((state) => state.isProposalFormOpen);
 
   // --- TanStack Query Client ---
-  const queryClient = useQueryClient(); // Get the query client instance
+  const queryClient = useQueryClient();
 
   // --- Local UI State (useState) ---
   const [isReviewsExpanded, setIsReviewsExpanded] = useState(false);
@@ -44,12 +47,9 @@ const SidePanel = () => {
 
   // --- Combined Close and Cancel Function ---
   const handleCloseAndCancel = (queryKeyToCancel) => {
-    // 1. Close the side panel
     closeSidePanel();
-    // 2. Clear any displayed nearby sites or selected place
     clearNearbySites();
-    clearSelectedPlace(); // Ensure selected place is also cleared
-    // 3. Cancel the specific query if a key is provided
+    clearSelectedPlace();
     if (queryKeyToCancel) {
       console.log(`Cancelling query with key: ${queryKeyToCancel}`);
       queryClient.cancelQueries({ queryKey: [queryKeyToCancel] });
@@ -57,12 +57,10 @@ const SidePanel = () => {
   };
 
   // --- Effects ---
-  // Side panel이 닫히거나 장소가 변경되면 리뷰 섹션 축소 및 상태 초기화
   useEffect(() => {
-    if (!isSidePanelOpen || (!uiSelectedPlace?._id && !nearbySites.length)) {
+    if (!isSidePanelOpen || (!uiSelectedPlace?._id && !nearbySites.length && !isProposalFormOpen)) {
       setIsReviewsExpanded(false);
       if (!isSidePanelOpen) {
-        // When panel is truly closed, ensure all related data is cleared
         clearNearbySites();
         clearSelectedPlace();
       }
@@ -72,76 +70,71 @@ const SidePanel = () => {
     uiSelectedPlace?._id,
     nearbySites.length,
     clearNearbySites,
-    clearSelectedPlace, // Add clearSelectedPlace to dependencies
+    clearSelectedPlace,
+    isProposalFormOpen,
   ]);
 
   // --- Rendering Logic ---
   if (!isSidePanelOpen) {
-    return null; // 패널이 닫혀있으면 아무것도 렌더링하지 않음
+    return null;
   }
 
   let panelContent;
 
-  // Prioritize rendering based on state:
-  // 1. Nearby sites loading (from context menu search)
-  if (nearbySitesLoading) {
-    // Pass 'nearbyOsm' as the query key to cancel
+  if (isProposalFormOpen) {
+    panelContent = <ProposalForm />;
+  }
+  else if (nearbySitesLoading) {
     panelContent = <SidePanelSkeleton onClose={() => handleCloseAndCancel('nearbyOsm')} />;
   }
-  // 2. Nearby sites error
   else if (nearbySitesError) {
     panelContent = (
       <ErrorMessage
         message={
           nearbySitesError?.message ||
-          "주변 문화재 정보를 불러오는데 실패했습니다."
+          "Failed to load nearby cultural sites." // English translation
         }
-        onClose={() => handleCloseAndCancel(null)} // No specific query to cancel here, just close
+        onClose={() => handleCloseAndCancel(null)}
       />
     );
   }
-  // 3. Nearby sites available (and no specific place selected)
   else if (nearbySites.length > 0 && !uiSelectedPlace?._id) {
-    panelContent = <NearbySitesList sites={nearbySites} onClose={() => handleCloseAndCancel(null)} />; // No specific query to cancel
+    panelContent = <NearbySitesList sites={nearbySites} onClose={() => handleCloseAndCancel(null)} />;
   }
-  // 4. Specific place error
   else if (isPlaceError) {
     panelContent = (
       <ErrorMessage
-        message={placeError?.message || "문화재 정보를 불러오는데 실패했습니다."}
-        onClose={() => handleCloseAndCancel(null)} // No specific query to cancel
+        message={placeError?.message || "Failed to load cultural site information."} // English translation
+        onClose={() => handleCloseAndCancel(null)}
       />
     );
   }
-  // 5. Specific place loading
   else if (isPlaceLoading && !selectedPlaceData) {
-    // Pass 'culturalSiteDetail' as the query key to cancel
     panelContent = <SidePanelSkeleton onClose={() => handleCloseAndCancel('culturalSiteDetail')} />;
   }
-  // 6. Specific place data available
   else if (selectedPlaceData) {
+    // Assuming SidePanelItems also needs a close button if not handled by outer panel
     panelContent = (
       <SidePanelItems
         isReviewsExpanded={isReviewsExpanded}
         toggleReviewsExpansion={() => setIsReviewsExpanded((prev) => !prev)}
-        onClose={() => handleCloseAndCancel(null)} // Allow closing the detail view
+        onClose={() => handleCloseAndCancel(null)} // Pass onClose if SidePanelItems has a close button
       />
     );
   }
-  // 7. Default case (no specific place, no nearby sites, not loading/error)
   else {
     panelContent = (
       <p className="p-4 text-gray-600 text-center relative">
         <div className="absolute top-4 right-4">
           <button
             className="text-gray-500 hover:text-gray-700 text-4xl font-bold hover:cursor-pointer p-1"
-            onClick={() => handleCloseAndCancel(null)} // Allow closing this default view
+            onClick={() => handleCloseAndCancel(null)}
             aria-label="Close panel"
           >
             &times;
           </button>
         </div>
-        No information
+        No information available.
       </p>
     );
   }
@@ -161,14 +154,12 @@ const SidePanel = () => {
     >
       <Resizer detailRef={detailRef} />
       {panelContent}
-      {/* This loading overlay is for the entire panel's initial load,
-          individual data section loading is better handled inside SidePanelItems. */}
       {isPlaceLoading && !selectedPlaceData && (
         <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
           <div className="absolute top-4 right-4">
             <button
               className="text-gray-500 hover:text-gray-700 text-4xl font-bold hover:cursor-pointer p-1"
-              onClick={() => handleCloseAndCancel('culturalSiteDetail')} // Cancel the specific detail query here too
+              onClick={() => handleCloseAndCancel('culturalSiteDetail')}
               aria-label="Close panel"
             >
               &times;

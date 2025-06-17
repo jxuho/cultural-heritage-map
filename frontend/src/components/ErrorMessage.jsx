@@ -1,10 +1,20 @@
-import React from 'react';
+// components/ErrorMessage.jsx
 
-const ErrorMessage = ({ message }) => {
+const ErrorMessage = ({ message, onClose }) => {
   return (
-    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-      <strong className="font-bold">Error!</strong>
-      <span className="block sm:inline ml-2">{message}</span>
+    <div className="p-4 text-red-700 bg-red-100 border border-red-200 rounded relative">
+      {onClose && (
+        <div className="absolute top-4 right-4">
+          <button
+            className="text-gray-500 hover:text-gray-700 text-4xl font-bold hover:cursor-pointer p-1"
+            onClick={onClose}
+            aria-label="Close error message"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+      <p className="pr-10">Error: {message}</p> {/* Prepended "Error: " */}
     </div>
   );
 };
