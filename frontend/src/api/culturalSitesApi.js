@@ -170,7 +170,7 @@ export const getNearbyOsm = async (lat, lon) => {
   }
 };
 
-
+// proposal 제출
 export const submitProposal = async (proposalData) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/proposals`, proposalData, { withCredentials: true });
@@ -185,4 +185,32 @@ export const submitProposal = async (proposalData) => {
 export const createCulturalSite = async (siteData) => {
   const response = await axios.post(`${API_BASE_URL}/cultural-sites`, siteData, { withCredentials: true });
   return response.data.data.culturalSite;
+};
+
+// 특정 문화재 정보 업데이트 (관리자용, PUT 메서드)
+export const updateCulturalSite = async (culturalSiteId, updateData) => {
+  if (!culturalSiteId || !updateData) {
+    throw new Error("Cultural site ID and update data are required to update a cultural site.");
+  }
+  try {
+    const response = await axios.put(`${API_BASE_URL}/cultural-sites/${culturalSiteId}`, updateData, { withCredentials: true });
+    return response.data.data.culturalSite || null;
+  } catch (error) {
+    console.error(`Error updating cultural site ${culturalSiteId}:`, error);
+    throw error;
+  }
+};
+
+// 특정 문화재 삭제 (관리자용, DELETE 메서드)
+export const deleteCulturalSite = async (culturalSiteId) => {
+  if (!culturalSiteId) {
+    throw new Error("Cultural site ID is required to delete a cultural site.");
+  }
+  try {
+    await axios.delete(`${API_BASE_URL}/cultural-sites/${culturalSiteId}`, { withCredentials: true });
+    return true; // Indicate success
+  } catch (error) {
+    console.error(`Error deleting cultural site ${culturalSiteId}:`, error);
+    throw error;
+  }
 };

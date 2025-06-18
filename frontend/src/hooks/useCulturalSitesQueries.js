@@ -13,7 +13,9 @@ import {
   getMyReviews,
   getNearbyOsm,
   submitProposal,
-  createCulturalSite
+  createCulturalSite,
+  deleteCulturalSite,
+  updateCulturalSite
 } from '../api/culturalSitesApi'; // API 함수 임포트
 
 // 모든 문화재 목록 가져오기
@@ -194,6 +196,43 @@ export const useCreateCulturalSite = () => {
       console.error("문화 유적지 직접 생성 실패:", error);
       // 에러 처리 로직 (예: 에러 메시지 표시)
       throw error; // 에러를 다시 던져서 컴포넌트에서 catch할 수 있도록 합니다.
+    },
+  });
+};
+
+
+// 문화재 정보 업데이트를 위한 뮤테이션 훅 (관리자용, PUT 메서드)
+export const useUpdateCulturalSite = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ culturalSiteId, updateData }) => updateCulturalSite(culturalSiteId, updateData),
+    onSuccess: (data, variables) => {
+      // 성공 시 특정 문화재 상세 정보 쿼리 무효화 및 전체 목록 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ['culturalSite', variables.culturalSiteId] });
+      queryClient.invalidateQueries({ queryKey: ['culturalSites'] });
+      console.log(`문화 유적지 ${variables.culturalSiteId} 업데이트 성공!`);
+    },
+    onError: (error, variables) => {
+      console.error(`문화 유적지 ${variables.culturalSiteId} 업데이트 실패:`, error);
+      alert(`문화 유적지 업데이트 실패: ${error.message || "알 수 없는 오류"}`);
+    },
+  });
+};
+
+// 문화재 삭제를 위한 뮤테이션 훅 (관리자용, DELETE 메서드)
+export const useDeleteCulturalSite = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (culturalSiteId) => deleteCulturalSite(culturalSiteId),
+    onSuccess: (_, culturalSiteId) => {
+      // 성공 시 특정 문화재 상세 정보 쿼리 무효화 및 전체 목록 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ['culturalSite', culturalSiteId] });
+      queryClient.invalidateQueries({ queryKey: ['culturalSites'] });
+      console.log(`문화 유적지 ${culturalSiteId} 삭제 성공!`);
+    },
+    onError: (error, culturalSiteId) => {
+      console.error(`문화 유적지 ${culturalSiteId} 삭제 실패:`, error);
+      alert(`문화 유적지 삭제 실패: ${error.message || "알 수 없는 오류"}`);
     },
   });
 };
