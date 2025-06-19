@@ -171,9 +171,8 @@ const MapComponent = () => {
                 culturalSite.location.coordinates[1], // Latitude
                 culturalSite.location.coordinates[0], // Longitude
               ]}
-              // --- NEW: createCustomIcon 함수를 사용하여 아이콘 할당 ---
+              // createCustomIcon 함수를 사용하여 아이콘 할당
               icon={createCustomIcon(culturalSite.category)}
-              // --- END NEW ---
               eventHandlers={{
                 click: () => openSidePanel(culturalSite),
               }}
