@@ -61,7 +61,7 @@ const createCustomIcon = (category, isSelected = false) => {
 
 // 개별 마커를 위한 컴포넌트
 const MemoizedCulturalSiteMarker = React.memo(({ culturalSite, openSidePanel, isSelected }) => {
-    console.log(`마커 ${culturalSite.name} (${culturalSite._id}) 재렌더링됨. isSelected: ${isSelected}`);
+    // console.log(`마커 ${culturalSite.name} (${culturalSite._id}) 재렌더링됨. isSelected: ${isSelected}`);
 
     // 아이콘 생성은 여기서 직접 합니다.
     const iconToRender = createCustomIcon(culturalSite.category, isSelected);

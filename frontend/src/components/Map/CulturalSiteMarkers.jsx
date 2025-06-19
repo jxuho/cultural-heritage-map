@@ -11,7 +11,7 @@ import MemoizedCulturalSiteMarker from './MemoizedCulturalSiteMarker'; // 새로
 
 
 const CulturalSiteMarkers = React.memo(({ sites, openSidePanel, selectedPlace }) => {
-    console.log("CulturalSiteMarkers 재렌더링됨."); // 디버깅용
+    // console.log("CulturalSiteMarkers 재렌더링됨."); // 디버깅용
 
     return (
         <MarkerClusterGroup chunkedLoading>

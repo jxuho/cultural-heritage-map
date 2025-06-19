@@ -78,6 +78,10 @@ const useUiStore = create(devtools((set) => ({
       queryClient.cancelQueries({ queryKey: [queryKeyToCancel] });
     }
   },
+
+  jumpToPlace: null,
+setJumpToPlace: (place) => set({ jumpToPlace: place }),
+clearJumpToPlace: () => set({ jumpToPlace: null }),
 })));
 
 export default useUiStore;

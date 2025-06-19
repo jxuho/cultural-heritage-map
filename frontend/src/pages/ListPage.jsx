@@ -19,6 +19,7 @@ const ListPage = () => {
   const [sortBy, setSortBy] = useState('alphabetical');
 
   const openSidePanel = useUiStore((state) => state.openSidePanel);
+  const setJumpToPlace = useUiStore(state => state.setJumpToPlace);
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -107,10 +108,11 @@ const ListPage = () => {
     }
     return stars;
   };
-  const handleCardClick = (site) => {
-    navigate('/'); // 홈 페이지 (지도 뷰)로 이동
-    openSidePanel(site); // 사이드 패널 열고 해당 cultural site 정보 전달
-  };
+const handleCardClick = (site) => {
+  navigate('/'); // 지도 페이지로 이동
+  openSidePanel(site); // 기존 동작
+  setJumpToPlace(site); // 추가: 지도 중심 이동 요청
+};
 
   return (
     <div className="container mx-auto p-4 mt-5">
