@@ -3,12 +3,13 @@ import {
   PiUserCircleThin,
   PiTrashThin,
   PiMapPinLineThin,
-  PiChatCircleTextThin
+  PiChatCircleTextThin,
+  PiClipboardTextThin // New icon for proposals
 } from "react-icons/pi";
 import useAuthStore from "../../store/authStore";
 import useUiStore from "../../store/uiStore";
 import defaultProfileImg from "../../assets/profile_image.svg";
-import { Link } from 'react-router';
+import { Link } from 'react-router'; // Ensure Link is from react-router-dom
 
 const ProfileView = () => {
   const user = useAuthStore((state) => state.user);
@@ -105,7 +106,7 @@ const ProfileView = () => {
           </div>
           <Link
             className="font-medium text-chemnitz-blue flex hover:underline hover:cursor-pointer pb-2 pt-4 border-t"
-            to="update-profile" 
+            to="update-profile"
           >
             <span className="uppercase max-[400px]:text-sm" title="update profile">
               Update Profile
@@ -140,7 +141,7 @@ const ProfileView = () => {
           </div>
           <Link
             className="font-medium text-chemnitz-blue flex hover:underline hover:cursor-pointer pb-2 pt-4 border-t"
-            to="favorite-sites" 
+            to="favorite-sites"
           >
             <span className="uppercase max-[400px]:text-sm" title="go to favorites">
               Go to favorites
@@ -175,7 +176,7 @@ const ProfileView = () => {
           </div>
           <Link
             className="font-medium text-chemnitz-blue flex hover:underline hover:cursor-pointer pb-2 pt-4 border-t"
-            to="reviews" 
+            to="reviews"
           >
             <span className="uppercase max-[400px]:text-sm" title="check reviews">
               Check reviews
@@ -186,6 +187,43 @@ const ProfileView = () => {
           </Link>
         </div>
       </div>
+
+      {/* Admin: View Proposals Card (Conditionally Rendered) */}
+      {user.role === 'admin' && (
+        <div
+          className="flex flex-col max-w-xs p-4 bg-white rounded h-full row-span-1"
+          style={{
+            boxShadow:
+              "0px 5px 10px rgba(0,0,0,0.1), 0px 1.6px 3.6px rgba(0,0,0,0.1)",
+          }}
+        >
+          <div className="flex flex-col items-center justify-between h-full mt-4">
+            <div className="flex flex-col items-center">
+              <div className="text-2xl font-normal pb-4 max-[400px]:text-lg">
+                View Proposals
+              </div>
+              <PiClipboardTextThin // Using the new icon
+                className="text-light-text"
+                size={"60px"}
+              />
+              <p className="py-3 text-center">
+                Review and manage user-submitted proposals.
+              </p>
+            </div>
+            <Link
+              className="font-medium text-chemnitz-blue flex hover:underline hover:cursor-pointer pb-2 pt-4 border-t"
+              to="proposals" // Link to the new proposals route
+            >
+              <span className="uppercase max-[400px]:text-sm" title="view proposals">
+                View Proposals
+              </span>
+              <span>
+                <MdKeyboardArrowRight size={"22px"} />
+              </span>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Delete Account Card */}
       <div
@@ -211,7 +249,7 @@ const ProfileView = () => {
           </div>
           <Link
             className="font-medium text-alert-error flex hover:underline hover:cursor-pointer pb-2 pt-4 border-t "
-            to="delete-account" 
+            to="delete-account"
           >
             <span className="uppercase max-[400px]:text-xs" title="delete account">
               Delete Account

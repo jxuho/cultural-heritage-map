@@ -81,7 +81,7 @@ const SidePanelContent = () => {
     );
   } else {
     panelContent = (
-      <p className="p-4 text-gray-600 text-center relative">
+      <div className="p-4 text-gray-600 text-center relative">
         <div className="absolute top-4 right-4">
           <button
             className="text-gray-500 hover:text-gray-700 text-4xl font-bold hover:cursor-pointer p-1"
@@ -92,7 +92,7 @@ const SidePanelContent = () => {
           </button>
         </div>
         No information available.
-      </p>
+      </div>
     );
   }
 

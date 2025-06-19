@@ -15,7 +15,10 @@ import {
   submitProposal,
   createCulturalSite,
   deleteCulturalSite,
-  updateCulturalSite
+  updateCulturalSite,
+  fetchAllProposals,
+  acceptProposal,
+  rejectProposal
 } from '../api/culturalSitesApi'; // API 함수 임포트
 
 // 모든 문화재 목록 가져오기
@@ -235,4 +238,54 @@ export const useDeleteCulturalSite = () => {
       alert(`문화 유적지 삭제 실패: ${error.message || "알 수 없는 오류"}`);
     },
   });
+};
+
+export const useProposals = () => {
+  return useQuery({
+    queryKey: ['proposals'],
+    queryFn: fetchAllProposals, // Use the imported API function
+    staleTime: 1000 * 60, // 1 minute stale time for proposals (adjust as needed for admin view)
+  });
+};
+
+// Proposal 승인/거절을 위한 뮤테이션 훅
+export const useProposalModeration = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ proposalId, actionType, adminNotes }) => {
+            if (actionType === 'accept') {
+                return acceptProposal(proposalId, adminNotes);
+            } else if (actionType === 'reject') {
+                return rejectProposal(proposalId, adminNotes);
+            }
+            throw new Error('Invalid proposal moderation action type.');
+        },
+        onSuccess: (data, variables) => {
+            console.log(`Proposal ${variables.proposalId} ${variables.actionType}ed successfully!`, data);
+            // 제안 목록 쿼리를 무효화하여 최신 상태를 반영합니다.
+            queryClient.invalidateQueries({ queryKey: ['proposals'] });
+
+            // 만약 승인된 제안이 새로운 문화재 생성이라면, 전체 문화재 목록도 무효화해야 합니다.
+            // 또는 서버 응답에서 'create' 타입의 제안이 승인되었음을 알리는 정보가 있다면,
+            // 'culturalSites' 쿼리도 무효화할 수 있습니다.
+            // 여기서는 `data.data.proposal.proposalType` 또는 유사한 필드를 확인한다고 가정합니다.
+            // 실제 백엔드 API 응답 구조에 따라 조정하세요.
+            if (data?.data?.proposal?.proposalType === 'create' && variables.actionType === 'accept') {
+                queryClient.invalidateQueries({ queryKey: ['culturalSites'] });
+            }
+
+            // 특정 문화재를 수정하거나 삭제하는 제안이 승인되었다면
+            // 해당 문화재 상세 정보 쿼리도 무효화해야 할 수 있습니다.
+            // 예를 들어:
+            // if (variables.actionType === 'accept' && data?.data?.proposal?.culturalSite) {
+            //     queryClient.invalidateQueries({ queryKey: ['culturalSite', data.data.proposal.culturalSite] });
+            // }
+
+            alert(`제안이 성공적으로 ${variables.actionType === 'accept' ? '승인' : '거절'}되었습니다.`);
+        },
+        onError: (error, variables) => {
+            console.error(`Error ${variables.actionType}ing proposal ${variables.proposalId}:`, error);
+            alert(`제안 ${variables.actionType === 'accept' ? '승인' : '거절'} 실패: ${error.message || "알 수 없는 오류"}`);
+        },
+    });
 };
