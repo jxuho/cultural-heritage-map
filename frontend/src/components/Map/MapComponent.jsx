@@ -1,5 +1,11 @@
 import { useRef } from "react";
-import { MapContainer, TileLayer, Marker, ZoomControl, useMapEvents } from "react-leaflet"; // useMapEvents 임포트 추가
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  ZoomControl,
+  useMapEvents,
+} from "react-leaflet"; // useMapEvents 임포트 추가
 import "leaflet/dist/leaflet.css"; // Leaflet 기본 CSS
 
 // Leaflet 마커 아이콘 깨짐 방지 (기존 코드 유지)
@@ -32,17 +38,17 @@ import useFilterStore from "../../store/filterStore";
 import useUiStore from "../../store/uiStore";
 
 // TanStack Query 훅 임포트
-import { useAllCulturalSites } from '../../hooks/useCulturalSitesQueries'; // 새롭게 추가
+import { useAllCulturalSites } from "../../hooks/useCulturalSitesQueries"; // 새롭게 추가
 
 // MapEventsHandler 컴포넌트 추가
 const MapEventsHandler = () => {
   const openContextMenu = useUiStore((state) => state.openContextMenu);
-  const setSelectedLatLng = useUiStore(state => state.setSelectedLatLng)
+  const setSelectedLatLng = useUiStore((state) => state.setSelectedLatLng);
   useMapEvents({
     // 우클릭
     contextmenu: (e) => {
       console.log(e.latlng);
-      
+
       e.originalEvent.preventDefault(); // 기본 브라우저 contextmenu 방지
       openContextMenu();
       setSelectedLatLng(e.latlng);
@@ -52,7 +58,8 @@ const MapEventsHandler = () => {
 };
 
 // MapComponent는 이제 culturalSites를 props로 받지 않습니다.
-const MapComponent = () => { // props 제거
+const MapComponent = () => {
+  // props 제거
 
   const mapRef = useRef(null);
 
@@ -65,23 +72,27 @@ const MapComponent = () => { // props 제거
   const {
     data: culturalSites = [], // 데이터 (기본값 빈 배열)
     isLoading, // 로딩 상태
-    isError,   // 에러 발생 여부
-    error      // 에러 객체
+    isError, // 에러 발생 여부
+    error, // 에러 객체
   } = useAllCulturalSites(); // 훅 호출
 
   // 로딩 또는 에러 상태 처리
   if (isLoading) {
     // 로딩 중일 때 지도를 렌더링하지 않거나, 로딩 스피너 등을 표시
-    return <div className="h-full w-full flex items-center justify-center text-gray-600">
-             지도를 불러오고 있습니다...
-           </div>;
+    return (
+      <div className="h-full w-full flex items-center justify-center text-gray-600">
+        지도를 불러오고 있습니다...
+      </div>
+    );
   }
 
   if (isError) {
     // 에러 발생 시 사용자에게 메시지 표시
-    return <div className="h-full w-full flex items-center justify-center text-red-600">
-             지도 데이터를 불러오는 데 실패했습니다: {error.message}
-           </div>;
+    return (
+      <div className="h-full w-full flex items-center justify-center text-red-600">
+        지도 데이터를 불러오는 데 실패했습니다: {error.message}
+      </div>
+    );
   }
 
   // 선택된 카테고리에 따라 문화유산 지점 필터링
@@ -101,6 +112,12 @@ const MapComponent = () => { // props 제거
       <MapContainer
         center={initialPosition}
         zoom={14}
+        minZoom={13}
+        maxZoom={17}
+        maxBounds={[
+          [50.7, 12.7], // SW corner
+          [50.95, 13.1], // NE corner
+        ]}
         scrollWheelZoom={true}
         className="h-full w-full z-0"
         whenCreated={(mapInstance) => {
@@ -143,6 +160,6 @@ const MapComponent = () => { // props 제거
       </MapContainer>
     </div>
   );
-}
+};
 
 export default MapComponent;
