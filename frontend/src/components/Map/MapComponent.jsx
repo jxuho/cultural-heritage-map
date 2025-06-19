@@ -82,7 +82,7 @@ const MapComponent = () => {
     // 로딩 중일 때 지도를 렌더링하지 않거나, 로딩 스피너 등을 표시
     return (
       <div className="h-full w-full flex items-center justify-center text-gray-600">
-        지도를 불러오고 있습니다...
+        Loading the Map...
       </div>
     );
   }
@@ -126,8 +126,7 @@ const MapComponent = () => {
         }}
         zoomControl={false}
       >
-      <CurrentLocationButton/>
-
+      <CurrentLocationButton />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
