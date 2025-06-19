@@ -50,7 +50,7 @@ const MapEventsHandler = () => {
   return null;
 };
 
-// --- NEW: 카테고리별 React Icons 및 DivIcon 생성 함수 ---
+// 카테고리별 React Icons 및 DivIcon 생성 함수 ---
 // 각 카테고리에 맞는 React Icon 컴포넌트 매핑
 const categoryIconComponents = {
   artwork: <FaPalette />,
@@ -95,8 +95,6 @@ const createCustomIcon = (category) => {
     iconAnchor: [15, 15], // div의 중심을 마커의 앵커로 설정
   });
 };
-// --- END NEW ---
-
 
 // MapComponent
 const MapComponent = () => {
