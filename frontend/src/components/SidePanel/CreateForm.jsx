@@ -7,6 +7,7 @@ import {
   useSubmitProposal,
   useCreateCulturalSite,
 } from "../../hooks/useCulturalSitesQueries";
+import { CULTURAL_CATEGORY } from "../../config/culturalSiteConfig";
 
 const CreateForm = () => {
   const { createFormData, closeCreateForm, closeSidePanel } = useUiStore();
@@ -169,18 +170,7 @@ const CreateForm = () => {
     );
   }
 
-  const categories = [
-    "artwork",
-    "gallery",
-    "museum",
-    "restaurant",
-    "theatre",
-    "arts_centre",
-    "community_centre",
-    "library",
-    "cinema",
-    "other",
-  ];
+  const categories = CULTURAL_CATEGORY;
 
   return (
     <div className="flex-grow overflow-y-auto p-4 relative">

@@ -5,7 +5,7 @@ import L from 'leaflet';
 import ReactDOMServer from 'react-dom/server';
 import { FaLandmark, FaPalette, FaBuilding, FaUtensils, FaTheaterMasks, FaUsers, FaBook, FaFilm, FaQuestionCircle } from 'react-icons/fa';
 
-// 카테고리 아이콘 매핑 (이 부분은 CulturalSiteMarkers에서 복사해옴)
+// 카테고리 아이콘 매핑
 const categoryIconComponents = {
     artwork: <FaPalette />,
     gallery: <FaBuilding />,

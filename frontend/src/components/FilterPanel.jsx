@@ -1,16 +1,14 @@
 import { useState } from 'react';
 import useFilterStore from '../store/filterStore';
-
+import { CULTURAL_CATEGORY } from '../config/culturalSiteConfig';
 const FilterPanel = () => {
   const selectedCategories = useFilterStore((state) => state.selectedCategories);
   const toggleCategory = useFilterStore((state) => state.toggleCategory);
 
   const [isOpen, setIsOpen] = useState(false); // 기본적으로 닫힌 상태로 시작 (지도 위에 버튼만 보일 때)
 
-  const categories = [
-    'artwork', 'gallery', 'museum', 'restaurant', 'theatre',
-    'arts_centre', 'community_centre', 'library', 'cinema', 'other',
-  ];
+
+  const categories = CULTURAL_CATEGORY;
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
