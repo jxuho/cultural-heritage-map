@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router"; // Assuming you're using React Router for navigation
+import { useNavigate } from "react-router"; // This import is fine, but it's not directly used for the button after adding BackButton component
 import { useDeleteMyAccount } from "../../hooks/useCulturalSitesQueries"; // Adjust the import path as needed
+import BackButton from "../BackButton"; // <--- IMPORT BACK BUTTON
 
 const DeleteAccount = () => {
   const navigate = useNavigate();
@@ -15,10 +16,6 @@ const DeleteAccount = () => {
   // Redirect after successful account deletion
   useEffect(() => {
     if (isDeleted) {
-      // It's a good practice to also clear any client-side authentication tokens
-      // if your application uses them (e.g., localStorage.removeItem('authToken')).
-      // If relying solely on httpOnly cookies, this might not be strictly necessary here,
-      // as the backend should invalidate the session.
       console.log("Account deleted, redirecting to login...");
       navigate("/login"); // Redirect to the login page
     }
@@ -38,6 +35,11 @@ const DeleteAccount = () => {
   return (
     <div className="container mx-auto p-4 max-w-lg mt-10">
       <div className="bg-white p-8 rounded-lg shadow-xl border border-red-200">
+        {/* Add BackButton here, usually at the top or next to the title */}
+        <div className="flex justify-start mb-4">
+          <BackButton />
+        </div>
+
         <h2 className="text-3xl font-bold text-red-700 mb-6 text-center">
           Delete Your Account
         </h2>

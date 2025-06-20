@@ -7,6 +7,7 @@ import {
 } from "../../hooks/useCulturalSitesQueries";
 import ErrorMessage from "../ErrorMessage";
 import StarIcon from "../StarIcon";
+import BackButton from "../BackButton"; 
 
 const FavoriteSites = () => {
   const currentUser = useAuthStore((state) => state.user);
@@ -270,6 +271,11 @@ const FavoriteSites = () => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md flex flex-col h-full">
+      {/* Add BackButton here, usually at the top or next to the title */}
+      <div className="flex justify-start mb-4">
+          <BackButton />
+      </div>
+
       <div ref={headerRef}>
         <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">
           My Favorites

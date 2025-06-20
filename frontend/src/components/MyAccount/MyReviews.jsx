@@ -3,12 +3,12 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import StarIcon from "../StarIcon";
 import ReviewForm from "../Review/ReviewForm";
 import useAuthStore from "../../store/authStore";
-
 // Import custom TanStack Query hooks
 import {
   useMyReviews,
   useReviewMutation,
 } from "../../hooks/useCulturalSitesQueries";
+import BackButton from "../BackButton";
 
 const MyReviews = () => {
   const currentUser = useAuthStore((state) => state.user);
@@ -222,6 +222,11 @@ const MyReviews = () => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md flex flex-col h-full">
+      {/* Add BackButton here */}
+      <div className="flex justify-start mb-4">
+        <BackButton />
+      </div>
+
       {/* 제목 섹션 - Ref 연결 */}
       <div ref={headerRef}>
         <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">
