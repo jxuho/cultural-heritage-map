@@ -5,7 +5,7 @@ import {
   TileLayer,
   ZoomControl,
   useMapEvents,
-  useMap, // <-- useMap 훅 임포트 유지
+  useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -43,6 +43,7 @@ const MapCenterUpdater = () => {
   const jumpToPlace = useUiStore((state) => state.jumpToPlace);
   const clearJumpToPlace = useUiStore((state) => state.clearJumpToPlace);
   const sidePanelWidth = useUiStore((state) => state.sidePanelWidth);
+  const isSidePanelOpen = useUiStore((state) => state.isSidePanelOpen);
 
   // jumpToPlace에 따라 지도 중심 이동
   useEffect(() => {
@@ -55,14 +56,16 @@ const MapCenterUpdater = () => {
       });
 
       // 마커로 이동 후, sidebar 고려해서 중심으로 이동
-      setTimeout(() => {
-        let offsetX= (sidePanelWidth) / 2 - 20
-        map.panBy([offsetX, 0], { animate: true, duration: 0.5 });
-      }, 1600);
+      if (isSidePanelOpen && sidePanelWidth > 0) {
+        setTimeout(() => {
+          let offsetX = sidePanelWidth / 2 - 20;
+          map.panBy([offsetX, 0], { animate: true, duration: 0.5 });
+        }, 1600);
 
-      clearJumpToPlace();
+        clearJumpToPlace();
+      }
     }
-  }, [jumpToPlace, clearJumpToPlace, map, sidePanelWidth]);
+  }, [jumpToPlace, clearJumpToPlace, map, sidePanelWidth, isSidePanelOpen]);
 
   return null;
 };
@@ -90,14 +93,22 @@ const MapComponent = () => {
     error,
   } = useAllCulturalSites();
 
+  const searchQuery = useFilterStore((state) =>
+    state.searchQuery.toLowerCase()
+  );
+
   const memoizedFilteredSites = useMemo(() => {
     return culturalSites.filter((site) => {
-      if (selectedCategories.length === 0) {
-        return true;
-      }
-      return selectedCategories.includes(site.category);
+      const matchesCategory =
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(site.category);
+      const matchesSearch =
+        site.name.toLowerCase().includes(searchQuery) ||
+        (site.description &&
+          site.description.toLowerCase().includes(searchQuery));
+      return matchesCategory && matchesSearch;
     });
-  }, [culturalSites, selectedCategories]);
+  }, [culturalSites, selectedCategories, searchQuery]);
 
   if (isLoading) {
     return (

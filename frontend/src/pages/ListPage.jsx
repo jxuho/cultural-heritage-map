@@ -1,11 +1,17 @@
 // src/pages/ListPage.jsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { useAllCulturalSites } from "../hooks/useCulturalSitesQueries";
-import FilterPanel from '../components/FilterPanel';
-import useFilterStore from '../store/filterStore';
-import { FaStar, FaRegStar, FaHeart, FaRegHeart, FaCommentAlt } from 'react-icons/fa'; // NEW: 아이콘 임포트
-import useUiStore from '../store/uiStore';
-import { useNavigate } from 'react-router';
+import FilterPanel from "../components/FilterPanel";
+import useFilterStore from "../store/filterStore";
+import {
+  FaStar,
+  FaRegStar,
+  FaHeart,
+  FaRegHeart,
+  FaCommentAlt,
+} from "react-icons/fa"; // NEW: 아이콘 임포트
+import useUiStore from "../store/uiStore";
+import { useNavigate } from "react-router";
 
 const ListPage = () => {
   const {
@@ -15,11 +21,17 @@ const ListPage = () => {
     error,
   } = useAllCulturalSites();
 
-  const selectedCategories = useFilterStore((state) => state.selectedCategories);
-  const [sortBy, setSortBy] = useState('alphabetical');
+  const selectedCategories = useFilterStore(
+    (state) => state.selectedCategories
+  );
+  const [sortBy, setSortBy] = useState("alphabetical");
 
   const openSidePanel = useUiStore((state) => state.openSidePanel);
-  const setJumpToPlace = useUiStore(state => state.setJumpToPlace);
+  const setJumpToPlace = useUiStore((state) => state.setJumpToPlace);
+  const searchQuery = useFilterStore((state) =>
+    state.searchQuery.toLowerCase()
+  );
+
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -41,23 +53,27 @@ const ListPage = () => {
   }
 
   let filteredSites = culturalSites.filter((site) => {
-    if (selectedCategories.length === 0) {
-      return true;
-    }
-    return selectedCategories.includes(site.category);
+    const matchesCategory =
+      selectedCategories.length === 0 ||
+      selectedCategories.includes(site.category);
+    const matchesSearch =
+      site.name.toLowerCase().includes(searchQuery) ||
+      (site.description &&
+        site.description.toLowerCase().includes(searchQuery));
+    return matchesCategory && matchesSearch;
   });
 
   filteredSites = [...filteredSites].sort((a, b) => {
     switch (sortBy) {
-      case 'alphabetical':
+      case "alphabetical":
         return a.name.localeCompare(b.name);
-      case 'reviewsCount':
+      case "reviewsCount":
         // reviewCount 필드가 없으면 0으로 간주
         return (b.reviewCount || 0) - (a.reviewCount || 0);
-      case 'averageRating':
+      case "averageRating":
         // averageRating 필드가 없으면 0으로 간주
         return (b.averageRating || 0) - (a.averageRating || 0);
-      case 'favoritesCount':
+      case "favoritesCount":
         // favoritesCount 필드가 없으면 0으로 간주
         return (b.favoritesCount || 0) - (a.favoritesCount || 0);
       default:
@@ -66,12 +82,12 @@ const ListPage = () => {
   });
 
   if (culturalSites.length === 0 && selectedCategories.length === 0) {
-      return (
-          <div className="container mx-auto p-4 text-center mt-10">
-              <h1 className="text-3xl font-bold text-gray-800">Cultural Sites</h1>
-              <p className="mt-4 text-gray-600">No cultural sites available.</p>
-          </div>
-      );
+    return (
+      <div className="container mx-auto p-4 text-center mt-10">
+        <h1 className="text-3xl font-bold text-gray-800">Cultural Sites</h1>
+        <p className="mt-4 text-gray-600">No cultural sites available.</p>
+      </div>
+    );
   }
 
   if (filteredSites.length === 0 && selectedCategories.length > 0) {
@@ -81,13 +97,14 @@ const ListPage = () => {
           <FilterPanel />
         </div>
         <div className="text-center mt-10">
-            <h1 className="text-3xl font-bold text-gray-800">Cultural Sites</h1>
-            <p className="mt-4 text-gray-600">No cultural sites found matching the selected filters.</p>
+          <h1 className="text-3xl font-bold text-gray-800">Cultural Sites</h1>
+          <p className="mt-4 text-gray-600">
+            No cultural sites found matching the selected filters.
+          </p>
         </div>
       </div>
     );
   }
-
 
   // NEW: 별점을 시각적으로 표시하는 헬퍼 함수
   const renderStars = (rating) => {
@@ -108,11 +125,11 @@ const ListPage = () => {
     }
     return stars;
   };
-const handleCardClick = (site) => {
-  navigate('/'); // 지도 페이지로 이동
-  openSidePanel(site); // 기존 동작
-  setJumpToPlace(site); // 추가: 지도 중심 이동 요청
-};
+  const handleCardClick = (site) => {
+    navigate("/"); // 지도 페이지로 이동
+    openSidePanel(site); // 기존 동작
+    setJumpToPlace(site); // 추가: 지도 중심 이동 요청
+  };
 
   return (
     <div className="container mx-auto p-4 mt-5">
@@ -133,15 +150,30 @@ const handleCardClick = (site) => {
             <option value="favoritesCount">Sort by Favorites Count</option>
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 6.757 7.586 5.343 9z"/></svg>
+            <svg
+              className="fill-current h-4 w-4"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+            >
+              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 6.757 7.586 5.343 9z" />
+            </svg>
           </div>
         </div>
       </div>
 
-      <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">All Cultural Sites List</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">
+        All Cultural Sites List
+      </h1>
       <p className="text-lg text-gray-600 mb-6 text-center">
         Showing **{filteredSites.length}** cultural sites
-        {selectedCategories.length > 0 && ` (filtered by ${selectedCategories.map(cat => cat.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '))})`}
+        {selectedCategories.length > 0 &&
+          ` (filtered by ${selectedCategories.map((cat) =>
+            cat
+              .replace(/_/g, " ")
+              .split(" ")
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" ")
+          )})`}
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -151,16 +183,21 @@ const handleCardClick = (site) => {
             className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col cursor-pointer" // cursor-pointer 추가
             onClick={() => handleCardClick(site)} // NEW: onClick 이벤트 핸들러 추가
           >
-            <h2 className="text-xl font-semibold text-chemnitz-blue mb-2">{site.name}</h2>
-            
+            <h2 className="text-xl font-semibold text-chemnitz-blue mb-2">
+              {site.name}
+            </h2>
+
             <div className="flex items-center text-sm text-gray-700 mb-2">
-              {site.averageRating !== undefined && site.averageRating !== null && (
-                <div className="flex items-center mr-3">
-                  {renderStars(site.averageRating)}
-                  <span className="ml-1 font-semibold">{site.averageRating.toFixed(1)}</span>
-                </div>
-              )}
-              
+              {site.averageRating !== undefined &&
+                site.averageRating !== null && (
+                  <div className="flex items-center mr-3">
+                    {renderStars(site.averageRating)}
+                    <span className="ml-1 font-semibold">
+                      {site.averageRating.toFixed(1)}
+                    </span>
+                  </div>
+                )}
+
               {site.reviewCount !== undefined && site.reviewCount !== null && (
                 <div className="flex items-center mr-3">
                   <FaCommentAlt className="text-blue-500 mr-1" />
@@ -168,20 +205,28 @@ const handleCardClick = (site) => {
                 </div>
               )}
 
-              {site.favoritesCount !== undefined && site.favoritesCount !== null && (
-                <div className="flex items-center">
-                  <FaHeart className="text-red-500 mr-1" />
-                  <span>{site.favoritesCount} Favorites</span>
-                </div>
-              )}
+              {site.favoritesCount !== undefined &&
+                site.favoritesCount !== null && (
+                  <div className="flex items-center">
+                    <FaHeart className="text-red-500 mr-1" />
+                    <span>{site.favoritesCount} Favorites</span>
+                  </div>
+                )}
             </div>
 
             <p className="text-gray-700 text-sm mb-1">
-              <strong>Category:</strong> {site.category.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+              <strong>Category:</strong>{" "}
+              {site.category
+                .replace(/_/g, " ")
+                .split(" ")
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" ")}
             </p>
             <p className="text-gray-600 text-sm mb-2">{site.address}</p>
             {site.description && (
-              <p className="text-gray-800 text-sm line-clamp-3 flex-grow">{site.description}</p>
+              <p className="text-gray-800 text-sm line-clamp-3 flex-grow">
+                {site.description}
+              </p>
             )}
           </div>
         ))}
