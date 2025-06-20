@@ -1,8 +1,8 @@
 // FilterPanel.jsx
-import { useState, useMemo } from "react"; // useMemo를 import 합니다.
+import { useState, useMemo } from "react";
 import useFilterStore from "../store/filterStore";
 import { CULTURAL_CATEGORY } from "../config/culturalSiteConfig";
-import debounce from "lodash.debounce"; // lodash.debounce를 import 합니다.
+import debounce from "lodash.debounce";
 
 const FilterPanel = () => {
   const selectedCategories = useFilterStore(
@@ -12,17 +12,7 @@ const FilterPanel = () => {
   const searchQuery = useFilterStore((state) => state.searchQuery);
   const setSearchQuery = useFilterStore((state) => state.setSearchQuery);
   const [isOpen, setIsOpen] = useState(false);
-
-  // 로컬 상태를 사용하여 input의 현재 값을 제어합니다.
-  // 이는 debounce가 적용된 setSearchQuery 호출이 약간 지연될 수 있기 때문에
-  // input 필드에 즉각적인 피드백을 제공하기 위함입니다.
   const [localSearchInput, setLocalSearchInput] = useState(searchQuery);
-
-  // searchQuery가 외부에서 변경될 때 (예: 필터 패널이 닫히거나 초기화될 때),
-  // localSearchInput도 업데이트되도록 useEffect를 사용합니다.
-  // useEffect(() => {
-  //   setLocalSearchInput(searchQuery);
-  // }, [searchQuery]); // 이 부분은 현재 setup에서는 필수는 아니지만, 외부 동기화가 필요할 때 유용합니다.
 
   const handleToggle = () => {
     setIsOpen(!isOpen);

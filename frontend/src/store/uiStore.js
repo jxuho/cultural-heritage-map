@@ -11,25 +11,29 @@ const useUiStore = create(devtools((set) => ({
 
   // account manager
   isAccountManagerOpen: false,
-  openAccountManager: () => set({isAccountManagerOpen: true}),
-  closeAccountManager: () => set({isAccountManagerOpen: false}),
+  openAccountManager: () => set({ isAccountManagerOpen: true }),
+  closeAccountManager: () => set({ isAccountManagerOpen: false }),
 
   // side panel
   isSidePanelOpen: false,
   selectedPlace: null,
   sidePanelWidth: 360,
-  setSidePanelWidth: (width) => set({sidePanelWidth: width}),
+  setSidePanelWidth: (width) => set({ sidePanelWidth: width }),
   openSidePanel: (placeInfo) => set({ isSidePanelOpen: true, selectedPlace: placeInfo }),
   closeSidePanel: () => set({ isSidePanelOpen: false, selectedPlace: null }),
-  clearSelectedPlace: () => set({selectedPlace: null}),
+  clearSelectedPlace: () => set({ selectedPlace: null }),
 
+
+  // context menu
   isContextMenuOpen: false,
-  openContextMenu: () => set({isContextMenuOpen: true}),
-  closeContextMenu: () => set({isContextMenuOpen: false}),
+  openContextMenu: () => set({ isContextMenuOpen: true }),
+  closeContextMenu: () => set({ isContextMenuOpen: false }),
 
+  // latlng
   selectedLatLng: null,
-  setSelectedLatLng: (LatLng) => set({selectedLatLng: LatLng}),
+  setSelectedLatLng: (LatLng) => set({ selectedLatLng: LatLng }),
 
+  // nearby
   nearbySites: [],
   nearbySitesLoading: false,
   nearbySitesError: null,
@@ -38,6 +42,7 @@ const useUiStore = create(devtools((set) => ({
   setNearbySitesLoading: (isLoading) => set({ nearbySitesLoading: isLoading }),
   setNearbySitesError: (error) => set({ nearbySitesError: error }),
 
+  // create form
   isCreateFormOpen: false,
   createFormData: null, // Holds the data to pre-fill the form
   openCreateForm: (data) => set({
@@ -49,6 +54,7 @@ const useUiStore = create(devtools((set) => ({
   }),
   closeCreateForm: () => set({ isCreateFormOpen: false, createFormData: null }),
 
+  // update form
   isUpdateFormOpen: false,
   updateFormData: null,
   openUpdateForm: (data) => set({
@@ -57,7 +63,7 @@ const useUiStore = create(devtools((set) => ({
     updateFormData: data,
     selectedPlace: data, // Keep selectedPlace for update form to reflect the item being updated
   }),
-  closeUpdateForm: () => set({isUpdateFormOpen: false, updateFormData: null}),
+  closeUpdateForm: () => set({ isUpdateFormOpen: false, updateFormData: null }),
 
   // Centralized Close and Cancel Logic ---
   handleCloseAndCancel: (queryKeyToCancel) => {
@@ -79,9 +85,10 @@ const useUiStore = create(devtools((set) => ({
     }
   },
 
+  // jump to place
   jumpToPlace: null,
-setJumpToPlace: (place) => set({ jumpToPlace: place }),
-clearJumpToPlace: () => set({ jumpToPlace: null }),
+  setJumpToPlace: (place) => set({ jumpToPlace: place }),
+  clearJumpToPlace: () => set({ jumpToPlace: null }),
 })));
 
 export default useUiStore;

@@ -1,17 +1,15 @@
 // src/pages/ListPage.jsx
-import React, { useState } from "react";
+import React from "react";
 import { useAllCulturalSites } from "../hooks/useCulturalSitesQueries";
 import FilterPanel from "../components/FilterPanel";
-import useFilterStore from "../store/filterStore";
+import useFilterStore from "../store/filterStore"; // Import useFilterStore
 import {
-  FaStar,
-  FaRegStar,
   FaHeart,
-  FaRegHeart,
   FaCommentAlt,
-} from "react-icons/fa"; // NEW: 아이콘 임포트
+} from "react-icons/fa";
 import useUiStore from "../store/uiStore";
 import { useNavigate } from "react-router";
+import StarIcon from "../components/StarIcon";
 
 const ListPage = () => {
   const {
@@ -21,16 +19,15 @@ const ListPage = () => {
     error,
   } = useAllCulturalSites();
 
-  const selectedCategories = useFilterStore(
-    (state) => state.selectedCategories
-  );
-  const [sortBy, setSortBy] = useState("alphabetical");
+  // Get selectedCategories, searchQuery, sortBy, and setSortBy from useFilterStore
+  const selectedCategories = useFilterStore((state) => state.selectedCategories);
+  const searchQuery = useFilterStore((state) => state.searchQuery.toLowerCase());
+  const sortBy = useFilterStore((state) => state.sortBy); // NEW: Get sortBy from filterStore
+  const setSortBy = useFilterStore((state) => state.setSortBy); // NEW: Get setSortBy from filterStore
+
 
   const openSidePanel = useUiStore((state) => state.openSidePanel);
   const setJumpToPlace = useUiStore((state) => state.setJumpToPlace);
-  const searchQuery = useFilterStore((state) =>
-    state.searchQuery.toLowerCase()
-  );
 
   const navigate = useNavigate();
 
@@ -64,17 +61,14 @@ const ListPage = () => {
   });
 
   filteredSites = [...filteredSites].sort((a, b) => {
-    switch (sortBy) {
+    switch (sortBy) { // Uses sortBy from useFilterStore
       case "alphabetical":
         return a.name.localeCompare(b.name);
       case "reviewsCount":
-        // reviewCount 필드가 없으면 0으로 간주
         return (b.reviewCount || 0) - (a.reviewCount || 0);
       case "averageRating":
-        // averageRating 필드가 없으면 0으로 간주
         return (b.averageRating || 0) - (a.averageRating || 0);
       case "favoritesCount":
-        // favoritesCount 필드가 없으면 0으로 간주
         return (b.favoritesCount || 0) - (a.favoritesCount || 0);
       default:
         return 0;
@@ -106,29 +100,10 @@ const ListPage = () => {
     );
   }
 
-  // NEW: 별점을 시각적으로 표시하는 헬퍼 함수
-  const renderStars = (rating) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    const stars = [];
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<FaStar key={`full-${i}`} className="text-yellow-400" />);
-    }
-    // 하프 스타는 현재 FontAwesome에서 제공되지 않아 일단 풀 스타 또는 빈 별로 처리
-    // if (hasHalfStar) {
-    //   stars.push(<FaStarHalfAlt key="half" className="text-yellow-400" />);
-    // }
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<FaRegStar key={`empty-${i}`} className="text-gray-300" />);
-    }
-    return stars;
-  };
   const handleCardClick = (site) => {
-    navigate("/"); // 지도 페이지로 이동
-    openSidePanel(site); // 기존 동작
-    setJumpToPlace(site); // 추가: 지도 중심 이동 요청
+    navigate("/");
+    openSidePanel(site);
+    setJumpToPlace(site);
   };
 
   return (
@@ -140,8 +115,8 @@ const ListPage = () => {
 
         <div className="relative">
           <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
+            value={sortBy} // Value from useFilterStore
+            onChange={(e) => setSortBy(e.target.value)} // Action from useFilterStore
             className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
           >
             <option value="alphabetical">Sort by Alphabetical</option>
@@ -180,8 +155,8 @@ const ListPage = () => {
         {filteredSites.map((site) => (
           <div
             key={site._id}
-            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col cursor-pointer" // cursor-pointer 추가
-            onClick={() => handleCardClick(site)} // NEW: onClick 이벤트 핸들러 추가
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col cursor-pointer"
+            onClick={() => handleCardClick(site)}
           >
             <h2 className="text-xl font-semibold text-chemnitz-blue mb-2">
               {site.name}
@@ -191,7 +166,15 @@ const ListPage = () => {
               {site.averageRating !== undefined &&
                 site.averageRating !== null && (
                   <div className="flex items-center mr-3">
-                    {renderStars(site.averageRating)}
+                    {[...Array(5)].map((_, i) => (
+                      <StarIcon
+                        key={i}
+                        rating={site.averageRating}
+                        index={i}
+                        className="w-4 h-4"
+                        displayMode="averageRating"
+                      />
+                    ))}
                     <span className="ml-1 font-semibold">
                       {site.averageRating.toFixed(1)}
                     </span>

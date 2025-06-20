@@ -1,10 +1,12 @@
+// src/store/filterStore.js
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware'
+import { devtools } from 'zustand/middleware';
 
-// 필터 관련 상태를 관리하는 스토어 생성
+// 필터 및 정렬 관련 상태를 관리하는 스토어 생성
 const useFilterStore = create(devtools((set) => ({
   selectedCategories: [],
   searchQuery: '',
+  sortBy: 'alphabetical', 
 
   toggleCategory: (category) =>
     set((state) => ({
@@ -15,7 +17,13 @@ const useFilterStore = create(devtools((set) => ({
 
   setSearchQuery: (query) => set({ searchQuery: query }),
 
-  resetFilters: () => set({ selectedCategories: [], searchQuery: '' }),
+  setSortBy: (sortOption) => set({ sortBy: sortOption }),
+
+  resetFilters: () => set({
+    selectedCategories: [],
+    searchQuery: '',
+    sortBy: 'alphabetical', // Also reset sortBy when resetting filters
+  }),
 })));
 
 export default useFilterStore;
