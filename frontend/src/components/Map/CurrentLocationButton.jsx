@@ -1,7 +1,7 @@
 import { useMap } from "react-leaflet";
 import { useState } from "react";
 import L from "leaflet";
-import { MdMyLocation } from "react-icons/md"; // ✅ 아이콘 import
+import { MdMyLocation } from "react-icons/md";
 
 const CurrentLocationButton = () => {
   const map = useMap();

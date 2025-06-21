@@ -123,7 +123,7 @@ const SidePanelItems = ({ isReviewsExpanded, toggleReviewsExpansion }) => {
           </button>
         )}
         <h2
-          className="text-2xl font-bold text-gray-800 break-words pr-2 cursor-pointer hover:underline" // Add cursor-pointer and hover:underline for visual cue
+          className="text-2xl font-bold text-gray-800 break-words pr-2 cursor-pointer hover:underline break-all" // Add cursor-pointer and hover:underline for visual cue
           onClick={handleNameClick} // Add onClick handler
         >
           {selectedPlaceData.name}

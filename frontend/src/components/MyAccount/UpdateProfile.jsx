@@ -290,8 +290,6 @@ const UpdateProfile = () => {
                         >
                             Save
                         </button>
-                        {/* Replaced Link with BackButton for consistent back navigation */}
-                        <BackButton showText={true} showIcon={false}>Cancel</BackButton>
                     </div>
                 </form>
             </div>

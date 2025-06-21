@@ -14,7 +14,7 @@ import MyReviews from "./components/MyAccount/MyReviews";
 import FavoriteSites from "./components/MyAccount/FavoriteSites";
 import Proposals from "./components/MyAccount/Proposals";
 import DeleteAccount from "./components/MyAccount/DeleteAccount";
-import ListPage from "./pages/ListPage"; // NEW: Import ListPage
+import ListPage from "./pages/ListPage";
 
 const App = () => {
   const checkAuthStatus = useAuthStore((state) => state.checkAuthStatus);
@@ -35,7 +35,7 @@ const App = () => {
         <Route path="/sign-in" element={<SignInPage />} />
         <Route path="/" element={<MainLayout />}>
           <Route index element={<HomePage />} />
-          <Route path="list" element={<ListPage />} /> {/* NEW: Add route for ListPage */}
+          <Route path="list" element={<ListPage />} /> 
           
           <Route element={<ProtectedRoute />}>
             <Route path="my-account" element={<MyAccountPage />}>
