@@ -125,6 +125,8 @@ const determineCulturalSiteAddress = async (tags, lat, lon, name, sourceId) => {
     return address;
 };
 
+
+// reverse geocodig 없이 address를 결정
 const determineCulturalSiteAddressFromTags = (tags) => {
     let address = '';
     if (tags['addr:street'] && tags['addr:housenumber']) {

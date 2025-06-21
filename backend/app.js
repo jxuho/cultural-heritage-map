@@ -5,9 +5,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 // 3. 서드파티 미들웨어 (Alphabetical order is often good)
-const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
+const rateLimit = require('express-rate-limit');
 // 4. 모델 파일 (스키마 정의)
 // 라우트나 컨트롤러에서 모델을 참조하기 전에 먼저 정의되어야 합니다.
 require('./models/User');
@@ -49,17 +49,13 @@ const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 5000;
 
 
-// if (process.env.NODE_ENV === 'development') {
-//   app.use(morgan('dev'));
-// }
-
-// // API 속도 제한 (동일 IP에서 1시간 동안 100회 요청으로 제한)
-// const limiter = rateLimit({
-//   max: 100,
-//   windowMs: 60 * 60 * 1000,
-//   message: '한 시간 동안 이 IP에서 너무 많은 요청이 있었습니다. 잠시 후 다시 시도해주세요.',
-// });
-// app.use('/api', limiter); // /api로 시작하는 모든 라우트에 적용
+// API 속도 제한 (동일 IP에서 1시간 동안 100회 요청으로 제한)
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many request on this ip.',
+});
+app.use('/api', limiter); // /api로 시작하는 모든 라우트에 적용
 
 
 app.use(express.json());

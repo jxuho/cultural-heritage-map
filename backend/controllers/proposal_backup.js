@@ -218,7 +218,7 @@ const approveProposal = asyncHandler(async (req, res, next) => {
         proposal.status = 'approved';
         proposal.processedAt = Date.now();
         proposal.processedBy = req.user.id;
-        proposal.adminNotes = req.body.adminNotes || proposal.adminNotes;
+        proposal.adminComment = req.body.adminComment || proposal.adminComment;
         await proposal.save({ session }); // <-- { session } 옵션 추가
 
         // 모든 작업이 성공하면 트랜잭션 커밋
@@ -270,7 +270,7 @@ const rejectProposal = asyncHandler(async (req, res, next) => {
     proposal.status = 'rejected';
     proposal.processedAt = Date.now();
     proposal.processedBy = req.user.id;
-    proposal.adminNotes = req.body.adminNotes || '관리자에 의해 거절되었습니다.';
+    proposal.adminComment = req.body.adminComment || '관리자에 의해 거절되었습니다.';
     await proposal.save();
 
     res.status(200).json({

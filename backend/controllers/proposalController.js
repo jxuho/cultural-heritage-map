@@ -494,119 +494,11 @@ const getProposalById = asyncHandler(async (req, res, next) => {
     });
 });
 
-// 3. 제안 수락
-// const acceptProposal = asyncHandler(async (req, res, next) => {
-//     const { id } = req.params;
-//     const { adminComment } = req.body; // 관리자의 승인 사유
-
-//     // 트랜잭션 시작
-//     const session = await mongoose.startSession();
-//     session.startTransaction();
-
-//     try {
-//         const proposal = await Proposal.findById(id).session(session);
-
-//         if (!proposal) {
-//             return next(new AppError('제안을 찾을 수 없습니다.', 404));
-//         }
-
-//         if (proposal.status !== 'pending') {
-//             return next(new AppError('이미 처리된 제안입니다.', 400));
-//         }
-
-//         let culturalSite;
-//         let originalCulturalSite; // 삭제 제안 시 sourceId를 가져올 용도
-
-//         switch (proposal.proposalType) {
-//             case 'create':
-//                 // 새로운 문화유산 생성
-//                 const newCulturalSiteData = {
-//                     ...proposal.proposedChanges,
-//                     registeredBy: req.user.id,
-//                     proposedBy: proposal.proposedBy
-//                 };
-
-//                 if (!newCulturalSiteData.name || !newCulturalSiteData.category || !newCulturalSiteData.location || !newCulturalSiteData.sourceId) {
-//                     throw new AppError('새로운 문화유산 생성에 필요한 필수 정보가 누락되었습니다.', 400);
-//                 }
-
-//                 culturalSite = await CulturalSite.create([newCulturalSiteData], { session });
-
-//                 break;
-//             case 'update':
-//                 culturalSite = await CulturalSite.findById(proposal.culturalSite).session(session);
-//                 if (!culturalSite) {
-//                     throw new AppError('수정 대상 문화유산을 찾을 수 없습니다.', 404);
-//                 }
-
-//                 // proposedChanges = {category: {oldValue: other, newValue: restaurant}}
-//                 const updateData = {};
-//                 // Apply proposedChanges (which now contain oldValue and newValue)
-//                 for (const field of CULTURAL_SITE_UPDATABLE_FIELDS) {
-//                     if (proposal.proposedChanges[field] !== undefined && proposal.proposedChanges[field].newValue !== undefined) {
-//                         updateData[field] = proposal.proposedChanges[field].newValue; // Use newValue
-//                     }
-//                 }
-
-//                 Object.assign(culturalSite, updateData);
-//                 await culturalSite.save({ session });
-
-//                 break;
-//             case 'delete':
-//                 originalCulturalSite = await CulturalSite.findById(proposal.culturalSite).session(session);
-//                 if (!originalCulturalSite) {
-//                     console.warn(`삭제 대상 문화유산 ${proposal.culturalSite}를 찾을 수 없습니다. 이미 삭제되었을 수 있습니다.`);
-//                 } else {
-//                     await CulturalSite.findByIdAndDelete(proposal.culturalSite).session(session);
-//                 }
-
-//                 if (originalCulturalSite && originalCulturalSite.sourceId) {
-//                     await ExcludeSourceId.findOneAndUpdate(
-//                         { sourceId: originalCulturalSite.sourceId },
-//                         { sourceId: originalCulturalSite.sourceId, reason: '사용자 제안에 의해 삭제됨' },
-//                         { upsert: true, new: true, session }
-//                     );
-//                     console.log(`SourceId ${originalCulturalSite.sourceId} added to ExcludeSourceId collection.`);
-//                 } else {
-//                     console.warn(`삭제된 문화유산의 sourceId를 ExcludeSourceId에 추가할 수 없습니다. proposal.culturalSite: ${proposal.culturalSite}`);
-//                 }
-
-//                 break;
-//             default:
-//                 throw new AppError('알 수 없는 제안 유형입니다.', 400);
-//         }
-
-//         // 제안 상태 업데이트
-//         proposal.status = 'accepted';
-//         proposal.reviewedBy = req.user.id;
-//         proposal.reviewedAt = Date.now();
-//         proposal.adminComment = adminComment || '승인됨';
-//         await proposal.save({ session });
-
-//         await session.commitTransaction();
-//         session.endSession();
-
-//         res.status(200).json({
-//             status: 'success',
-//             message: '제안이 성공적으로 수락되었습니다.',
-//             data: {
-//                 proposal,
-//                 culturalSite
-//             }
-//         });
-
-//     } catch (error) {
-//         await session.abortTransaction();
-//         session.endSession();
-//         console.error('제안 수락 중 트랜잭션 오류 발생:', error);
-//         return next(error instanceof AppError ? error : new AppError(`제안 수락 중 오류 발생: ${error.message}`, 500));
-//     }
-// });
 
 // 3. 제안 수락
 const acceptProposal = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
-    const { adminComment } = req.body; // 관리자의 승인 사유
+    const { adminComment } = req.body; 
 
     // 트랜잭션 시작
     const session = await mongoose.startSession();
@@ -702,7 +594,7 @@ const acceptProposal = asyncHandler(async (req, res, next) => {
         proposal.status = 'accepted';
         proposal.reviewedBy = req.user.id;
         proposal.reviewedAt = Date.now();
-        proposal.adminComment = adminComment || '승인됨';
+        proposal.adminComment = adminComment || 'Accepted';
         await proposal.save({ session });
 
         await session.commitTransaction();

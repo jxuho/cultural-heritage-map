@@ -66,7 +66,7 @@ const writeLogsToFile = async () => {
 const queryOverpass = async (query) => {
     try {
         const response = await axios.post(OVERPASS_API_URL, query, {
-            headers: { 'Content-Type': 'text/plain' },
+            headers: { 'Content-Type': 'text/plain', 'User-Agent': 'ChemnitzCulturalSitesApp/1.0 (jxuholee@gmail.com)' },
             timeout: 60000 // 60초 타임아웃 설정
         });
         return response.data;
