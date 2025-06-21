@@ -10,6 +10,7 @@ import {
 import useUiStore from "../store/uiStore";
 import { useNavigate } from "react-router";
 import StarIcon from "../components/StarIcon";
+import GoToTopButton from "../components/GoToTopButton";
 
 const ListPage = () => {
   const {
@@ -112,7 +113,7 @@ const ListPage = () => {
         <div className="text-left">
           <FilterPanel />
         </div>
-
+        <GoToTopButton />
         <div className="relative">
           <select
             value={sortBy} // Value from useFilterStore
