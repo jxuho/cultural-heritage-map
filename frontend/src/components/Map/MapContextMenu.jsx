@@ -14,7 +14,7 @@ const MapContextMenu = () => {
     (state) => state.setNearbySitesLoading
   ); // nearbySites 로딩 상태 설정 함수
   const setNearbySitesError = useUiStore((state) => state.setNearbySitesError); // nearbySites 에러 상태 설정 함수
-  const role = useAuthStore((state) => state.user?.role);
+  const user = useAuthStore((state) => state.user);
 
   const {
     data: nearbyOsmData,
@@ -35,8 +35,12 @@ const MapContextMenu = () => {
       setNearbySitesError(null); // 이전 에러 상태 초기화
       refetchNearbyOsm(); // 주변 OSM 데이터 가져오기 시작
     } else {
-      console.warn("유효한 위경도 정보가 없어 주변 지역을 검색할 수 없습니다.");
-      setNearbySitesError(new Error("유효한 위경도 정보가 없습니다.")); // 에러 상태 설정
+      console.warn(
+        "The surrounding area cannot be searched due to lack of valid latitude and longitude information."
+      );
+      setNearbySitesError(
+        new Error("There is no valid latitude and longitude information.")
+      ); // 에러 상태 설정
     }
   };
 
@@ -47,12 +51,15 @@ const MapContextMenu = () => {
       console.log(nearbyOsmData);
       setNearbySites(nearbyOsmData); // 응답 구조에 맞게 `data.osmCulturalSites` 접근
       console.log(
-        "주변 OSM 문화재 데이터가 UI 스토어에 설정되었습니다:",
+        "Surrounding OSM cultural site data is set in the UI store:",
         nearbyOsmData
       );
     }
     if (isNearbyOsmError) {
-      console.error("주변 OSM 문화재를 가져오는 중 오류 발생:", nearbyOsmError);
+      console.error(
+        "Error occurred while retrieving surrounding OSM cultural site:",
+        nearbyOsmError
+      );
       setNearbySites([]); // 에러 발생 시 빈 배열로 초기화
       setNearbySitesError(nearbyOsmError); // 에러 객체를 Zustand 스토어에 저장
       // 사용자에게 에러 메시지를 표시할 수도 있습니다.
@@ -69,13 +76,17 @@ const MapContextMenu = () => {
   ]);
 
   return (
-    <Menu>
-      <MenuItem onClick={queryThisArea}>
-        <div className="px-1 mx-1 text-xs">
-          {role === "admin" ? "Add new place" : "Suggest new place"}
-        </div>
-      </MenuItem>
-    </Menu>
+    <>
+      {user && (
+        <Menu>
+          <MenuItem onClick={queryThisArea}>
+            <div className="px-1 mx-1 text-xs">
+              {user.role === "admin" ? "Add new place" : "Suggest new place"}
+            </div>
+          </MenuItem>
+        </Menu>
+      )}
+    </>
   );
 };
 
