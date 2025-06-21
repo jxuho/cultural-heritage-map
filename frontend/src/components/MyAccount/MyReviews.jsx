@@ -225,19 +225,19 @@ const MyReviews = () => {
       <div className="mb-6 flex flex-wrap gap-2 sm:gap-4 justify-start">
         <button
           onClick={() => handleSortChange("createdAt")}
-          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "createdAt" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
+          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "createdAt" ? "bg-blue-600 text-white cursor-pointer" : "bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"}`}
         >
           Sort by Date{getSortIndicator("createdAt")}
         </button>
         <button
           onClick={() => handleSortChange("rating")}
-          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "rating" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
+          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "rating" ? "bg-blue-600 text-white cursor-pointer" : "bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"}`}
         >
           Sort by Rating{getSortIndicator("rating")}
         </button>
         <button
           onClick={() => handleSortChange("culturalSiteName")}
-          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "culturalSiteName" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
+          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "culturalSiteName" ? "bg-blue-600 text-white cursor-pointer" : "bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"}`}
         >
           Sort by Site Name{getSortIndicator("culturalSiteName")}
         </button>

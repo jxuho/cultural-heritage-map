@@ -6,6 +6,7 @@ const UserProfileCard = ({ user }) => {
   const { openModal } = useUiStore();
 
   const {
+    _id,
     username = "N/A",
     email = "N/A",
     profileImage,
@@ -38,6 +39,9 @@ const UserProfileCard = ({ user }) => {
           <p className="text-sm sm:text-md text-gray-700 break-words">
             {email}
           </p>
+          <p className="text-xs text-gray-500 mt-1">
+              DB ID: <span className="font-mono break-all">{_id}</span>
+            </p>
           {googleId && (
             <p className="text-xs text-gray-500 mt-1">
               Google ID: <span className="font-mono break-all">{googleId}</span>
@@ -53,21 +57,12 @@ const UserProfileCard = ({ user }) => {
         <div className="space-y-1.5 sm:space-y-2 text-sm sm:text-md text-gray-700">
           <p>
             <strong>Role: </strong>
-            {/* Make the role text clickable */}
             <span
               className="capitalize text-blue-600 font-medium cursor-pointer hover:underline"
               onClick={handleRoleClick}
             >
               {role}
             </span>
-          </p>
-          <p>
-            <strong>Status: </strong>
-            {user.active ? "Active" : "Inactive"}
-          </p>
-          <p>
-            <strong>Data Version (__v): </strong>
-            {__v !== undefined ? __v : "N/A"}
           </p>
           <p>
             <strong>Registered On: </strong>
@@ -106,7 +101,7 @@ const UserProfileCard = ({ user }) => {
 
       <div>
         <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3 border-b pb-1.5 sm:pb-2">
-          Bio / About Me
+          Bio
         </h3>
         <p className="italic text-gray-600 whitespace-pre-line leading-relaxed text-sm sm:text-base">
           {bio.trim() !== "" ? bio : "No biography provided."}

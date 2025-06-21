@@ -14,7 +14,7 @@ const ErrorMessage = ({ message, onClose }) => {
           </button>
         </div>
       )}
-      <p className="pr-10">Error: {message}</p> {/* Prepended "Error: " */}
+      <p className="pr-10">Error: {message}</p> 
     </div>
   );
 };

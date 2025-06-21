@@ -199,7 +199,7 @@ const ListPage = () => {
             </div>
 
             <p className="text-gray-700 text-sm mb-1">
-              <strong>Category:</strong>{" "}
+              <strong>Category: </strong>
               {site.category
                 .replace(/_/g, " ")
                 .split(" ")

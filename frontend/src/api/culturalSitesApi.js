@@ -228,14 +228,14 @@ export const fetchAllProposals = async () => {
 }
 
 // 등록된 proposal을 승인하는 함수 (관리자용)
-export const acceptProposal = async (proposalId, adminNotes) => {
-    if (!proposalId || !adminNotes) {
+export const acceptProposal = async (proposalId, adminComment) => {
+    if (!proposalId || !adminComment) {
         throw new Error("Proposal ID and admin notes are required to accept a proposal.");
     }
     try {
         const response = await axios.patch(
             `${API_BASE_URL}/proposals/${proposalId}/accept`,
-            { adminNotes }, // 요청 본문에 adminNotes 포함
+            { adminComment }, // 요청 본문에 adminComment 포함
             { withCredentials: true }
         );
         // 승인 후 반환되는 데이터를 그대로 반환 (예: 업데이트된 Proposal 객체)
@@ -247,14 +247,14 @@ export const acceptProposal = async (proposalId, adminNotes) => {
 };
 
 // 등록된 proposal을 거절하는 함수 (관리자용)
-export const rejectProposal = async (proposalId, adminNotes) => {
-    if (!proposalId || !adminNotes) {
+export const rejectProposal = async (proposalId, adminComment) => {
+    if (!proposalId || !adminComment) {
         throw new Error("Proposal ID and admin notes are required to reject a proposal.");
     }
     try {
         const response = await axios.patch(
             `${API_BASE_URL}/proposals/${proposalId}/reject`,
-            { adminNotes }, // 요청 본문에 adminNotes 포함
+            { adminComment }, // 요청 본문에 adminComment 포함
             { withCredentials: true }
         );
         // 거절 후 반환되는 데이터를 그대로 반환 (예: 업데이트된 Proposal 객체)
@@ -275,6 +275,10 @@ export const deleteMyAccount = async () => {
     throw error.response?.data?.message || 'Failed to delete account';
   }
 };
+
+
+
+
 
 export const fetchUserById = async (userId) => {
   if (!userId) {

@@ -233,7 +233,7 @@ const SidePanelItems = ({ isReviewsExpanded, toggleReviewsExpansion }) => {
           {/* Basic Info Section */}
           <div className="mb-6">
             <p className="text-sm text-gray-500 mb-1">
-              <span className="font-semibold text-gray-700">Category:</span>{" "}
+              <span className="font-semibold text-gray-700">Category: </span>
               {selectedPlaceData.category
                 ?.replace(/_/g, " ")
                 .split(" ")
@@ -242,13 +242,13 @@ const SidePanelItems = ({ isReviewsExpanded, toggleReviewsExpansion }) => {
             </p>
             {selectedPlaceData.address && (
               <p className="text-gray-700 mb-1">
-                <span className="font-semibold">Address:</span>{" "}
+                <span className="font-semibold">Address: </span>
                 {selectedPlaceData.address}
               </p>
             )}
             {selectedPlaceData.website && (
               <p className="text-gray-700 mb-1">
-                <span className="font-semibold">Website:</span>{" "}
+                <span className="font-semibold">Website: </span>
                 <a
                   href={selectedPlaceData.website}
                   target="_blank"
@@ -261,7 +261,7 @@ const SidePanelItems = ({ isReviewsExpanded, toggleReviewsExpansion }) => {
             )}
             {selectedPlaceData.openingHours && (
               <p className="text-gray-700 mb-1">
-                <span className="font-semibold">Opening Hours:</span>{" "}
+                <span className="font-semibold">Opening Hours: </span>
                 {selectedPlaceData.openingHours}
               </p>
             )}

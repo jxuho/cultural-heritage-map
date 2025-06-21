@@ -297,7 +297,6 @@ const UpdateForm = () => {
               !backendError &&
               !submissionError && (
                 <span className="block sm:inline">
-                  {" "}
                   Please correct the highlighted fields.
                 </span>
               )}

@@ -200,7 +200,6 @@ const CreateForm = () => {
           >
             <strong className="font-bold">Validation Error!</strong>
             <span className="block sm:inline">
-              {" "}
               Please correct the highlighted fields.
             </span>
           </div>

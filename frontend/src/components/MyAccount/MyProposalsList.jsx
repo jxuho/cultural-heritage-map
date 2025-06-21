@@ -141,7 +141,7 @@ const MyProposalsList = () => {
                 : "Update Proposal"}
             </h3>
             <p className="text-gray-700 mb-1">
-              <strong>Status:</strong>{" "}
+              <strong>Status: </strong>
               <span
                 className={`font-medium ${
                   proposal.status === "pending"
@@ -158,12 +158,12 @@ const MyProposalsList = () => {
             {proposal.culturalSite && (
               <>
                 <p className="text-gray-700 mb-1">
-                  <strong>Cultural Site:</strong>{" "}
+                  <strong>Cultural Site:</strong>
                   {proposal.culturalSite.name || "N/A"}
                 </p>
                 {proposal.culturalSite.description && (
                   <p className="text-gray-700 mb-1">
-                    <strong>Description:</strong>{" "}
+                    <strong>Description:</strong>
                     {proposal.culturalSite.description}
                   </p>
                 )}
@@ -196,7 +196,7 @@ const MyProposalsList = () => {
                 )}
                 {proposal.culturalSite.openingHours && (
                   <p className="text-gray-700 mb-1">
-                    <strong>Opening Hours:</strong>{" "}
+                    <strong>Opening Hours:</strong>
                     {proposal.culturalSite.openingHours}
                   </p>
                 )}
@@ -225,7 +225,7 @@ const MyProposalsList = () => {
                     ) // Filter out originalTags for 'create' proposals
                     .map(([key, value]) => (
                       <li key={key}>
-                        {key}:{" "}
+                        {key}:
                         {renderProposedValue(key, value, proposal.proposalType)}
                       </li>
                     ))}

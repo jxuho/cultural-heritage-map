@@ -1,8 +1,9 @@
-import { useState } from 'react'; 
+import { useState } from 'react';
 import { useNavigate } from "react-router";
 import defaultProfileImg from "../../assets/profile_image.svg";
 import useAuthStore from "../../store/authStore";
 import BackButton from '../BackButton';
+import { useUpdateProfile } from '../../hooks/useUserQueries';
 
 const UpdateProfile = () => {
     const nameRegex = /^(?!^\d+$)[\p{L}][\p{L}\p{N}\s.'-]*$/u;
@@ -28,10 +29,12 @@ const UpdateProfile = () => {
         apiErrorMessage: "", // ✨ API 오류 메시지 추가
     });
 
+    // useUpdateProfile 훅 사용
+    const updateProfileMutation = useUpdateProfile();
+
     const nameInputHandler = (e) => {
         const inputValue = e.target.value;
         setUserName(inputValue);
-
         setShowMessage((prevState) => ({ ...prevState, showNameMessage: false }));
         setNameMessage("");
 
@@ -59,7 +62,6 @@ const UpdateProfile = () => {
     const bioInputHandler = (e) => {
         const inputValue = e.target.value;
         setBio(inputValue);
-
         setShowMessage((prevState) => ({ ...prevState, showBioMessage: false }));
         setBioMessage("");
 
@@ -72,8 +74,8 @@ const UpdateProfile = () => {
     const submitUpdateProfileHandler = async (e) => {
         e.preventDefault();
 
-        let isValid = true; // 폼 전체 유효성 검사 플래그
-        setShowMessage((prevState) => ({ ...prevState, apiError: false, apiErrorMessage: "" })); // ✨ API 에러 메시지 초기화
+        let isValid = true;
+        setShowMessage((prevState) => ({ ...prevState, apiError: false, apiErrorMessage: "" }));
 
         // --- 사용자 이름 유효성 검사 (Submit 시) ---
         if (userName.trim() === "") {
@@ -106,55 +108,31 @@ const UpdateProfile = () => {
         }
 
         if (!isValid) {
-            return; // 유효성 검사 실패 시 제출 중단
+            return;
         }
 
-        // --- DB 업데이트 로직 ---
+        const updateData = {};
+        if (userName !== user.username) { // 이름이 변경되었을 경우에만 전송
+            updateData.username = userName;
+        }
+        if (bio !== user.bio) { // 자기소개가 변경되었을 경우에만 전송
+            updateData.bio = bio;
+        }
+
+        // 변경된 필드가 없으면 API 호출하지 않음
+        if (Object.keys(updateData).length === 0) {
+            setShowMessage((prevState) => ({ ...prevState, changeSuccess: true }));
+            return;
+        }
+
         try {
-            const updateData = {};
-            if (userName !== user.username) { // 이름이 변경되었을 경우에만 전송
-                updateData.username = userName;
-            }
-            if (bio !== user.bio) { // 자기소개가 변경되었을 경우에만 전송
-                updateData.bio = bio;
-            }
-
-            // 변경된 필드가 없으면 API 호출하지 않음
-            if (Object.keys(updateData).length === 0) {
-                setShowMessage((prevState) => ({ ...prevState, changeSuccess: true }));
-                return;
-            }
-
-            const response = await fetch('http://localhost:5000/api/v1/users/updateMe', {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // 'Authorization' 헤더는 HttpOnly 쿠키를 사용하므로 수동으로 추가할 필요 없음
-                },
-                body: JSON.stringify(updateData),
-                credentials: 'include', // HttpOnly 쿠키를 요청에 포함
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                // API 응답에서 업데이트된 사용자 정보를 받아서 Zustand 스토어 업데이트
-                updateUser(data.data.user); // ✨ updateUser 액션 호출
-                setShowMessage((prevState) => ({ ...prevState, changeSuccess: true }));
-            } else {
-                // API 응답에 따른 오류 처리
-                let errorMessage = "Failed to update profile. Please try again";
-                if (data && data.message) { // 백엔드에서 제공하는 오류 메시지 사용
-                    errorMessage = data.message;
-                } else if (response.status === 401) {
-                    errorMessage = "Not authenticated. please login.";
-                    // navigate('/sign-in'); // 필요시 로그인 페이지로 리다이렉트
-                }
-                setShowMessage((prevState) => ({ ...prevState, apiError: true, apiErrorMessage: errorMessage }));
-            }
+            // useMutation 훅을 통해 mutate 함수 호출
+            const data = await updateProfileMutation.mutateAsync(updateData);
+            updateUser(data.data.user); // Zustand 스토어 업데이트
+            setShowMessage((prevState) => ({ ...prevState, changeSuccess: true, apiError: false }));
         } catch (error) {
-            console.error("Network error:", error);
-            setShowMessage((prevState) => ({ ...prevState, apiError: true, apiErrorMessage: "Network error" }));
+            console.error("Profile update failed:", error);
+            setShowMessage((prevState) => ({ ...prevState, apiError: true, apiErrorMessage: error.message }));
         }
     };
 
@@ -287,8 +265,9 @@ const UpdateProfile = () => {
                         <button
                             className="mr-6 py-1.5 px-8 rounded-sm border bg-blue text-white hover:bg-blue-hover transition-colors hover:cursor-pointer"
                             type="submit"
+                            disabled={updateProfileMutation.isPending} // 뮤테이션 진행 중에는 버튼 비활성화 (TanStack Query v5에서는 isLoading 대신 isPending 사용)
                         >
-                            Save
+                            {updateProfileMutation.isPending ? 'Saving...' : 'Save'}
                         </button>
                     </div>
                 </form>

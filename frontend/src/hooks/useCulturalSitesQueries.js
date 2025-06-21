@@ -55,7 +55,6 @@ export const usePlaceReviews = (placeId, isExpanded) => {
   });
 };
 
-// NEW: Hook to fetch current user's reviews
 export const useMyReviews = () => {
   return useQuery({
     queryKey: ['myReviews'],
@@ -234,11 +233,11 @@ export const useProposals = () => {
 export const useProposalModeration = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async ({ proposalId, actionType, adminNotes }) => {
+        mutationFn: async ({ proposalId, actionType, adminComment }) => {
             if (actionType === 'accept') {
-                return acceptProposal(proposalId, adminNotes);
+                return acceptProposal(proposalId, adminComment);
             } else if (actionType === 'reject') {
-                return rejectProposal(proposalId, adminNotes);
+                return rejectProposal(proposalId, adminComment);
             }
             throw new Error('Invalid proposal moderation action type.');
         },

@@ -8,7 +8,7 @@ import BackButton from "../BackButton";
 const Proposals = () => {
   const [sortOption, setSortOption] = useState("-createdAt"); // 기본 정렬: 최신 순
   // adminNote를 각 proposal._id에 매핑하여 저장하는 객체 상태로 변경
-  const [adminNotes, setAdminNotes] = useState({});
+  const [adminComment, setadminComment] = useState({});
 
   const { data: proposals = [], isLoading, isError, error } = useProposals();
   const {
@@ -62,7 +62,7 @@ const Proposals = () => {
 
   // 각 proposal의 adminNote를 업데이트하는 헬퍼 함수
   const handleAdminNoteChange = (proposalId, note) => {
-    setAdminNotes((prevNotes) => ({
+    setadminComment((prevNotes) => ({
       ...prevNotes,
       [proposalId]: note,
     }));
@@ -70,22 +70,22 @@ const Proposals = () => {
 
   // 제안 승인 핸들러
   const handleAccept = (proposalId) => {
-    const note = adminNotes[proposalId] || "";
+    const note = adminComment[proposalId] || "";
     if (!note.trim()) {
       alert("승인 시 관리자 메모를 입력해야 합니다.");
       return;
     }
-    moderateProposal({ proposalId, actionType: "accept", adminNotes: note });
+    moderateProposal({ proposalId, actionType: "accept", adminComment: note });
   };
 
   // 제안 거절 핸들러
   const handleReject = (proposalId) => {
-    const note = adminNotes[proposalId] || "";
+    const note = adminComment[proposalId] || "";
     if (!note.trim()) {
       alert("거절 시 관리자 메모를 입력해야 합니다.");
       return;
     }
-    moderateProposal({ proposalId, actionType: "reject", adminNotes: note });
+    moderateProposal({ proposalId, actionType: "reject", adminComment: note });
   };
 
   // Helper function to safely render values from proposedChanges
@@ -196,7 +196,7 @@ const Proposals = () => {
               {proposal.proposalType}
             </h3>
             <p className="text-gray-700 mb-1">
-              <strong>Status:</strong>{" "}
+              <strong>Status: </strong>
               <span
                 className={`font-medium ${
                   proposal.status === "pending"
@@ -212,12 +212,12 @@ const Proposals = () => {
             {proposal.culturalSite && (
               <>
                 <p className="text-gray-700 mb-1">
-                  <strong>Cultural Site:</strong>{" "}
+                  <strong>Cultural Site: </strong>
                   {proposal.culturalSite.name || "N/A"}
                 </p>
                 {proposal.culturalSite.description && (
                   <p className="text-gray-700 mb-1">
-                    <strong>Description:</strong>{" "}
+                    <strong>Description: </strong>
                     {proposal.culturalSite.description}
                   </p>
                 )}
@@ -250,7 +250,7 @@ const Proposals = () => {
                 )}
                 {proposal.culturalSite.openingHours && (
                   <p className="text-gray-700 mb-1">
-                    <strong>Opening Hours:</strong>{" "}
+                    <strong>Opening Hours: </strong>
                     {proposal.culturalSite.openingHours}
                   </p>
                 )}
@@ -258,7 +258,7 @@ const Proposals = () => {
             )}
 
             <p className="text-gray-700 mb-1">
-              <strong>Proposed By:</strong>{" "}
+              <strong>Proposed By: </strong>
               {proposal.proposedBy?.email || "N/A"}
             </p>
 
@@ -282,7 +282,7 @@ const Proposals = () => {
                     )
                     .map(([key, value]) => (
                       <li key={key}>
-                        {key}:{" "}
+                        {key}:
                         {renderProposedValue(key, value, proposal.proposalType)}
                       </li>
                     ))}
@@ -296,7 +296,7 @@ const Proposals = () => {
               </p>
             )}
             <p className="text-sm text-gray-500 mt-2">
-              Created:{" "}
+              Created:
               {new Date(proposal.createdAt).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
@@ -305,7 +305,7 @@ const Proposals = () => {
             </p>
             {proposal.reviewedAt && (
               <p className="text-sm text-gray-500">
-                Reviewed: Created:{" "}
+                Reviewed: Created:
                 {new Date(proposal.reviewedAt).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
@@ -318,14 +318,14 @@ const Proposals = () => {
             {proposal.status === "pending" && (
               <div className="mt-4 p-3 border rounded-md bg-gray-50">
                 <label
-                  htmlFor={`adminNotes-${proposal._id}`}
+                  htmlFor={`adminComment-${proposal._id}`}
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   Admin Notes:
                 </label>
                 <textarea
-                  id={`adminNotes-${proposal._id}`}
-                  value={adminNotes[proposal._id] || ""}
+                  id={`adminComment-${proposal._id}`}
+                  value={adminComment[proposal._id] || ""}
                   onChange={(e) =>
                     handleAdminNoteChange(proposal._id, e.target.value)
                   }
@@ -339,7 +339,7 @@ const Proposals = () => {
                     className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     // 해당 제안의 메모가 없거나, 처리 중일 경우 비활성화
                     disabled={
-                      isModerationPending || !adminNotes[proposal._id]?.trim()
+                      isModerationPending || !adminComment[proposal._id]?.trim()
                     }
                   >
                     Accept
@@ -349,7 +349,7 @@ const Proposals = () => {
                     className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     // 해당 제안의 메모가 없거나, 처리 중일 경우 비활성화
                     disabled={
-                      isModerationPending || !adminNotes[proposal._id]?.trim()
+                      isModerationPending || !adminComment[proposal._id]?.trim()
                     }
                   >
                     Reject

@@ -122,25 +122,25 @@ const UsersManagementPage = () => {
       <div className="mb-6 flex flex-wrap gap-2 sm:gap-4 justify-start">
         <button
           onClick={() => handleSortChange("username")}
-          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "username" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
+          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "username" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"}`}
         >
           Sort by Username{getSortIndicator("username")}
         </button>
         <button
           onClick={() => handleSortChange("role")}
-          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "role" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
+          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "role" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"}`}
         >
           Sort by Role{getSortIndicator("role")}
         </button>
         <button
           onClick={() => handleSortChange("createdAt")}
-          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "createdAt" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
+          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "createdAt" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"}`}
         >
           Sort by Registered Date{getSortIndicator("createdAt")}
         </button>
         <button
           onClick={() => handleSortChange("updatedAt")}
-          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "updatedAt" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
+          className={`px-4 py-2 rounded-md transition-colors ${sortBy === "updatedAt" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"}`}
         >
           Sort by Last Updated{getSortIndicator("updatedAt")}
         </button>
@@ -174,7 +174,7 @@ const UsersManagementPage = () => {
               </div>
               <button
                 onClick={() => handleViewProfile(user._id)}
-                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none text-sm sm:text-base flex-shrink-0"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none text-sm sm:text-base flex-shrink-0 cursor-pointer"
               >
                 {selectedUserId === user._id ? "Hide Profile" : "View Profile"}
               </button>

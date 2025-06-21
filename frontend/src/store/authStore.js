@@ -1,78 +1,83 @@
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware'
+import { devtools } from 'zustand/middleware';
+import axios from 'axios';
 
-// 실제 백엔드 응답에 따라 필드를 조정하세요.
+// Adjust fields according to the actual backend response.
 /**
  * @typedef {Object} User
  * @property {string} id
  * @property {string} name
  * @property {string} email
- * @property {string} [role] // 선택적 필드
- * @property {Object} [settings] // 선택적 필드
+ * @property {string} [role] // Optional field
+ * @property {Object} [settings] // Optional field
+ * @property {string} [username] // Added username field
+ * @property {string} [bio] // Added bio field
+ * @property {string} [profileImage] // Added profileImage field
  */
+
+// Create axios instance (if needed)
+// Setting baseURL can prevent typing the full URL every time.
+const api = axios.create({
+  baseURL: 'http://localhost:5000/api/v1',
+  withCredentials: true, // Include HttpOnly cookies in all requests
+});
 
 const useAuthStore = create(devtools((set) => ({
   /** @type {User | null} */
-  user: null, // 사용자 정보
-  isAuthenticated: false, // 인증 여부
-  loading: true, // 초기 인증 상태 로딩 중 여부
+  user: null, // User information
+  isAuthenticated: false, // Authentication status
+  loading: true, // Initial authentication status loading state
 
-  // 로그인 액션 (현재 user 정보도 함께 설정)
+  // Login action (also sets current user information)
   login: (/** @type {User} */ userData) => {
     set({ user: userData, isAuthenticated: true });
   },
 
-  // ✨ 추가된 액션: 사용자 정보 업데이트
+  // ✨ Added action: Update user information
   updateUser: (/** @type {Partial<User>} */ userData) => {
     set((state) => ({
       user: state.user ? { ...state.user, ...userData } : userData,
     }));
   },
 
-  // 로그아웃 액션
+  // Logout action
   logout: async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/v1/auth/logout', {
-        method: 'POST',
-        credentials: 'include' // HttpOnly 쿠키 전송
-      });
-      if (!response.ok) {
-        console.error('로그아웃 API 호출 실패:', response.statusText);
-      }
+      // Use axios for POST request
+      await api.post('/auth/logout');
     } catch (error) {
-      console.error('로그아웃 중 오류 발생:', error);
+      console.error('Error during logout:', error);
+      // Extract message from axios error response (optional)
+      if (error.response) {
+        console.error('Logout API call failed:', error.response.status, error.response.data);
+      }
     } finally {
-      // API 호출 성공 여부와 관계없이 클라이언트 상태 초기화
+      // Initialize client state regardless of API call success
       set({ user: null, isAuthenticated: false });
     }
   },
 
-  // 초기 인증 상태 확인 (앱 시작 시 호출)
+  // Check initial authentication status (called on app startup)
   checkAuthStatus: async () => {
     set({ loading: true });
     try {
-      const response = await fetch('http://localhost:5000/api/v1/users/me', {
-        credentials: 'include' // HttpOnly 쿠키 전송
-      });
+      // Use axios for GET request
+      const response = await api.get('/users/me');
 
-      if (response.ok) {
-        const data = await response.json();
-        set({ user: data.data.user, isAuthenticated: true });
-      } else {
-        console.warn('인증 확인 실패:', response.status, response.statusText);
-        set({ user: null, isAuthenticated: false });
-      }
+      // axios automatically treats 2xx status codes as success,
+      // and puts the response data in response.data.
+      set({ user: response.data.data.user, isAuthenticated: true });
     } catch (error) {
-      console.error('인증 상태 확인 중 오류 발생:', error);
+      console.error('Error checking authentication status:', error);
+      // Extract message from axios error response (optional)
+      if (error.response) {
+        console.warn('Authentication check failed:', error.response.status, error.response.data);
+      }
       set({ user: null, isAuthenticated: false });
     } finally {
       set({ loading: false });
     }
   },
 })));
-
-
-
-
 
 export default useAuthStore;
