@@ -131,6 +131,7 @@ const Proposals = () => {
   if (isError) {
     return (
       <div className="text-center p-6 text-xl text-red-600">
+        <BackButton />
         Error loading proposals: {error.message}
       </div>
     );
@@ -139,6 +140,7 @@ const Proposals = () => {
   if (!sortedProposals.length) {
     return (
       <div className="text-center p-6 text-xl text-gray-600">
+        <BackButton />
         No proposals found.
       </div>
     );

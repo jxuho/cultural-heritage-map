@@ -6,8 +6,6 @@ const ReviewDisplay = ({ reviews, currentUser }) => {
 
   // Handler for clicking on user info
   const handleUserClick = (user) => {
-    console.log('trigger');
-    
     openUserProfile(user._id);
   };
 

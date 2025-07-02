@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router";
+import { Routes, Route } from "react-router"; // 'react-router' 대신 'react-router-dom'을 사용해야 합니다.
 import HomePage from "./pages/HomePage";
 import MainLayout from "./layouts/MainLayout";
 import useAuthStore from "./store/authStore";
@@ -17,15 +17,18 @@ import DeleteAccount from "./components/MyAccount/DeleteAccount";
 import ListPage from "./pages/ListPage";
 import UsersManagementPage from "./components/MyAccount/UsersManagementPage";
 import MyProposalsList from "./components/MyAccount/MyProposalsList";
+import NotFoundPage from "./pages/NotFoundPage";
 
 const App = () => {
   const checkAuthStatus = useAuthStore((state) => state.checkAuthStatus);
   const loading = useAuthStore((state) => state.loading);
 
   useEffect(() => {
-    checkAuthStatus(); // Always re-validate login status
+    // Always re-validate login status on component mount
+    checkAuthStatus();
   }, [checkAuthStatus]);
 
+  // Display a loading spinner while authentication status is being determined
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -34,24 +37,44 @@ const App = () => {
     <>
       <Modal />
       <Routes>
+        {/* Public route for signing in */}
         <Route path="/sign-in" element={<SignInPage />} />
+
+        {/* Main layout with nested routes */}
         <Route path="/" element={<MainLayout />}>
+          {/* Public home page */}
           <Route index element={<HomePage />} />
-          <Route path="list" element={<ListPage />} /> 
-          
+          {/* Public list page */}
+          <Route path="list" element={<ListPage />} />
+
+          {/* Protected routes for authenticated users */}
+          {/* All routes nested here require authentication. */}
+          {/* Individual routes can further specify a requiredRole. */}
           <Route element={<ProtectedRoute />}>
             <Route path="my-account" element={<MyAccountPage />}>
-              <Route index element={<ProfileView />} />
+              <Route index element={<ProfileView />} /> {/* Default for my-account */}
               <Route path="update-profile" element={<UpdateProfile />} />
               <Route path="reviews" element={<MyReviews />} />
               <Route path="favorite-sites" element={<FavoriteSites />} />
-              <Route path="proposals" element={<Proposals />} />
               <Route path="delete-account" element={<DeleteAccount />} />
-              <Route path="users" element={<UsersManagementPage />} />
-              <Route path="my-proposals" element={<MyProposalsList />} />
             </Route>
           </Route>
+
+          {/* Routes specifically for 'user' role */}
+          <Route element={<ProtectedRoute requiredRole="user" />}>
+            <Route path="/my-account/my-proposals" element={<MyProposalsList />} />
+          </Route>
+
+          {/* Routes specifically for 'admin' role */}
+          <Route element={<ProtectedRoute requiredRole="admin" />}>
+            <Route path="/my-account/proposals" element={<Proposals />} />
+            <Route path="/my-account/users" element={<UsersManagementPage />} />
+          </Route>
         </Route>
+
+        {/* 404 Page - This route must be the last one */}
+        {/* '*' matches any path that hasn't been matched by the routes above */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );

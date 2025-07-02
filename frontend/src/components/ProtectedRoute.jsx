@@ -1,16 +1,39 @@
-// components/ProtectedRoute.jsx
+import React from 'react';
 import { Navigate, Outlet } from 'react-router';
-import useAuthStore from '../store/authStore'; // 인증 스토어 임포트
-import LoadingSpinner from './LoadingSpinner'; // 로딩 스피너 임포트
+import useAuthStore from '../store/authStore';
+import LoadingSpinner from './LoadingSpinner'; // Assuming this component exists
 
-const ProtectedRoute = () => {
-  const { isAuthenticated, loading } = useAuthStore(); // 인증 상태와 로딩 상태 가져오기
+/**
+ * A component to protect routes based on authentication status and user roles.
+ * If not authenticated, redirects to /sign-in.
+ * If authenticated but role doesn't match, redirects to /.
+ * @param {object} props - The component props.
+ * @param {React.ReactNode} props.children - Child components to render if authorized.
+ * @param {string} [props.requiredRole] - The role required to access this route (e.g., 'admin', 'user').
+ * @returns {React.ReactNode} - Rendered content or a redirection.
+ */
+const ProtectedRoute = ({ children, requiredRole }) => {
+  const { isAuthenticated, loading, user } = useAuthStore();
 
+  // Show a loading spinner while authentication status is being checked
   if (loading) {
-    return <LoadingSpinner />; // 인증 상태 확인 중 로딩 스피너 표시
+    return <LoadingSpinner />;
   }
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/sign-in" replace />;
+  // If not authenticated, redirect to the sign-in page
+  if (!isAuthenticated) {
+    return <Navigate to="/sign-in" replace />;
+  }
+
+  // If a required role is specified, check if the user has that role
+  if (requiredRole && (!user || user.role !== requiredRole)) {
+    // If the user does not have the required role, redirect to the home page
+    // Or you could render an "Unauthorized" component here
+    return <Navigate to="/" replace />;
+  }
+
+  // If authenticated and role matches (if required), render the child routes/components
+  return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

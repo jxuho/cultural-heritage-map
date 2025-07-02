@@ -57,8 +57,6 @@ const MapCenterUpdater = () => {
 
       // 마커로 이동 후, sidebar 고려해서 중심으로 이동
       if (isSidePanelOpen && sidePanelWidth > 0 && viewportWidth > 450) {
-        console.log("trigger");
-
         setTimeout(() => {
           let offsetX = sidePanelWidth / 2 - 20;
           map.panBy([offsetX, 0], { animate: true, duration: 0.5 });

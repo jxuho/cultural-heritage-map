@@ -37,42 +37,6 @@ export const fetchCulturalSiteById = async (id) => {
   }
 };
 
-
-// // 즐겨찾기 추가
-// export const addFavorite = async (culturalSiteId) => {
-//   if (!culturalSiteId) throw new Error("Cultural site ID is required to add to favorites.");
-//   try {
-//     const response = await axios.post(`${API_BASE_URL}/users/me/favorites/${culturalSiteId}`, {}, { withCredentials: true });
-//     return response.data.data.favoriteSites || null; // Ensure it returns a value
-//   } catch (error) {
-//     console.error("Error adding favorite:", error);
-//     throw error;
-//   }
-// };
-
-// // Fetch all favorite cultural sites for the current user
-// export const fetchMyFavorites = async () => {
-//   try {
-//     const response = await axios.get(`${API_BASE_URL}/users/me/favorites`, { withCredentials: true });
-//     return response.data.data.favoriteSites || []; // Ensure it returns an array
-//   } catch (error) {
-//     console.error("Error fetching my favorites:", error);
-//     throw error;
-//   }
-// };
-
-// // Delete a cultural site from favorites
-// export const deleteFavorite = async (culturalSiteId) => {
-//   if (!culturalSiteId) throw new Error("Cultural site ID is required to delete from favorites.");
-//   try {
-//     await axios.delete(`${API_BASE_URL}/users/me/favorites/${culturalSiteId}`, { withCredentials: true });
-//     return true; // Success indicates true
-//   } catch (error) {
-//     console.error("Error deleting favorite:", error);
-//     throw error;
-//   }
-// };
-
 // 주변 osm 장소 가지고오기(backend extended query 기준)
 export const getNearbyOsm = async (lat, lon) => {
   if (!lat || !lon) {
@@ -88,17 +52,6 @@ export const getNearbyOsm = async (lat, lon) => {
     throw error;
   }
 };
-
-// // proposal 제출
-// export const submitProposal = async (proposalData) => {
-//   try {
-//     const response = await axios.post(`${API_BASE_URL}/proposals`, proposalData, { withCredentials: true });
-//     return response.data;
-//   } catch (error) {
-//     // It's good practice to re-throw with a more specific error or process it
-//     throw error.response?.data?.message || 'Failed to submit proposal';
-//   }
-// };
 
 // site 즉시 생성(admin)
 export const createCulturalSite = async (siteData) => {
@@ -133,68 +86,3 @@ export const deleteCulturalSite = async (culturalSiteId) => {
     throw error;
   }
 };
-
-// // 모든 proposals 가지고오기(관리자용)
-// export const fetchAllProposals = async () => {
-//   try {
-//     const response = await axios.get(`${API_BASE_URL}/proposals/`, { withCredentials: true });
-//     // Assuming the structure is response.data.data.proposals
-//     return response.data.data.proposals || [];
-//   } catch (error) {
-//     console.error("Error fetching all proposals:", error);
-//     throw error;
-//   }
-// }
-
-// // 등록된 proposal을 승인하는 함수 (관리자용)
-// export const acceptProposal = async (proposalId, adminComment) => {
-//     if (!proposalId || !adminComment) {
-//         throw new Error("Proposal ID and admin notes are required to accept a proposal.");
-//     }
-//     try {
-//         const response = await axios.patch(
-//             `${API_BASE_URL}/proposals/${proposalId}/accept`,
-//             { adminComment }, // 요청 본문에 adminComment 포함
-//             { withCredentials: true }
-//         );
-//         // 승인 후 반환되는 데이터를 그대로 반환 (예: 업데이트된 Proposal 객체)
-//         return response.data;
-//     } catch (error) {
-//         console.error(`Error accepting proposal ${proposalId}:`, error);
-//         throw error.response?.data?.message || 'Failed to accept proposal'; // 서버 오류 메시지 우선 사용
-//     }
-// };
-
-// // 등록된 proposal을 거절하는 함수 (관리자용)
-// export const rejectProposal = async (proposalId, adminComment) => {
-//     if (!proposalId || !adminComment) {
-//         throw new Error("Proposal ID and admin notes are required to reject a proposal.");
-//     }
-//     try {
-//         const response = await axios.patch(
-//             `${API_BASE_URL}/proposals/${proposalId}/reject`,
-//             { adminComment }, // 요청 본문에 adminComment 포함
-//             { withCredentials: true }
-//         );
-//         // 거절 후 반환되는 데이터를 그대로 반환 (예: 업데이트된 Proposal 객체)
-//         return response.data;
-//     } catch (error) {
-//         console.error(`Error rejecting proposal ${proposalId}:`, error);
-//         throw error.response?.data?.message || 'Failed to reject proposal'; // 서버 오류 메시지 우선 사용
-//     }
-// };
-
-
-// export const fetchMyProposals = async () => {
-//   try {
-//     const response = await axios.get(`${API_BASE_URL}/proposals/my-proposals`,{
-//       withCredentials: true, 
-//     });
-//     console.log(response);
-    
-//     return response.data.data.proposals;
-//   } catch (error) {
-//     console.error('Error fetching my proposals:', error);
-//     throw error;
-//   }
-// };

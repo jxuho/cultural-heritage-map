@@ -163,7 +163,7 @@ const ListPage = () => {
               {site.name}
             </h2>
 
-            <div className="flex items-center text-sm text-gray-700 mb-2">
+            <div className="flex flex-wrap items-center text-sm text-gray-700 mb-2">
               {site.averageRating !== undefined &&
                 site.averageRating !== null && (
                   <div className="flex items-center mr-3">

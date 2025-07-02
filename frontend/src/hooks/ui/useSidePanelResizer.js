@@ -55,13 +55,9 @@ const useSidePanelResizer = (detailRef) => {
   }, [resizeHandler, resizerMouseUpHandler]);
 
   useEffect(() => {
-    if (viewportWidth - sidePanelWidth < 50 && viewportWidth > 450) {
-      setSidePanelWidth(viewportWidth - 50);
-      setResizerPosition(viewportWidth - 50);
-    } else if (viewportWidth <= 450) {
-      setSidePanelWidth(viewportWidth);
+    if (viewportWidth <= 450 || sidePanelWidth > viewportWidth) {
       setResizerPosition(viewportWidth);
-    }
+    } 
   }, [viewportWidth, sidePanelWidth, setSidePanelWidth]);
 
   return {
