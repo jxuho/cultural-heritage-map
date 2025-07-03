@@ -1,9 +1,9 @@
 import { useAllUsers } from "../../hooks/data/useUserQueries";
 import defaultProfileImg from "../../assets/profile_image.svg";
 import UserProfileCard from "./UserProfileCard";
-import { useState, useMemo } from "react"; // Added useMemo
+import { useState, useMemo } from "react"; 
 import BackButton from "../BackButton";
-import useAuthStore from "../../store/authStore"; // Import your auth store
+import useAuthStore from "../../store/authStore"; 
 
 const UsersManagementPage = () => {
   const { data: users, isLoading, isError, error } = useAllUsers();
@@ -145,8 +145,6 @@ const UsersManagementPage = () => {
           Sort by Last Updated{getSortIndicator("updatedAt")}
         </button>
       </div>
-      {/* End Sort Buttons */}
-
       <div className="space-y-6 md:space-y-8">
         {sortedUsers.map((user) => ( // Use sortedUsers here
           <div

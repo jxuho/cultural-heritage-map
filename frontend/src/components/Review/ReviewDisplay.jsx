@@ -1,5 +1,5 @@
 import StarIcon from "../StarIcon";
-import useUiStore from "../../store/uiStore"; // Import useUiStore
+import useUiStore from "../../store/uiStore"; 
 
 const ReviewDisplay = ({ reviews, currentUser }) => {
   const openUserProfile = useUiStore((state) => state.openUserProfile);

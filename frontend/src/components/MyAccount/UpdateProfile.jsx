@@ -12,7 +12,7 @@ const UpdateProfile = () => {
 
     // useAuthStore에서 user와 updateUser 액션 가져오기
     const user = useAuthStore((state) => state.user);
-    const updateUser = useAuthStore((state) => state.updateUser); // ✨ updateUser 액션 가져오기
+    const updateUser = useAuthStore((state) => state.updateUser); 
     const navigate = useNavigate();
 
     const [userName, setUserName] = useState(user.username ?? "");
@@ -254,7 +254,6 @@ const UpdateProfile = () => {
                         )}
                     </div>
 
-                    {/* ✨ API 오류 메시지 표시 */}
                     {showMessage.apiError && (
                         <p className="mb-4 text-sm text-red-600 text-center">
                             {showMessage.apiErrorMessage}

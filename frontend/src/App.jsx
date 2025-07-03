@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router"; // 'react-router' 대신 'react-router-dom'을 사용해야 합니다.
+import { Routes, Route } from "react-router"; 
 import HomePage from "./pages/HomePage";
 import MainLayout from "./layouts/MainLayout";
 import useAuthStore from "./store/authStore";

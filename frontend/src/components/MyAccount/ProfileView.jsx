@@ -6,7 +6,7 @@ import {
   PiChatCircleTextThin,
   PiClipboardTextThin,
   PiUsersThreeThin,
-  PiFileTextThin, // 새로운 아이콘 추가: PiFileTextThin
+  PiFileTextThin,
 } from "react-icons/pi";
 import useAuthStore from "../../store/authStore";
 import useUiStore from "../../store/uiStore";

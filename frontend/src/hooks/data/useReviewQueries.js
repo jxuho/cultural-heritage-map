@@ -14,8 +14,8 @@ export const usePlaceReviews = (placeId, isExpanded) => {
 export const useMyReviews = () => {
   return useQuery({
     queryKey: ['myReviews'],
-    queryFn: getMyReviews, // Assuming getMyReviews handles sorting internally or defaults
-    staleTime: 1000 * 10, // 10 seconds, adjust as needed
+    queryFn: getMyReviews, 
+    staleTime: 1000 * 10,
     enabled: true, // This query should always run if the component is mounted
   });
 };

@@ -1,7 +1,7 @@
 // src/components/ChangeRoleModalContent.jsx
 import React, { useState } from 'react';
-import useUiStore from '../../store/uiStore'; // Assuming this path is correct
-import { useUpdateUserRole } from '../../hooks/data/useUserQueries'; // Adjust path to your hooks file
+import useUiStore from '../../store/uiStore'; 
+import { useUpdateUserRole } from '../../hooks/data/useUserQueries';
 
 export const ChangeRoleModalContent = ({ user }) => {
   const { closeModal } = useUiStore();

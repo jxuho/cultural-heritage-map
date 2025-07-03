@@ -2,7 +2,7 @@
 import React from "react";
 import { useAllCulturalSites } from "../hooks/data/useCulturalSitesQueries";
 import FilterPanel from "../components/Filter/FilterPanel";
-import useFilterStore from "../store/filterStore"; // Import useFilterStore
+import useFilterStore from "../store/filterStore"; 
 import {
   FaHeart,
   FaCommentAlt,
@@ -23,8 +23,8 @@ const ListPage = () => {
   // Get selectedCategories, searchQuery, sortBy, and setSortBy from useFilterStore
   const selectedCategories = useFilterStore((state) => state.selectedCategories);
   const searchQuery = useFilterStore((state) => state.searchQuery.toLowerCase());
-  const sortBy = useFilterStore((state) => state.sortBy); // NEW: Get sortBy from filterStore
-  const setSortBy = useFilterStore((state) => state.setSortBy); // NEW: Get setSortBy from filterStore
+  const sortBy = useFilterStore((state) => state.sortBy); 
+  const setSortBy = useFilterStore((state) => state.setSortBy); 
 
 
   const openSidePanel = useUiStore((state) => state.openSidePanel);

@@ -1,5 +1,5 @@
 // src/hooks/ui/useSidePanelResizer.js
-import { useCallback, useEffect, useState } from "react"; // useRef 제거
+import { useCallback, useEffect, useState } from "react";
 import useUiStore from "../../store/uiStore";
 import useViewport from "./useViewPort";
 

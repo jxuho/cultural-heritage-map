@@ -5,16 +5,10 @@ export const useSubmitProposal = () => {
   return useMutation({
     mutationFn: submitProposal,
     onSuccess: () => {
-      // Invalidate queries that might need refetching after a proposal is submitted.
-      // For example, if you have a list of pending proposals, you'd invalidate that.
-      // queryClient.invalidateQueries({ queryKey: ['proposals', 'pending'] });
-      // You might also want to invalidate cultural sites list if the proposal is immediately approved and added
-      // queryClient.invalidateQueries({ queryKey: ['culturalSites'] });
       console.log("Proposal submitted successfully!");
     },
     onError: (error) => {
       console.error("Error submitting proposal:", error);
-      // You can add more sophisticated error handling here, e.g., display a toast notification
       throw error; // Re-throw to be caught by the component
     },
   });

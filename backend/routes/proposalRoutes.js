@@ -1,6 +1,6 @@
 const express = require('express');
 const proposalController = require('../controllers/proposalController');
-const authController = require('../controllers/authController'); // 인증 및 역할 제한을 위한 컨트롤러 가정
+const authController = require('../controllers/authController');
 
 const router = express.Router();
 

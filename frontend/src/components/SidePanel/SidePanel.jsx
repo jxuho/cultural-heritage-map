@@ -12,9 +12,9 @@ const SidePanel = () => {
   // --- Zustand (UI State Management) ---
   const isSidePanelOpen = useUiStore((state) => state.isSidePanelOpen);
   const uiSelectedPlace = useUiStore((state) => state.selectedPlace);
-  const nearbySites = useUiStore((state) => state.nearbySites); // Still needed for useEffect cleanup
-  const isCreateFormOpen = useUiStore((state) => state.isCreateFormOpen); // Still needed for useEffect cleanup
-  const isUpdateFormOpen = useUiStore((state) => state.isUpdateFormOpen); // Still needed for useEffect cleanup
+  const nearbySites = useUiStore((state) => state.nearbySites); 
+  const isCreateFormOpen = useUiStore((state) => state.isCreateFormOpen); 
+  const isUpdateFormOpen = useUiStore((state) => state.isUpdateFormOpen); 
 
   const handleCloseAndCancel = useUiStore((state) => state.handleCloseAndCancel); // Get action from store
 

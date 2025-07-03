@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router"; // This import is fine, but it's not directly used for the button after adding BackButton component
-import { useDeleteMyAccount } from "../../hooks/data/useUserQueries"; // Adjust the import path as needed
-import BackButton from "../BackButton"; // <--- IMPORT BACK BUTTON
+import { useNavigate } from "react-router"; 
+import { useDeleteMyAccount } from "../../hooks/data/useUserQueries"; 
+import BackButton from "../BackButton"; 
 
 const DeleteAccount = () => {
   const navigate = useNavigate();

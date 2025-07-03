@@ -1,5 +1,5 @@
 // src/components/Review/MyReview.jsx
-import { useState, useCallback, useMemo } from "react"; // Added useMemo
+import { useState, useCallback, useMemo } from "react";
 import StarIcon from "../StarIcon";
 import ReviewForm from "../Review/ReviewForm";
 import useAuthStore from "../../store/authStore";
@@ -242,7 +242,6 @@ const MyReviews = () => {
           Sort by Site Name{getSortIndicator("culturalSiteName")}
         </button>
       </div>
-      {/* End Sort Buttons */}
 
       <div
         className="overflow-y-auto pr-2 flex-grow"

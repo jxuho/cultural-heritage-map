@@ -1,6 +1,6 @@
 import defaultProfileImg from "../../assets/profile_image.svg";
 import useUiStore from "../../store/uiStore";
-import { ChangeRoleModalContent } from "./ChangeRoleModalContent"; // We'll create this next
+import { ChangeRoleModalContent } from "./ChangeRoleModalContent"; 
 
 const UserProfileCard = ({ user }) => {
   const { openModal } = useUiStore();

@@ -22,7 +22,7 @@ const useFilterStore = create(devtools((set) => ({
   resetFilters: () => set({
     selectedCategories: [],
     searchQuery: '',
-    sortBy: 'alphabetical', // Also reset sortBy when resetting filters
+    sortBy: 'alphabetical', 
   }),
 })));
 

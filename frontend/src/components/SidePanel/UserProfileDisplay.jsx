@@ -1,10 +1,10 @@
-import defaultProfileImg from "../../assets/profile_image.svg"; // Adjust path as needed
+import defaultProfileImg from "../../assets/profile_image.svg";
 import { useUserById } from "../../hooks/data/useUserQueries";
 import useUiStore from "../../store/uiStore";
 import { FaArrowLeft } from 'react-icons/fa';
 
 const UserProfileDisplay = () => {
-  const closeSidePanel = useUiStore((state) => state.closeSidePanel); // Use closeSidePanel for full panel close
+  const closeSidePanel = useUiStore((state) => state.closeSidePanel);
   const closeUserProfile = useUiStore(state => state.closeUserProfile)
   const userProfileId = useUiStore(state => state.userProfileId);
 

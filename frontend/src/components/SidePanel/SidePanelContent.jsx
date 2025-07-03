@@ -1,8 +1,7 @@
 // src/components/SidePanel/SidePanelContent.jsx
-import React, { useState } from 'react'; // isReviewsExpanded is local
-import useUiStore from "../../store/uiStore"; // Direct import
-import { useCulturalSiteDetail } from "../../hooks/data/useCulturalSitesQueries"; // Direct import
-
+import React, { useState } from 'react'; 
+import useUiStore from "../../store/uiStore";
+import { useCulturalSiteDetail } from "../../hooks/data/useCulturalSitesQueries";
 import SidePanelSkeleton from "./SidePanelSkeleton";
 import ErrorMessage from "../ErrorMessage";
 import NearbySitesList from "./NearbySitesList";
@@ -41,7 +40,7 @@ const SidePanelContent = () => {
     panelContent = <UpdateForm />;
   } 
 
-   else if (isUserProfileOpen) { // ✨ Handle User Profile display first
+   else if (isUserProfileOpen) { 
     panelContent = <UserProfileDisplay />;
   } 
 

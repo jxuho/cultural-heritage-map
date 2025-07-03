@@ -4,7 +4,7 @@ import { Marker } from 'react-leaflet';
 import L from 'leaflet';
 import ReactDOMServer from 'react-dom/server';
 import { FaLandmark, FaPalette, FaBuilding, FaUtensils, FaTheaterMasks, FaUsers, FaBook, FaFilm, FaQuestionCircle } from 'react-icons/fa';
-import { categoryBorderColors } from '../../config/colors'; // <--- RE-IMPORT THIS!
+import { categoryBorderColors } from '../../config/colors';
 
 // 카테고리 아이콘 매핑
 const categoryIconComponents = {

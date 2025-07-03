@@ -3,7 +3,7 @@ require('dotenv').config();
 const fsAsync = require('fs/promises');
 const path = require('path');
 const mongoose = require('mongoose');
-const CulturalSite = require('../models/CulturalSite'); // CulturalSite 모델 경로
+const CulturalSite = require('../models/CulturalSite');
 const { processOsmElementForCulturalSite } = require('../utils/osmDataProcessor');
 
 /**

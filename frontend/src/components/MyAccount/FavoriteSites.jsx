@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"; // Added useMemo
+import { useState, useMemo } from "react"; 
 import { BsStarFill } from "react-icons/bs";
 import useAuthStore from "../../store/authStore";
 import {
@@ -303,7 +303,6 @@ const FavoriteSites = () => {
           Sort by Review Count{getSortIndicator("reviewCount")}
         </button>
       </div>
-      {/* End Sort Buttons */}
 
       <div
         className="overflow-y-auto pr-2 flex-grow"

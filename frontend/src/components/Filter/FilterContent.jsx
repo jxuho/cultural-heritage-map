@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import useFilterStore from "../../store/filterStore";
 import { CULTURAL_CATEGORY } from "../../config/culturalSiteConfig";
 import debounce from "lodash.debounce";
-import { categoryBorderColors } from "../../config/colors"; // <--- IMPORT HERE
+import { categoryBorderColors } from "../../config/colors";
 
 const FilterContent = React.forwardRef(
   ({ isOpen, floatingStyles, ...props }, ref) => {
