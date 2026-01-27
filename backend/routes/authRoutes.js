@@ -14,7 +14,7 @@ router.get('/google', passport.authenticate('google', {
 router.get(
 	'/google/callback',
 	passport.authenticate('google', {
-		failureRedirect: 'http://localhost:3000/', // 인증 실패 시 리다이렉트할 프론트엔드 URL
+		failureRedirect: 'https://chemnitz-cultural-sites.onrender.com/', // 인증 실패 시 리다이렉트할 프론트엔드 URL
 		session: false // JWT를 사용하므로 세션은 사용하지 않음
 	}),
 	authController.googleAuthCallback // 성공 시 JWT 발행 및 응답 처리
