@@ -1,8 +1,75 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware'
-import { queryClient } from '../config/reactQueryConfig'; // 수정된 경로로 queryClient 임포트!
+import { queryClient } from '../config/reactQueryConfig'; 
+import { ReactNode } from 'react';
+import { Place } from '../types/place';
 
-const useUiStore = create(devtools((set) => ({
+interface UiState {
+  // modal
+  isModalOpen: boolean;
+  modalContent: ReactNode | null; // JSX나 컴포넌트가 들어감
+  openModal: (content: ReactNode) => void;
+  closeModal: () => void;
+
+  // account manager
+  isAccountManagerOpen: boolean;
+  openAccountManager: () => void;
+  closeAccountManager: () => void;
+
+  // side panel
+  isSidePanelOpen: boolean;
+  selectedPlace: Place | null;
+  sidePanelWidth: number;
+  setSidePanelWidth: (width: number) => void;
+  openSidePanel: (placeInfo: Place) => void;
+  closeSidePanel: () => void;
+  clearSelectedPlace: () => void;
+  isUserProfileOpen: boolean;
+  userProfileId: string | null;
+  openUserProfile: (userId: string) => void;
+  closeUserProfile: () => void;
+
+  // context menu
+  isContextMenuOpen: boolean;
+  openContextMenu: () => void;
+  closeContextMenu: () => void;
+
+  // latlng
+  selectedLatLng: { lat: number; lng: number } | null;
+  setSelectedLatLng: (latLng: { lat: number; lng: number } | null) => void;
+
+  // nearby
+  nearbySites: Place[];
+  nearbySitesLoading: boolean;
+  nearbySitesError: any;
+  setNearbySites: (sites: Place[]) => void;
+  clearNearbySites: () => void;
+  setNearbySitesLoading: (isLoading: boolean) => void;
+  setNearbySitesError: (error: any) => void;
+
+  // create form
+  isCreateFormOpen: boolean;
+  createFormData: any;
+  openCreateForm: (data: any) => void;
+  closeCreateForm: () => void;
+
+  // update form
+  isUpdateFormOpen: boolean;
+  updateFormData: any;
+  openUpdateForm: (data: any) => void;
+  closeUpdateForm: () => void;
+
+  // actions
+  handleCloseAndCancel: (queryKeyToCancel?: string) => void;
+
+  // jump to place
+  jumpToPlace: Place | null;
+  setJumpToPlace: (place: Place | null) => void;
+  clearJumpToPlace: () => void;
+}
+
+
+const useUiStore = create<UiState>()(devtools((set) => ({
   // modal
   isModalOpen: false,
   modalContent: null, // 모달 내부에 렌더링할 JSX 또는 컴포넌트
