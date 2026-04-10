@@ -2,12 +2,14 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
 import "./index.css";
-import App from "./App.jsx";
+import App from "./App";
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from './config/reactQueryConfig';
+import { queryClient } from './config/reactQueryConfig.js';
 
-createRoot(document.getElementById("root")).render(
+const rootElement = document.getElementById("root") as HTMLElement;
+
+createRoot(rootElement).render(
   <StrictMode>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
