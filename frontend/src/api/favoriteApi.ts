@@ -1,10 +1,7 @@
-import axios, { AxiosError } from 'axios';
+import apiClient from './axiosInstance';
+import { AxiosError } from 'axios';
 import { Place } from '../types/place';
 import { ApiResponse } from '../types/api';
-
-const API_BASE_URL = import.meta.env.PROD 
-  ? "https://chemnitz-cultural-sites-map.onrender.com/api/v1" 
-  : "http://localhost:5000/api/v1";
 
 /**
  * Add a cultural site to favorites
@@ -15,12 +12,9 @@ export const addFavorite = async (culturalSiteId: string): Promise<Place[]> => {
   }
   
   try {
-    const response = await axios.post<ApiResponse<{ favoriteSites: Place[] }>>(
-      `${API_BASE_URL}/users/me/favorites/${culturalSiteId}`, 
-      {}, 
-      { withCredentials: true }
+    const response = await apiClient.post<ApiResponse<{ favoriteSites: Place[] }>>(
+      `/users/me/favorites/${culturalSiteId}`
     );
-    // Return the updated list of favorite sites
     return response.data.data.favoriteSites || [];
   } catch (error) {
     const err = error as AxiosError;
@@ -34,9 +28,8 @@ export const addFavorite = async (culturalSiteId: string): Promise<Place[]> => {
  */
 export const fetchMyFavorites = async (): Promise<Place[]> => {
   try {
-    const response = await axios.get<ApiResponse<{ favoriteSites: Place[] }>>(
-      `${API_BASE_URL}/users/me/favorites`, 
-      { withCredentials: true }
+    const response = await apiClient.get<ApiResponse<{ favoriteSites: Place[] }>>(
+      '/users/me/favorites'
     );
     return response.data.data.favoriteSites || [];
   } catch (error) {
@@ -55,11 +48,8 @@ export const deleteFavorite = async (culturalSiteId: string): Promise<boolean> =
   }
   
   try {
-    await axios.delete(
-      `${API_BASE_URL}/users/me/favorites/${culturalSiteId}`, 
-      { withCredentials: true }
-    );
-    return true; // Return true on successful deletion
+    await apiClient.delete(`/users/me/favorites/${culturalSiteId}`);
+    return true; 
   } catch (error) {
     const err = error as AxiosError;
     console.error("Error deleting favorite:", err);
