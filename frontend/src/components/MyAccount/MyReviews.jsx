@@ -22,8 +22,8 @@ const MyReviews = () => {
     isLoading: loadingReviews,
     isError: reviewFetchError,
     error: reviewsError,
-  } = useMyReviews(); // Call the custom hook
-
+  } = useMyReviews(); 
+  
   const reviewMutation = useReviewMutation(); // Call the custom hook
 
   const handleReviewActionCompleted = useCallback(

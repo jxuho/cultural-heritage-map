@@ -43,7 +43,7 @@ export const useDeleteMyAccount = () => {
   
   return useMutation<{ status: string; message: string }, Error, void>({
     mutationFn: deleteMyAccount,
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myReviews'] });
       queryClient.invalidateQueries({ queryKey: ['myFavorites'] });
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
