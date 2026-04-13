@@ -3,6 +3,12 @@ import { Navigate, Outlet } from 'react-router';
 import useAuthStore from '../store/authStore';
 import LoadingSpinner from './LoadingSpinner'; // Assuming this component exists
 
+interface ProtectedRouteProps {
+  children?: React.ReactNode;
+  requiredRole?: 'admin' | 'user' | string;
+}
+
+
 /**
  * A component to protect routes based on authentication status and user roles.
  * If not authenticated, redirects to /sign-in.
@@ -12,7 +18,7 @@ import LoadingSpinner from './LoadingSpinner'; // Assuming this component exists
  * @param {string} [props.requiredRole] - The role required to access this route (e.g., 'admin', 'user').
  * @returns {React.ReactNode} - Rendered content or a redirection.
  */
-const ProtectedRoute = ({ children, requiredRole }) => {
+const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   const { isAuthenticated, loading, user } = useAuthStore();
 
   // Show a loading spinner while authentication status is being checked
