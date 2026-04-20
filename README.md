@@ -1,90 +1,108 @@
-### **Live Demo:** [Click here](https://chemnitz-cultural-sites.onrender.com/)
-> ⚠️ **Note:** The server is hosted on Render's free tier and may take **up to 1 minute to wake up** on the first load.
+# 🏛️ Chemnitz Cultural Heritage Map
 
+[![Vercel](https://img.shields.io/badge/Frontend-Vercel-black?style=for-the-badge&logo=vercel)](https://cultural-heritage-map.vercel.app/)
+[![Render](https://img.shields.io/badge/Backend-Render-blue?style=for-the-badge&logo=render)](https://cultural-heritage-map.onrender.com/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-🚧 Ongoing Progress:
-Currently migrating the entire codebase to TypeScript and adding Berlin data support in the feature/typescript-migration branch.
-
-
-
-# How to initialize Database and Application
-
-### 1. Create `.env` file at `/backend` directory
-
-##### .env example
-
-```
-MONGO_URI=mongodb+srv://id:password@cluster0.ssh0lrs.mongodb.net/dbw
-GOOGLE_CLIENT_ID=12345678900-EXAMPLE_VALUE.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=GOCSPX-Gm2r-EXAMPLE_VALUE
-
-PORT=5000
-GOOGLE_CALLBACK_URL=/api/v1/auth/google/callback
-JWT_SECRET=your_jwt_secret_key_here
-JWT_EXPIRES_IN=90d
-JWT_COOKIE_EXPIRES_IN=90
-NODE_ENV=dev
-```
-##### **Note**
-- `MONGO_URI`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` must be changed to own value.
-- To obtain the `MONGO_URI`, you need to configure MongoDB
-    - Given that MongoDB transactions are being utilized, in a local environment, it is necessary to configure your MongoDB instance as a replica set. Or opt for a cloud-hosted MongoDB service such as MongoDB Atlas (**recommended**).
-
-- To obtain `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, you need to access https://console.cloud.google.com/ and create OAuth 2.0 client in a project.
-    - The authorized JavaScript origin should be set to http://localhost:3000 (set in `/frontend/vite.config.js`), and the authorized redirect URI should be http://localhost:5000/api/v1/auth/google/callback (set in `/backend/.env` PORT and GOOGLE_CALLBACK_URL).
-    - If you change the URIs above, you need to be careful about dependencies.
-
-### 2. Install Packages
-
-1. Move to `/frontend` 
-2. Run `npm install`
-3. Move to `/backend`
-4. Run `npm install`
-
-### 3. Initialize the Database
-
-A script to initialize the database is located in the source code.
-The explanation below assumes use of a CLI and assumes a MongoDB database exist.
-
-1.  Move to `/backend`
-
-2.  Run `node scripts/fetchAndSaveCulturalSites.js`
-    - This script fetch cultural site data from Overpass API.
-    - Data will be saved in `/backend/data`
-
-3.  Run `node scripts/importGeojson.js --no-reverse-geocode` 
-    - This script import the newest `chemnitz_cultural_sites_[time].geojson` saved in `/backend/data` and convert it into CulturalSite schema, and load it into the database.
-    - Check culturalsites collection in your database.
-        
-    ##### **Note**
-    importGeojson.js basically performs reverse-geocoding using the Nominatim API for any of the hundreds of items in the geojson that do not have an addr tag specified. This process can take several minutes.
-    This process had to be done because the address field in culturalSiteSchema (`/backend/models/CulturalSite.js`) was set to `required: true`.
-    However, for faster database setup, `required: true` is currently commented out.
-    To perform reverse geocoding, you can run `node scripts/importGeojson.js`. This script loads the geojson file into the database with performing reverse geocoding, and this is the original logic of the app.
-
-
-
-### 4. Run Servers
-1. Move to `/frontend` 
-2. Run `npm run dev`
-3. Open a New Terminal
-4. Move to `/backend`
-5. Run `npm start`
-
-### 5. Access to the Browser
-1. Open a Browser
-2. Enter http://localhost:3000/ in the address bar.
-
-    ##### **Note**
-    When initially signing up via Google OAuth, the role is defaulted to 'user'. However, for a smoother functional review, it was temporarily set to 'admin'.
-    (`/backend/models/User.js` 'role' field default value was set to 'admin' currently.)
-    Since the app behaves differently when the role is 'user' and when it is 'admin' (my-account page, proposals), the case when the role is 'user' should also be checked. 
-    To do this, the role can be changed in another account with the role set to 'admin' to 'user' at http://localhost:3000/my-account/users, but there's simpler way to change the value of the role field in the database users collection to 'user' manually.
-    
-
+An interactive web application designed to explore and manage cultural heritage sites in **Chemnitz, Germany**. This project was built using the **MERN stack**, focusing on efficient GIS data handling, interactive mapping, and a professional administrative workflow.
 
 ---
 
-# OpenAPI Specification
-- The OpenAPI Specification is located at `/backend/public/openapi.yaml`.
-- Since it is hosted in the backend by the swagger-ui-express library, you can access the OpenAPI document via http://localhost:5000/api-docs/.
+### 🔗 **[Live Demo](https://cultural-heritage-map.vercel.app/)**
+
+> ⚠️ **Note:** The backend is hosted on Render's free tier. If the site is idle, the server "sleeps." Please allow **30–60 seconds** for the initial load while the backend wakes up.
+
+---
+
+## ✨ Key Features (Frontend & UX Focus)
+
+* **Interactive Map Rendering:** Real-time visualization of heritage sites using **OpenStreetMap** and the **Overpass API**.
+* **Decoupled Architecture:** Optimized performance by hosting the frontend on Vercel’s Global Edge Network and the backend on Render.
+* **Admin Dashboard:** Comprehensive interface for managing user roles and reviewing site proposals.
+* **Google OAuth 2.0 Integration:** Secure and seamless social authentication flow.
+* **Responsive Design:** Fully optimized for mobile, tablet, and desktop viewing.
+* **Automated Data Sync:** Weekly cron-jobs to fetch and update cultural data from the Overpass API.
+
+---
+
+## 🛠️ Tech Stack
+
+### **Frontend**
+* **React (Vite):** Leveraging Vite for lightning-fast HMR and optimized production builds.
+* **TypeScript:** Currently migrating the codebase to TS to ensure type safety and scalability.
+* **State Management:** (e.g., React Query / Context API)
+* **Styling:** (e.g., CSS Modules / Tailwind CSS)
+
+### **Backend**
+* **Node.js & Express:** RESTful API architecture with robust error handling.
+* **MongoDB Atlas:** Cloud-hosted NoSQL database utilizing replica sets for transactions.
+* **Passport.js:** Strategic implementation of JWT and Google OAuth strategies.
+
+---
+
+## 🚀 Architectural Decision: Why Vercel + Render?
+
+To provide the best possible user experience for a **Werkstudent** portfolio, I chose a decoupled deployment strategy:
+1.  **Vercel (Frontend):** Ensures the UI is delivered via CDN immediately, preventing the "blank screen" during backend cold starts.
+2.  **Render (Backend):** Provides a reliable environment for Node.js logic and scheduled cron-jobs.
+3.  **Result:** Faster First Contentful Paint (FCP) and a more professional feel for the end user.
+
+---
+
+## 🚧 Roadmap & Ongoing Progress
+
+- [ ] **TypeScript Migration:** Converting all React components and Express routes to TypeScript (currently 60% complete).
+- [ ] **Berlin Support:** Extending the data architecture to support multiple German cities.
+- [ ] **Performance:** Implementing client-side caching to reduce API calls to the Overpass server.
+
+---
+
+## 💻 Local Development
+
+<details>
+<summary>Click to expand setup instructions</summary>
+
+### 1. Environment Variables
+Create a `.env` file in the `/backend` directory:
+```env
+MONGO_URI=your_mongodb_atlas_uri
+GOOGLE_CLIENT_ID=your_id
+GOOGLE_CLIENT_SECRET=your_secret
+GOOGLE_CALLBACK_URL=/api/v1/auth/google/callback
+JWT_SECRET=your_jwt_secret
+PORT=5000
+NODE_ENV=dev
+```
+
+### 2. Installation
+```
+# Install frontend dependencies
+cd frontend && npm install
+
+# Install backend dependencies
+cd backend && npm install
+```
+
+### 3. Initialize Database
+```
+cd backend
+# Fetch data from Overpass API
+node scripts/fetchAndSaveCulturalSites.js
+# Import to MongoDB
+node scripts/importGeojson.js --no-reverse-geocode
+```
+### 4. Run Servers
+```
+# Frontend
+cd frontend && npm run dev (Runs on http://localhost:3000)
+
+# Backend
+cd backend && npm start (Runs on http://localhost:5000)
+```
+</details>
+
+## 📄 API Specification
+The API is documented using OpenAPI (Swagger). When running locally, you can access the interactive docs at:
+http://localhost:5000/api-docs/
+https://cultural-heritage-map.onrender.com/api-docs/
