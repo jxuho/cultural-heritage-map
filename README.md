@@ -1,4 +1,4 @@
-# 🏛️ Chemnitz Cultural Heritage Map
+# 🏛️ Cultural Heritage Map
 
 [![Vercel](https://img.shields.io/badge/Frontend-Vercel-black?style=for-the-badge&logo=vercel)](https://cultural-heritage-map.vercel.app/)
 [![Render](https://img.shields.io/badge/Backend-Render-blue?style=for-the-badge&logo=render)](https://cultural-heritage-map.onrender.com/)
