@@ -1,4 +1,4 @@
-// importGeojson.js
+// Import geojson.js
 require('dotenv').config();
 const fsAsync = require('fs/promises');
 const path = require('path');
@@ -7,10 +7,10 @@ const CulturalSite = require('../models/CulturalSite');
 const { processOsmElementForCulturalSite } = require('../utils/osmDataProcessor');
 
 /**
- * turbo가 아닌, osm api에서 받아온 정보(elements)를 mongodb에 저장하는 함수.
- * /backend/data 내부의 최신 chemnitz_cultural_sites_[시간].geojson을 가지고온다.
- * @param {boolean} performReverseGeocoding - 역지오코딩을 수행할지 여부 (true/false).
- * node scripts/importGeojson.js
+ * A function that stores information (elements) received from the osm API, not turbo, in mongodb.
+ * Retrieves the latest chemnitz_cultural_sites_[time].geojson inside /backend/data.
+ * @param {boolean} performReverseGeocoding -Whether to perform reverse geocoding (true/false).
+ * nodescripts/importGeojson.js
  * node scripts/importGeojson.js --no-reverse-geocode
  */
 const importGeojson = async (performReverseGeocoding) => {
@@ -47,8 +47,8 @@ const importGeojson = async (performReverseGeocoding) => {
                     continue;
                 }
                 try {
-                    // processOsmElementForCulturalSite를 사용하여 데이터 가공
-                    // 여기에 인자를 직접 전달합니다.
+                    // Processing data using processOsmElementForCulturalSite
+                    // Pass the arguments directly here.
                     const culturalSiteData = await processOsmElementForCulturalSite(osmElementLike, performReverseGeocoding);
                     culturalSitesToInsert.push(culturalSiteData);
                 } catch (error) {
@@ -63,8 +63,8 @@ const importGeojson = async (performReverseGeocoding) => {
                     continue;
                 }
                 try {
-                    // processOsmElementForCulturalSite를 사용하여 데이터 가공
-                    // 여기에 인자를 직접 전달합니다.
+                    // Processing data using processOsmElementForCulturalSite
+                    // Pass the arguments directly here.
                     const culturalSiteData = await processOsmElementForCulturalSite(element, performReverseGeocoding);
                     culturalSitesToInsert.push(culturalSiteData);
                 } catch (error) {
@@ -124,9 +124,9 @@ async function getLatestCulturalSitesFile() {
     }
 }
 
-// 명령줄 인자 처리: --no-reverse-geocode 플래그 확인
-const args = process.argv.slice(2); // node, importGeojson.js 다음의 인자들
+// Command line argument handling: check the --no-reverse-geocode flag
+const args = process.argv.slice(2); // node, importGeojson.js following arguments
 const shouldPerformReverseGeocoding = !args.includes('--no-reverse-geocode');
 
-// importGeojson 함수를 호출하면서 결정된 인자를 전달합니다.
+// Pass the determined arguments while calling the importGeojson function.
 importGeojson(shouldPerformReverseGeocoding);

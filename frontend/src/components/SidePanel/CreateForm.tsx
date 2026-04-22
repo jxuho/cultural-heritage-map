@@ -96,7 +96,7 @@ const CreateForm: React.FC = () => {
       [name]: value,
     }));
 
-    // 에러 상태 초기화
+    // Reset error state
     if (formErrors[name as keyof FormErrors]) {
       setFormErrors((prevErrors) => ({ ...prevErrors, [name]: undefined }));
     }
@@ -176,7 +176,7 @@ const CreateForm: React.FC = () => {
   // --- Derived State ---
   const isSubmitting =
     role === "admin"
-      ? createCulturalSiteMutation.isPending // v5에서는 isLoading 대신 isPending 사용 권장
+      ? createCulturalSiteMutation.isPending
       : submitProposalMutation.isPending;
 
   const categories = CULTURAL_CATEGORY;

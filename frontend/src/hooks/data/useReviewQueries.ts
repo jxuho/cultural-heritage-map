@@ -38,9 +38,9 @@ export const useMyReviews = (
 type ReviewMutationVariables = {
   actionType: "create" | "update" | "delete";
   placeId: string;
-  reviewId?: string; // 필수 아님
-  reviewData?: ReviewInput; // 필수 아님
-  oldRating?: number; // 추가
+  reviewId?: string; 
+  reviewData?: ReviewInput; 
+  oldRating?: number; 
 };
 // mutation hook for creating, updating, and deleting reviews
 export const useReviewMutation = () => {

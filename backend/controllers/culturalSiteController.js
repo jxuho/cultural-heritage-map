@@ -16,7 +16,7 @@ const getAllCulturalSites = asyncHandler(async (req, res, next) => {
     // 1. Initialize aggregation pipeline
     let pipeline = [];
 
-    // --- Calculate additional fields in the aggregation pipeline (rating, review count) ---
+    // ---Calculate additional fields in the aggregation pipeline (rating, review count) ---
     // 2. Join review data to calculate average rating and review count
     pipeline.push(
         {
@@ -74,7 +74,7 @@ const getAllCulturalSites = asyncHandler(async (req, res, next) => {
         { $limit: limit }
     );
 
-    // 8. Final field selection ($project) - include only necessary fields
+    // 8. Final field selection ($project) -include only necessary fields
     pipeline.push({
         $project: {
             name: 1,
@@ -115,39 +115,39 @@ const getAllCulturalSites = asyncHandler(async (req, res, next) => {
 const getCulturalSiteById = asyncHandler(async (req, res, next) => {
     const siteId = req.params.id;
 
-    // 클라이언트에서 전달받는 정렬 기준 파라미터 (예: ?reviewSort=newest, ?reviewSort=highestRating, ?reviewSort=lowestRating)
-    const reviewSortParam = req.query.reviewSort || 'newest'; // 기본값은 최신순
+    // Sorting criteria parameters received from the client (e.g. ?reviewSort=newest, ?reviewSort=highestRating, ?reviewSort=lowestRating)
+    const reviewSortParam = req.query.reviewSort || 'newest'; // Default is latest
 
-    // 1. 유효한 ObjectId인지 확인 (선택 사항이지만 좋은 습관)
-    if (!mongoose.isObjectIdOrHexString(siteId)) { // mongoose.isObjectIdOrHexString를 사용하여 유효성 검사 강화
+    // 1. Check if it is a valid ObjectId (optional but good practice)
+    if (!mongoose.isObjectIdOrHexString(siteId)) { // Enhanced validation using mongoose.isObjectIdOrHexString
         return next(new AppError('Not valid Id.', 400));
     }
 
     const pipeline = [
         {
-            $match: { _id: mongoose.Types.ObjectId.createFromHexString(siteId) } // 특정 _id와 일치하는 문서 찾기
+            $match: { _id: mongoose.Types.ObjectId.createFromHexString(siteId) } // Find documents matching a specific _id
         },
         {
             $lookup: {
-                from: 'reviews', // Review 모델의 컬렉션 이름 (소문자, 복수형)
-                localField: 'reviews', // CulturalSite의 reviews 필드 (ObjectId 배열)
-                foreignField: '_id', // Review의 _id 필드
-                as: 'reviewsData' // 조인된 리뷰 데이터가 저장될 임시 필드
+                from: 'reviews', // Review model's collection name (lowercase, plural)
+                localField: 'reviews', // CulturalSite's reviews field (ObjectId array)
+                foreignField: '_id', // _id field in Review
+                as: 'reviewsData' // Temporary field where the joined review data will be stored
             }
         },
-         // 리뷰 데이터 배열을 개별 문서로 분리합니다. 리뷰가 없어도 문화유산 문서가 유지되도록 합니다.
+         // Separate the review data array into individual documents. Ensures cultural heritage documents are maintained even without reviews.
         {
             $unwind: {
                 path: '$reviewsData',
-                preserveNullAndEmptyArrays: true // 리뷰가 없는 경우에도 문화유산 문서가 유지되도록
+                preserveNullAndEmptyArrays: true // Ensure that cultural heritage documents are maintained even in the absence of reviews
             }
         },
         {
             $lookup: {
-                from: 'users', // User 모델의 컬렉션 이름
-                localField: 'reviewsData.user', // reviewsData의 user 필드
-                foreignField: '_id', // User의 _id 필드
-                as: 'reviewsData.userPopulated' // 조인된 유저 정보가 저장될 필드
+                from: 'users', // Collection name in User model
+                localField: 'reviewsData.user', // user field in reviewsData
+                foreignField: '_id', // User's _id field
+                as: 'reviewsData.userPopulated' // Field where joined user information will be stored
             }
         },
         {
@@ -158,7 +158,7 @@ const getCulturalSiteById = asyncHandler(async (req, res, next) => {
         },
         {
             $addFields: {
-                // reviewsData에 userPopulated의 원하는 필드만 복사
+                // Copy only the desired fields of userPopulated to reviewsData
                 'reviewsData.user': {
                     _id: '$reviewsData.userPopulated._id',
                     username: '$reviewsData.userPopulated.username',
@@ -168,7 +168,7 @@ const getCulturalSiteById = asyncHandler(async (req, res, next) => {
         },
         {
             $group: {
-                _id: '$_id', // culturalSite의 _id로 그룹화
+                _id: '$_id', // Group by _id of culturalSite
                 name: { $first: '$name' },
                 description: { $first: '$description' },
                 category: { $first: '$category' },
@@ -184,11 +184,11 @@ const getCulturalSiteById = asyncHandler(async (req, res, next) => {
                 registeredBy: { $first: '$registeredBy' },
                 createdAt: { $first: '$createdAt' },
                 updatedAt: { $first: '$updatedAt' },
-                // 리뷰 정보 다시 배열로 모으기 (정렬 옵션 적용 전)
+                // Re-arrange review information (before sorting options)
                 reviews: {
                     $push: {
                         $cond: {
-                            if: { $ne: ['$reviewsData', null] }, // reviewsData가 null이 아닌 경우에만 push
+                            if: { $ne: ['$reviewsData', null] }, // push only if reviewsData is not null
                             then: {
                                 _id: '$reviewsData._id',
                                 rating: '$reviewsData.rating',
@@ -196,13 +196,13 @@ const getCulturalSiteById = asyncHandler(async (req, res, next) => {
                                 createdAt: '$reviewsData.createdAt',
                                 user: '$reviewsData.user'
                             },
-                            else: '$$REMOVE' // null인 경우 제거
+                            else: '$$REMOVE' // Remove if null
                         }
                     }
                 }
             }
         },
-        // 리뷰 배열 정리 (null/빈 객체 제거)
+        // Cleaning up review array (removing null/empty objects)
         {
             $addFields: {
                 reviews: {
@@ -216,16 +216,16 @@ const getCulturalSiteById = asyncHandler(async (req, res, next) => {
         }
     ];
 
-    // 리뷰 정렬 로직 추가
+    // Add review sorting logic
     let reviewSortOrder = {};
     if (reviewSortParam === 'newest') {
-        reviewSortOrder = { createdAt: -1 }; // 최신순
+        reviewSortOrder = { createdAt: -1 }; // Latest
     } else if (reviewSortParam === 'highestRating') {
-        reviewSortOrder = { rating: -1 }; // 평점 높은 순
+        reviewSortOrder = { rating: -1 }; // Highest rated
     } else if (reviewSortParam === 'lowestRating') {
-        reviewSortOrder = { rating: 1 }; // 평점 낮은 순
+        reviewSortOrder = { rating: 1 }; // Lowest rating
     } else {
-        reviewSortOrder = { createdAt: -1 }; // 기본값
+        reviewSortOrder = { createdAt: -1 }; // default
     }
 
     pipeline.push(
@@ -234,12 +234,12 @@ const getCulturalSiteById = asyncHandler(async (req, res, next) => {
                 reviews: {
                     $sortArray: {
                         input: '$reviews',
-                        sortBy: reviewSortOrder // 동적으로 정렬 기준 적용
+                        sortBy: reviewSortOrder // Dynamically apply sorting criteria
                     }
                 }
             }
         },
-        // 최종적으로 averageRating과 reviewCount 계산
+        // Finally calculate averageRating and reviewCount
         {
             $addFields: {
                 averageRating: { $ifNull: [{ $avg: '$reviews.rating' }, 0] },
@@ -247,7 +247,7 @@ const getCulturalSiteById = asyncHandler(async (req, res, next) => {
             }
         },
         {
-            $project: { // 최종 결과 문서에 포함될 필드들을 선택.
+            $project: { // Select fields to be included in the final result document.
                 name: 1,
                 description: 1,
                 category: 1,
@@ -263,7 +263,7 @@ const getCulturalSiteById = asyncHandler(async (req, res, next) => {
                 registeredBy: 1,
                 createdAt: 1,
                 updatedAt: 1,
-                reviews: 1, // 리뷰 데이터도 함께 반환
+                reviews: 1, // Review data is also returned
                 averageRating: 1,
                 reviewCount: 1
             }
@@ -272,23 +272,23 @@ const getCulturalSiteById = asyncHandler(async (req, res, next) => {
 
     const culturalSite = await CulturalSite.aggregate(pipeline);
 
-    // --- 여기부터 백엔드 응답 직전 JavaScript를 이용한 데이터 후처리 ---
-    // reviews배열이 비어있을 경우, reviews: [user: {}]가 반환되는 문제 해결하기 위함.
-    // aggregation pipeline으로 해결하려 했으나, 실패함. 아래 js를 통해 조작하는 방법은 차선책.
+    // ---From here, data post-processing using JavaScript just before the backend response ---
+    // To solve the problem where reviews: [user: {}] is returned when the reviews array is empty.
+    // I tried to solve this problem with the aggregation pipeline, but it failed. The method of manipulating it through js below is the next best option.
     let finalCulturalSite = culturalSite[0];
 
-    // 1. reviews 배열 필터링: _id가 없거나 user._id가 없는 리뷰 제거
-    // reviews: [{ user: {} }] 와 같은 형태를 걸러냅니다.
+    // 1. Filter reviews array: remove reviews without _id or without user._id
+    // Reviews: Filters out things like [{ user: {} }] .
     if (finalCulturalSite.reviews && finalCulturalSite.reviews.length > 0) {
         finalCulturalSite.reviews = finalCulturalSite.reviews.filter(review =>
-            review && review._id && review.user && review.user._id // 리뷰 객체, 리뷰 _id, user 객체, user _id 모두 유효해야 함
+            review && review._id && review.user && review.user._id // Review object, review _id, user object, user _id must all be valid
         );
     } else {
-        // reviews 배열 자체가 없거나 비어있는 경우를 대비 (null 대신 빈 배열로 초기화)
+        // In case the reviews array itself does not exist or is empty (initialize with an empty array instead of null)
         finalCulturalSite.reviews = [];
     }
 
-    // 2. 필터링된 reviews 배열을 기반으로 averageRating 및 reviewCount 재계산
+    // 2. Recalculate averageRating and reviewCount based on the filtered reviews array
     if (finalCulturalSite.reviews.length > 0) {
         const totalRating = finalCulturalSite.reviews.reduce((sum, review) => sum + review.rating, 0);
         finalCulturalSite.averageRating = parseFloat((totalRating / finalCulturalSite.reviews.length).toFixed(1));
@@ -297,78 +297,78 @@ const getCulturalSiteById = asyncHandler(async (req, res, next) => {
         finalCulturalSite.averageRating = 0;
         finalCulturalSite.reviewCount = 0;
     }
-    // --- 후처리 끝 ---
+    // ---End of post-processing ---
 
     res.status(200).json({
         status: 'success',
         data: {
-            culturalSite: finalCulturalSite  // aggregate는 배열을 반환하므로 첫 번째 요소 사용
+            culturalSite: finalCulturalSite  // aggregate returns an array, so use the first element
         }
     });
 })
 
 const updateCulturalSiteById = asyncHandler(async (req, res, next) => {
-    // 1. 관리자 권한 확인
+    // 1. Check administrator privileges
     if (!req.user || req.user.role !== 'admin') {
         return next(new AppError('You do not have permission to edit cultural heritage. Only administrators can do so.', 403));
     }
 
-    // 2. 수정 허용된 필드만 추출하여 updateData 구성
+    // 2. Configure updateData by extracting only fields that are allowed to be modified
     const updateData = {};
     for (const field of CULTURAL_SITE_UPDATABLE_FIELDS) {
-        // req.body에 해당 필드가 정의되어 있고 null이 아니라면 (null은 업데이트 시키고 싶지 않은 경우)
+        // If the field is defined in req.body and is not null (null is when you do not want to update it)
         if (req.body[field] !== undefined) {
             updateData[field] = req.body[field];
         }
     }
 
-    // 3. 각 필드에 대한 추가 유효성 검사 (Mongoose Validator 외에 여기서 미리 처리할 수도 있습니다.)
-    // 예: category 필드가 CULTURAL_CATEGORY enum에 있는지 수동 검사
+    // 3. Additional validation for each field (in addition to Mongoose Validator, you can also pre-process this here).
+    // Example: Manually checking if the category field is in the CULTURAL_CATEGORY enum
     if (updateData.category && !CULTURAL_CATEGORY.includes(updateData.category)) {
         return next(new AppError(`Invalid category value: ${updateData.category}`, 400));
     }
-    // name 필드의 길이 검사 (Mongoose validator가 있지만, 클라이언트에게 더 빠른 피드백을 줄 수 있음)
+    // Checking the length of the name field (there is a Mongoose validator, but this can give faster feedback to the client)
     if (updateData.name && (updateData.name.length < 2 || updateData.name.length > 100)) {
         return next(new AppError('Name must be between 2 and 100 characters long.', 400));
     }
-    // description 필드의 길이 검사
+    // Check length of description field
     if (updateData.description && updateData.description.length > 1000) {
         return next(new AppError('Description cannot exceed 1000 characters.', 400));
     }
 
-    // 4. 업데이트할 필드가 없는 경우
+    // 4. If there are no fields to update
     if (Object.keys(updateData).length === 0) {
         return next(new AppError('The field to be updated is not provided or is invalid.', 400));
     }
 
-    // 5. CulturalSite 문서 업데이트
-    // { new: true } : 업데이트 후의 문서를 반환합니다.
-    // { runValidators: true } : 스키마에 정의된 유효성 검사(minlength, maxlength, enum 등)를 실행합니다.
+    // 5. CulturalSite document update
+    // { new: true } : Returns the document after update.
+    // { runValidators: true } : Runs validation (minlength, maxlength, enum, etc.) defined in the schema.
     const culturalSite = await CulturalSite.findByIdAndUpdate(req.params.id, updateData, {
         new: true,
         runValidators: true,
-        // true로 설정하면 updateData에 없는 필드들도 기본값으로 설정됩니다.
-        // 하지만 여기서는 updateData에 명시적으로 추가된 필드만 업데이트하므로 default 옵션은 기본값으로 둡니다.
+        // If set to true, fields that are not in updateData will also be set to default values.
+        // However, since we only update fields explicitly added to updateData, we leave the default option at its default value.
     });
 
-    // 6. 문서가 존재하지 않는 경우 처리
+    // 6. Handle when document does not exist
     if (!culturalSite) {
         return next(new AppError('No cultural heritage with that ID found.', 404));
     }
 
-    // 7. 성공 응답 반환
+    // 7. Return success response
     res.status(200).json({
         status: 'success',
         message: 'Cultural heritage information has been successfully updated.',
         data: {
-            culturalSite // 업데이트된 문화유산 정보를 응답
+            culturalSite // Respond with updated cultural heritage information
         }
     });
 });
 
 const deleteCulturalSiteById = asyncHandler(async (req, res, next) => {
     if (!req.user || req.user.role !== 'admin') {
-        return next(new AppError('문화유산을 직접 등록할 권한이 없습니다. 관리자만 가능합니다.', 403));
+        return next(new AppError('Do not have the authority to directly register cultural heritage. Only administrators can do this.', 403));
     }
 
     const session = await mongoose.startSession();
@@ -379,12 +379,12 @@ const deleteCulturalSiteById = asyncHandler(async (req, res, next) => {
 
         if (!culturalSite) {
             await session.abortTransaction();
-            return next(new AppError('해당 ID를 가진 문화유산이 없습니다.', 404));
+            return next(new AppError('No cultural heritage with that ID found.', 404));
         }
-        // CulturalSite 삭제
+        // Delete Cultural Site
         await CulturalSite.findByIdAndDelete(req.params.id, { session });
 
-        // 관련 리뷰 삭제 및 사용자 리뷰 목록에서 제거
+        // Delete relevant reviews and remove them from user review lists
         if (culturalSite.reviews && culturalSite.reviews.length > 0) {
             await Review.deleteMany({ culturalSite: culturalSite._id }, { session });
             const usersWithDeletedReviews = await User.find({ reviews: { $in: culturalSite.reviews } }).session(session);
@@ -397,14 +397,14 @@ const deleteCulturalSiteById = asyncHandler(async (req, res, next) => {
             }
         }
 
-        // 사용자 즐겨찾기 목록에서 문화유산 제거
+        // Remove cultural heritage from user favorites list
         await User.updateMany(
             { favoriteSites: req.params.id },
             { $pull: { favoriteSites: req.params.id } },
             { session }
         );
 
-        // ExcludeSourceId에 sourceId 추가
+        // Add sourceId to ExcludeSourceId
         await addSourceIdToExclusion(culturalSite.sourceId, session);
 
         await session.commitTransaction();
@@ -415,23 +415,23 @@ const deleteCulturalSiteById = asyncHandler(async (req, res, next) => {
         });
     } catch (error) {
         await session.abortTransaction();
-        console.error('문화유산 삭제 트랜잭션 실패:', error);
+        console.error('Cultural heritage deletion transaction failed:', error);
 
-        // `addSourceIdToExclusion`에서 발생할 수 있는 중복 키 오류 처리
+        // Handling duplicate key errors that can occur with `addSourceIdToExclusion`
         if (error.code === 11000) {
-            return next(new AppError('제외 목록에 이미 존재하는 ID입니다.', 409));
+            return next(new AppError('The ID already exists in the exclusion list.', 409));
         }
 
-        return next(new AppError('문화유산 삭제 중 오류가 발생했습니다.', 500));
+        return next(new AppError('Error occurred while deleting cultural heritage.', 500));
     } finally {
         session.endSession();
     }
 });
 
 /**
- * 클라이언트에서 전달된 위/경도를 기준으로 주위 50m 내에 있는 OSM 장소들을 반환합니다.
- * extendedQuery를 사용한다.
- * CulturalSite 배열을 반환한다.(osm을 가공함)
+ * Returns OSM locations within 50m based on the latitude/longitude passed from the client.
+ * Use extendedQuery.
+ * Returns CulturalSite array (processed osm)
  * GET /api/v1/cultural-sites/nearby-osm?lat={latitude}&lon={longitude}
  */
 const getNearbyOsmCulturalSites = asyncHandler(async (req, res, next) => {
@@ -442,16 +442,16 @@ const getNearbyOsmCulturalSites = asyncHandler(async (req, res, next) => {
     // Otherwise, it defaults to true.
     const performReverseGeocoding = noReverseGeocode !== 'true';
 
-    // 1. 위/경도 유효성 검사
+    // 1. Latitude/longitude validation
     if (!isValidLatLng(lon, lat)) {
         return next(new AppError('Effective latitude and longitude query parameters are required.', 400));
     }
 
     const parsedLat = parseFloat(lat);
     const parsedLon = parseFloat(lon);
-    const radius = 50; // 50m 반경 (Overpass 쿼리에 사용)
+    const radius = 50; // 50m radius (used for Overpass queries)
 
-    // 2. Chemnitz 시 경계 내부 확인 (선택 사항)
+    // 2. See inside Chemnitz city limits (optional)
     try {
         if (!isPointInChemnitz(parsedLat, parsedLon)) {
             return next(new AppError('Since the input location is not inside the boundary when Chemnitz, the surrounding OSM cultural heritage cannot be searched.', 400));
@@ -460,10 +460,10 @@ const getNearbyOsmCulturalSites = asyncHandler(async (req, res, next) => {
         return next(new AppError(`Error occurs during location validation: ${error.message}`, 500));
     }
 
-    // 3. Overpass 쿼리 생성
+    // 3. Create Overpass query
     const overpassQuery = extendedCulturalSiteQuery(radius, parsedLat, parsedLon);
 
-    // 4. Overpass API 호출
+    // 4. Overpass API call
     let osmData;
     try {
         osmData = await queryOverpass(overpassQuery);
@@ -487,30 +487,30 @@ const getNearbyOsmCulturalSites = asyncHandler(async (req, res, next) => {
     }
 
     // 5. Filter out sites already in your CulturalSite DB ---
-    const osmSourceIds = processedSites.map(site => site.sourceId).filter(Boolean); // sourceId가 있는 것만 추출
+    const osmSourceIds = processedSites.map(site => site.sourceId).filter(Boolean); // Extract only those with sourceId
 
     let existingCulturalSites = [];
     if (osmSourceIds.length > 0) {
         try {
-            // MongoDB에서 해당 sourceId를 가진 CulturalSite들을 찾습니다.
-            // CulturalSite 모델에 sourceId 필드가 있다고 가정합니다.
+            // Find CulturalSites with the corresponding sourceId in MongoDB.
+            // Assume your CulturalSite model has a sourceId field.
             existingCulturalSites = await CulturalSite.find({
                 sourceId: { $in: osmSourceIds }
-            }).select('sourceId'); // sourceId만 가져와서 효율성을 높입니다.
+            }).select('sourceId'); // Increase efficiency by only getting the sourceId.
         } catch (error) {
             return next(new AppError(`Errors occur during existing cultural site information request: ${error.message}`, 500));
         }
     }
 
-    // 기존 문화재의 sourceId를 Set으로 만들어 빠른 조회를 가능하게 합니다.
+    // The sourceId of existing cultural assets is created as a Set to enable quick search.
     const existingSourceIdsSet = new Set(existingCulturalSites.map(site => site.sourceId));
 
-    // 6. 데이터베이스에 없는 OSM 문화재만 필터링
+    // 6. Filter only OSM cultural assets not in the database
     const uniqueProcessedSites = processedSites.filter(site =>
         !existingSourceIdsSet.has(site.sourceId)
     );
 
-    // 7. 결과 반환 (단계 번호 조정)
+    // 7. Return results (adjust step number)
     res.status(200).json({
         status: 'success',
         results: uniqueProcessedSites.length,
@@ -521,61 +521,61 @@ const getNearbyOsmCulturalSites = asyncHandler(async (req, res, next) => {
 });
 
 /**
- * CulturalSite 스키마 형식으로 이미 가공된 데이터를 받아서 DB에 저장합니다.
- * 이 함수는 `processAndPreviewOsmCulturalSite`의 결과 또는 클라이언트가 직접 생성한 가공된 데이터를 받습니다.
+ * Receives already processed data in CulturalSite schema format and stores it in the DB.
+ * This function accepts the result of `processAndPreviewOsmCulturalSite` or processed data generated directly by the client.
  * POST /api/v1/cultural-sites/save-processed
  * Request Body: { ... culturalSiteData (CulturalSite Schema compliant) ... }
  */
 const saveCulturalSiteToDb = asyncHandler(async (req, res, next) => {
     if (!req.user || req.user.role !== 'admin') {
-        return next(new AppError('가공된 문화유산을 DB에 저장할 권한이 없습니다. 관리자만 가능합니다.', 403));
+        return next(new AppError('Do not have the authority to directly register cultural heritage. Only administrators can do this.', 403));
     }
 
-    const culturalSiteData = req.body; // 이미 CulturalSite 스키마에 맞는 형식이라고 가정
+    const culturalSiteData = req.body; // Assuming this is already a format that fits the CulturalSite schema
 
     console.log(culturalSiteData);
 
 
-    // 필수 필드 존재 여부 재확인 (방어적 코딩)
+    // Recheck whether required fields exist (defensive coding)
     if (!culturalSiteData.name || !culturalSiteData.category || !culturalSiteData.location ||
         !Array.isArray(culturalSiteData.location.coordinates) || culturalSiteData.location.coordinates.length !== 2 ||
         !culturalSiteData.sourceId) {
-        return next(new AppError('저장할 문화유산 데이터의 필수 필드가 누락되었거나 형식이 올바르지 않습니다.', 400));
+        return next(new AppError('The required fields for the cultural heritage data to be saved are missing or not in the correct format.', 400));
     }
 
     const [parsedLon, parsedLat] = culturalSiteData.location.coordinates;
 
-    // 1. Chemnitz 시 경계 내부 확인 (DB 저장 시 최종 검증)
+    // 1. Internal confirmation of Chemnitz city boundary (final verification when saving in DB)
     try {
         if (!isPointInChemnitz(parsedLat, parsedLon)) {
-            return next(new AppError('입력된 위치가 Chemnitz 시 경계 내부에 있지 않습니다. Chemnitz 내의 문화유산만 등록 가능합니다.', 400));
+            return next(new AppError('The entered location is not within the Chemnitz city boundary. Only cultural heritage within Chemnitz can be registered.', 400));
         }
     } catch (error) {
-        return next(new AppError(`위치 유효성 검사 중 오류 발생: ${error.message}`, 500));
+        return next(new AppError(`Error occurred during location validation: ${error.message}`, 500));
     }
 
-    // 2. sourceId 중복 검사 (DB에 이미 있는지)
+    // 2. Check sourceId duplicate (if it already exists in DB)
     const existingCulturalSite = await CulturalSite.findOne({ sourceId: culturalSiteData.sourceId });
     if (existingCulturalSite) {
-        return next(new AppError(`sourceId '${culturalSiteData.sourceId}'는 이미 등록된 문화유산입니다.`, 409));
+        return next(new AppError(`sourceId '${culturalSiteData.sourceId}' is already registered as a cultural heritage site.`, 409));
     }
 
-    // 3. sourceId가 제외 목록(ExcludeSourceId)에 있는지 확인
+    // 3. Check if sourceId is in exclude list (ExcludeSourceId)
     const isExcluded = await ExcludeSourceId.findOne({ sourceId: culturalSiteData.sourceId });
     if (isExcluded) {
-        return next(new AppError(`sourceId '${culturalSiteData.sourceId}'는 등록이 금지된 목록에 있습니다.`, 403));
+        return next(new AppError(`sourceId '${culturalSiteData.sourceId}' is in the exclusion list.`, 403));
     }
 
-    // 4. CulturalSite 인스턴스 생성 및 저장
+    // 4. Create and save CulturalSite instance
     try {
         const newCulturalSite = await CulturalSite.create({
             ...culturalSiteData,
-            registeredBy: req.user.id // 누가 등록했는지 기록
+            registeredBy: req.user.id // Record who registered
         });
 
         res.status(201).json({
             status: 'success',
-            message: '가공된 문화유산이 성공적으로 DB에 저장되었습니다.',
+            message: 'Processed cultural heritage has been successfully saved to the database.',
             data: {
                 culturalSite: newCulturalSite
             }
@@ -583,9 +583,9 @@ const saveCulturalSiteToDb = asyncHandler(async (req, res, next) => {
     } catch (error) {
         console.error('Error saving processed cultural site to DB:', error);
         if (error.code === 11000) {
-            return next(new AppError(`데이터베이스 저장 중 중복 오류가 발생했습니다: ${error.message}`, 409));
+            return next(new AppError(`Error occurred while saving to database: ${error.message}`, 409));
         }
-        return next(new AppError(`가공된 문화유산 저장 중 오류 발생: ${error.message}`, 500));
+        return next(new AppError(`Error occurred while saving processed cultural heritage: ${error.message}`, 500));
     }
 });
 

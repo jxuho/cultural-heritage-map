@@ -1,8 +1,8 @@
 // backend/services/overpassUpdater.js
 /**
- * app.js에서 cron 스케줄러를 사용해서 해당 함수를 주기적으로 실행한다.
- * 만약 baseCulturalSiteQuery의 결과 중, 내 db에 저장되있지 않은 장소가 있으면, 이를 추가한다.
- * 만약 해당 장소의 sourceID(node/1234567890)가 excludeSourceIds 배열에 저장되어있다면, 제외한다.
+ * In app.js, use the cron scheduler to run the function periodically.
+ * If there is a place among the results of baseCulturalSiteQuery that is not saved in my db, add it.
+ * If the sourceID (node/1234567890) of the location is stored in the excludeSourceIds array, it is excluded.
  */
 
 require('dotenv').config();
@@ -58,16 +58,16 @@ const writeLogsToFile = async () => {
 
 
 /**
- * Overpass API에 쿼리를 실행하고 결과를 배열로 반환합니다.
- * @param {string} query - Overpass 쿼리 문자열.
+ * Executes a query against the Overpass API and returns the results as an array.
+ * @param {string} query -Overpass query string.
  * @returns {"elements": [{"type": "node", "id":"" "lat": "", "lon": "", "tags": [...]}]}
- * @throws {Error} - API 호출 실패 시 오류 발생.
+ * @throws {Error} -An error occurs when an API call fails.
  */
 const queryOverpass = async (query) => {
     try {
         const response = await axios.post(OVERPASS_API_URL, query, {
             headers: { 'Content-Type': 'text/plain', 'User-Agent': 'ChemnitzCulturalSitesApp/1.0 (jxuholee@gmail.com)' },
-            timeout: 60000 // 60초 타임아웃 설정
+            timeout: 60000 // Set timeout to 60 seconds
         });
         return response.data;
 
@@ -75,11 +75,11 @@ const queryOverpass = async (query) => {
         console.error('Error querying Overpass API:', error.message);
         if (error.response) {
             console.error('Overpass API Response Error:', error.response.status, error.response.data);
-            throw new Error(`Overpass API 오류: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
+            throw new Error(`Overpass API error: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
         } else if (error.request) {
-            throw new Error('Overpass API에 연결할 수 없습니다. 네트워크 문제일 수 있습니다.');
+            throw new Error('Overpass API could not be reached. There might be a network issue.');
         } else {
-            throw new Error(`Overpass API 쿼리 중 알 수 없는 오류 발생: ${error.message}`);
+            throw new Error(`Unknown error occurred while querying Overpass API: ${error.message}`);
         }
     }
 };
@@ -87,10 +87,10 @@ const queryOverpass = async (query) => {
 
 
 /**
- * cron과 함께 사용
- * overpass api로부터 받은 정보를 비교해서, 기존에 없던 항목이 생기면 추가한다.
- * 1. 기존에 존재하지 않는 항목이 추가됐을 때 추가함.
- * 2. 기존에 존재하는 항목 중, CulturalSite.originalTags의 내용이 변경됐을 때 덮어쓰기.
+ * Used with cron
+ * Compare the information received from the overpass API and add any items that did not exist before.
+ * 1. Added when an item that does not previously exist is added.
+ * 2. Among existing items, overwrite when the contents of CulturalSite.originalTags are changed.
  */
 const overpassUpdater = async () => {
     customLogger('Weekly Overpass data update task started...');

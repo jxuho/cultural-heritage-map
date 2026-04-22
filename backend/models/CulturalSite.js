@@ -25,13 +25,13 @@ const culturalSiteSchema = new mongoose.Schema({
     location: {
         type: {
             type: String,
-            enum: ['Point'], // GeoJSON Point 타입
+            enum: ['Point'], // GeoJSON Point 
             required: true
         },
         coordinates: {
             type: [Number], // [longitude, latitude]
             required: true,
-            index: '2dsphere', // 지리 공간 쿼리를 위한 인덱스
+            index: '2dsphere', // Indexes for geospatial queries
             validate: {
                 validator: function (v) {
                     return v.length === 2 && v[0] >= -180 && v[0] <= 180 && v[1] >= -90 && v[1] <= 90;
@@ -59,44 +59,44 @@ const culturalSiteSchema = new mongoose.Schema({
     },
     licenseInfo: {
         type: String,
-        default: "Data © OpenStreetMap contributors, ODbL.", // 기본 라이선스 정보
+        default: "Data © OpenStreetMap contributors, ODbL.", // Basic licensing information
         trim: true
     },
-    sourceId: { // Overpass API의 OSM ID (node/way/relation ID)
+    sourceId: { // Overpass API's OSM ID (node/way/relation ID)
         type: String,
         required: true,
-        unique: true, // 중복 방지
+        unique: true, 
         trim: true
     },
-    reviews: [{ // 이 문화 유적지에 대한 모든 리뷰를 저장하는 배열
+    reviews: [{ 
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Review'
     }],
-    favoritesCount: { // 이 문화 유적지를 즐겨찾기에 추가한 사용자 수
+    favoritesCount: {
         type: Number,
         default: 0,
         min: 0
     },
-    // 원본 GeoJSON 데이터의 'properties' 객체를 그대로 저장하여 데이터 보존
+    // Preserve data by saving the ‘properties’ object of the original GeoJSON data as is
     originalTags: {
-        type: mongoose.Schema.Types.Mixed, // 유연한 스키마 타입
+        type: mongoose.Schema.Types.Mixed, 
         required: true
     },
     proposedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
-    registeredBy: { // 이 문화 유적지를 등록한 admin ID
+    registeredBy: { 
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    active: { // 소프트 삭제용 필드. 구현 안됨.
+    active: { //Field for soft delete. Not implemented.
         type: Boolean,
         default: true,
         select: false
     }
 }, {
-    timestamps: true // createdAt, updatedAt 타임스탬프 자동 추가
+    timestamps: true // createdAt, updatedAt Automatically add timestamps
 });
 
 

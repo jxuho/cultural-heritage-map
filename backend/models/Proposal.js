@@ -1,12 +1,12 @@
-// backend/models/Proposal.js
+// Backend/models/proposal.js
 const mongoose = require('mongoose');
-const { CULTURAL_SITE_UPDATABLE_FIELDS } = require('../config/culturalSiteConfig'); // CULTURAL_SITE_UPDATABLE_FIELDS 임포트
+const { CULTURAL_SITE_UPDATABLE_FIELDS } = require('../config/culturalSiteConfig'); // CULTURAL_SITE_UPDATABLE_FIELDS import
 
 const proposalSchema = new mongoose.Schema({
     culturalSite: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'CulturalSite',
-        // proposalType이 'create'가 아닐 때만 culturalSite ID가 필수
+        // culturalSite ID is required only when proposalType is not 'create'
         required: [
             function () { return this.proposalType !== 'create'; },
             'The culturalSite ID is required when proposing a modification or deletion.'
@@ -17,12 +17,12 @@ const proposalSchema = new mongoose.Schema({
         ref: 'User',
         required: [true, 'The suggested user ID is required.']
     },
-    proposalType: { // 제안의 종류 (추가: 'delete')
+    proposalType: { // Type of suggestion (add: 'delete')
         type: String,
-        enum: ['create', 'update', 'delete'], // 'create': 새로운 문화유산 등록 제안, 'update': 기존 문화유산 수정 제안, 'delete': 문화유산 삭제 제안
+        enum: ['create', 'update', 'delete'], // 'create': Proposal to register a new cultural heritage, 'update': Proposal to modify an existing cultural heritage, 'delete': Proposal to delete a cultural heritage
         required: [true, 'Proposal type is required.']
     },
-    // 제안된 변경 사항을 저장할 객체. 삭제 제안의 경우 비어있을 수 있음.
+    // An object to store proposed changes in. May be empty for deletion proposals.
     proposedChanges: {
         type: mongoose.Schema.Types.Mixed,
         validate: {
@@ -35,10 +35,10 @@ const proposalSchema = new mongoose.Schema({
                         return false;
                     }
 
-                    // --- 'create' 타입 제안에 대한 유효성 검사 ---
+                    // ---Validation for 'create' type suggestions ---
                     if (this.proposalType === 'create') {
-                        // 서버에서 주입되는 필드 포함 (name, category는 클라이언트도 제공해야 함)
-                        const requiredFieldsForCreate = ['name', 'category', 'location', 'sourceId', 'originalTags']; // 'originalTags' 추가!
+                        // Contains fields injected from the server (name, category must also be provided by the client)
+                        const requiredFieldsForCreate = ['name', 'category', 'location', 'sourceId', 'originalTags']; // Added 'originalTags'!
                         for (const field of requiredFieldsForCreate) {
                             if (v[field] === undefined || v[field] === null || (typeof v[field] === 'string' && v[field].trim() === '')) {
                                 this.validatorMessage = `Required field (${field}) is missing when proposing a new cultural heritage.`; 
@@ -46,7 +46,7 @@ const proposalSchema = new mongoose.Schema({
                             }
                         }
 
-                        // location GeoJSON 형식 유효성 검사 (서버에서 올바르게 주입했는지 재확인)
+                        // location GeoJSON format validation (double-check that it was injected correctly by the server)
                         if (v.location.type !== 'Point' || !Array.isArray(v.location.coordinates) || v.location.coordinates.length !== 2 ||
                             v.location.coordinates[0] < -180 || v.location.coordinates[0] > 180 ||
                             v.location.coordinates[1] < -90 || v.location.coordinates[1] > 90) {
@@ -54,13 +54,13 @@ const proposalSchema = new mongoose.Schema({
                             return false;
                         }
 
-                        // 허용된 필드만 포함되었는지 검사 (화이트리스트 방식)
+                        // Check whether only allowed fields are included (whitelist method)
                         const allowedFieldsForCreate = new Set([
                             ...CULTURAL_SITE_UPDATABLE_FIELDS,
                             'sourceId',
                             'location',
                             'licenseInfo',
-                            'originalTags' // 'originalTags' 추가! [cite: 95]
+                            'originalTags' // Added 'originalTags'! [cite: 95]
                         ]);
                         const proposedKeys = Object.keys(v); 
                         for (const key of proposedKeys) {
@@ -77,8 +77,8 @@ const proposalSchema = new mongoose.Schema({
                         }
                     }
 
-                    // --- 'update' 타입 제안에 대한 필드 유효성 검사 ---
-                    // ... 기존 로직 그대로 유지 ...
+                    // ---Field validation for 'update' type suggestions ---
+                    // ...keep the existing logic as is...
 
                 } else if (this.proposalType === 'delete') {
                     if (v && Object.keys(v).length > 0) {
@@ -97,9 +97,9 @@ const proposalSchema = new mongoose.Schema({
         type: String,
         trim: true,
         maxlength: [500, 'Your proposal message cannot exceed 500 characters..'],
-        default: '' // 메시지가 없을 경우 기본값
+        default: '' // Default if no message
     },
-    status: { // 제안의 상태 (대기 중, 수락됨, 거절됨)
+    status: { // Status of offer (pending, accepted, rejected)
         type: String,
         enum: ['pending', 'accepted', 'rejected'],
         default: 'pending'
@@ -119,9 +119,9 @@ const proposalSchema = new mongoose.Schema({
             'Administrator comments are required if the proposal is reviewed.'
         ]
     },
-    reviewedAt: Date, // 제안 검토 날짜
+    reviewedAt: Date, // Proposal Review Date
 }, {
-    timestamps: true // createdAt, updatedAt 자동 추가
+    timestamps: true // automatically added createdAt, updatedAt
 });
 
 
@@ -129,14 +129,14 @@ proposalSchema.index(
     { culturalSite: 1, proposedBy: 1, status: 1 },
     {
         unique: true,
-        // 이 인덱스는 proposalType이 'create'가 아니고,
-        // culturalSite 필드가 존재하며 null이 아닌 경우에만 적용됩니다.
-        // 즉, 'create' 타입의 제안(culturalSite가 null)에는 이 고유성 제약이 적용되지 않습니다.
+        // In this index, the proposalType is not 'create',
+        // Applies only if the culturalSite field exists and is not null.
+        // That is, proposals of type 'create' (where culturalSite is null) are not subject to this uniqueness constraint.
         partialFilterExpression: {
             proposalType: { $ne: 'create' },
             culturalSite: { $exists: true, $ne: null }
         },
-        name: 'unique_pending_update_delete_proposal' // 인덱스 이름을 명확하게 지정
+        name: 'unique_pending_update_delete_proposal' // Name your index clearly
     }
 );
 

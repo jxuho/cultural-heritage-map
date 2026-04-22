@@ -12,7 +12,7 @@ const SignInPage = () => {
   return (
     <div className="absolute h-full w-full flex flex-col items-center justify-center bg-background ">
       <div
-        className={`w-full h-full min-[600px]:w-[440px] min-[600px]:h-[380px] bg-white text-text-dark `}
+        className={`w-full h-full min-[600px]:w-110 min-[600px]:h-95 bg-white text-text-dark `}
         style={{ boxShadow: "0 2px 6px rgba(0,0,0,0.2)" }}
       >
         <div className="p-11 w-full h-full flex flex-col overflow-auto">
@@ -23,7 +23,7 @@ const SignInPage = () => {
           <div className="flex flex-col">
             <h1 className="text-2xl font-semibold mb-2">Sign-in options</h1>
             <div
-              className="flex flex-col hover:bg-white-hover hover:cursor-pointer py-3 px-11 ml-[-44px] mr-[-44px]"
+              className="flex flex-col hover:bg-white-hover hover:cursor-pointer py-3 px-11 -ml-11 -mr-11"
               onClick={handleGoogleLogin}
             >
               <div className="flex flex-row">
@@ -42,7 +42,7 @@ const SignInPage = () => {
 
           <div className="flex justify-end py-3 ">
             <button
-              className="py-1 px-3 bg-bg-border min-w-[108px] min-h-[32px] mr-2 hover:bg-gray-button-hover hover:cursor-pointer"
+              className="py-1 px-3 bg-bg-border min-w-27 min-h-8 mr-2 hover:bg-gray-button-hover hover:cursor-pointer"
               onClick={() => (window.location.pathname = "/")}
             >
               Back

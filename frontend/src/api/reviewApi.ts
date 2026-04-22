@@ -94,7 +94,7 @@ export const getMyReviews = async (
   try {
     const response = await axiosInstance.get<ApiResponse<{ reviews: Review[] }>>(
       '/users/me/reviews', 
-      { params: { reviewSort: sortOption } } // params 객체로 쿼리 스트링 관리
+      { params: { reviewSort: sortOption } }
     );
     return response.data.data.reviews || [];
   } catch (error) {

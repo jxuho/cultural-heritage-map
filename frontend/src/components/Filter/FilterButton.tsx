@@ -40,7 +40,7 @@ const FilterButton = React.forwardRef<HTMLButtonElement, FilterButtonProps>(
   }
 );
 
-// 디버깅 시 컴포넌트 이름을 확인하기 위해 설정
+// Set to check component name when debugging
 FilterButton.displayName = "FilterButton";
 
 export default FilterButton;

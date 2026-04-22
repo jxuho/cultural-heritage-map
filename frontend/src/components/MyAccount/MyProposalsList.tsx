@@ -4,7 +4,7 @@ import BackButton from "../BackButton";
 import { ProposalType } from "../../types/proposal";
 
 const MyProposalsList = () => {
-  const [sortOption, setSortOption] = useState("-createdAt"); // Default sort: Newest first
+  const [sortOption, setSortOption] = useState("-createdAt"); 
 
   const { data: proposals = [], isLoading, isError, error } = useMyProposals();
 

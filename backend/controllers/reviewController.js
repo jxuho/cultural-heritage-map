@@ -1,21 +1,21 @@
-// backend/controllers/reviewController.js
+// Backend/controllers/review controller.js
 const Review = require('../models/Review');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
-const CulturalSite = require('../models/CulturalSite'); // CulturalSite 모델 임포트
+const CulturalSite = require('../models/CulturalSite'); // Import the CulturalSite model
 const User = require('../models/User')
 const mongoose = require('mongoose');
 
-// 모든 리뷰 조회 (필터링 및 정렬 가능)
+// View all reviews (filterable and sortable)
 const getAllReviews = asyncHandler(async (req, res, next) => {
     let filter = {};
-    const CulturalSite = require('../models/CulturalSite'); // CulturalSite 모델을 가져와야 합니다.
-    const mongoose = require('mongoose'); // mongoose를 가져와 isObjectIdOrHexString을 사용합니다.
+    const CulturalSite = require('../models/CulturalSite'); // We need to import the CulturalSite model.
+    const mongoose = require('mongoose'); // Import mongoose and use isObjectIdOrHexString.
 
 
-    // 1. req.params.culturalSiteId가 있는 경우 문화유산 존재 여부 확인
+    // 1. Check whether cultural heritage exists if req.params.culturalSiteId exists
     if (req.params.culturalSiteId) {
-        // ID 유효성 검사
+        // Identity validation
         if (!mongoose.isObjectIdOrHexString(req.params.culturalSiteId)) {
             return next(new AppError('id is not valid.', 400));
         }
@@ -23,16 +23,16 @@ const getAllReviews = asyncHandler(async (req, res, next) => {
         const culturalSite = await CulturalSite.findById(req.params.culturalSiteId);
 
         if (!culturalSite) {
-            // 해당 문화유산이 존재하지 않으면 404 에러 반환
+            // If the cultural heritage does not exist, a 404 error is returned.
             return next(new AppError('Cannot find the cultural site.', 404));
         }
         filter = { culturalSite: req.params.culturalSiteId };
     }
 
-    // 2. 특정 user에 대한 리뷰 필터링 (새로 추가)
+    // 2. Filter reviews for specific users (new addition)
     // /api/reviews?user=userId
     if (req.query.user) {
-        // 사용자 ID 유효성 검사 (선택 사항이지만 권장)
+        // User ID validation (optional but recommended)
         if (!mongoose.isObjectIdOrHexString(req.query.user)) {
             return next(new AppError('invalid user.', 400));
         }
@@ -42,13 +42,13 @@ const getAllReviews = asyncHandler(async (req, res, next) => {
     const reviews = await Review.find(filter)
         .populate({
             path: 'culturalSite',
-            select: 'name' // 문화유산 이름만 가져옴
+            select: 'name' // Only cultural heritage names are imported.
         })
         .populate({
             path: 'user',
-            select: 'username profileImage' // 사용자 이름, 프로필 사진만 가져옴
+            select: 'username profileImage' // Get only username and profile picture
         })
-        .sort('-createdAt'); // 최신순 정렬;
+        .sort('-createdAt'); // Sort by newest;
 
     res.status(200).json({
         status: 'success',
@@ -59,7 +59,7 @@ const getAllReviews = asyncHandler(async (req, res, next) => {
     });
 });
 
-// 특정 리뷰 조회
+// View specific reviews
 const getReviewById = asyncHandler(async (req, res, next) => {
     const review = await Review.findById(req.params.reviewId)
         .populate({
@@ -83,17 +83,17 @@ const getReviewById = asyncHandler(async (req, res, next) => {
     });
 });
 
-// 새로운 리뷰 생성 (로그인한 사용자만 가능)
+// Create a new review (logged in users only)
 const createReview = asyncHandler(async (req, res, next) => {
-    if (!req.body.culturalSite) req.body.culturalSite = req.params.culturalSiteId; // URL 파라미터에서 culturalSiteId 가져오기 
-    if (!req.body.user) req.body.user = req.user.id; // 현재 로그인한 사용자 ID 
+    if (!req.body.culturalSite) req.body.culturalSite = req.params.culturalSiteId; // Get culturalSiteId from URL parameter 
+    if (!req.body.user) req.body.user = req.user.id; // Current logged in user ID 
 
     const existingCulturalSite = await CulturalSite.findById(req.body.culturalSite);
     if (!existingCulturalSite) {
         return next(new AppError('No cultural heritages found to leave a review for.', 404));
     }
 
-    // 이미 리뷰를 남겼는지 확인
+    // See if you've already left a review
     const existingReview = await Review.findOne({ user: req.body.user, culturalSite: req.body.culturalSite });
     if (existingReview) {
         return next(new AppError('You have already left a review for this cultural heritage.', 409)); // 409 Conflict
@@ -112,18 +112,18 @@ const createReview = asyncHandler(async (req, res, next) => {
             comment
         });
 
-        // 1. Review 문서 저장 (세션 포함)
+        // 1. Save review document (including session)
         const savedReview = await newReview.save({ session });
 
-        // 2. CulturalSite의 reviews 배열 업데이트 (세션 포함)
-        // $addToSet을 사용하여 중복 추가 방지
+        // 2. Update CulturalSite’s reviews array (including sessions)
+        // Avoid adding duplicates using $addToSet
         await CulturalSite.findByIdAndUpdate(
             culturalSite,
             { $addToSet: { reviews: savedReview._id } },
-            { session, new: true } // new: true는 업데이트 후의 문서를 반환 (여기서는 필요 없지만 좋은 습관)
+            { session, new: true } // new: true returns the document after update (not needed here, but good practice)
         );
 
-        await session.commitTransaction(); // 모든 작업 성공 시 커밋
+        await session.commitTransaction(); // Commit when all operations are successful
 
         res.status(201).json({
             status: 'success',
@@ -132,15 +132,15 @@ const createReview = asyncHandler(async (req, res, next) => {
             }
         });
     } catch (error) {
-        await session.abortTransaction(); // 오류 발생 시 롤백
-        console.error('리뷰 생성 트랜잭션 실패:', error);
-        return next(new AppError('리뷰 생성 중 오류가 발생했습니다.', 500));
+        await session.abortTransaction(); // Rollback in case of error
+        console.error('Review creation transaction failed:', error);
+        return next(new AppError('An error occurred while creating your review.', 500));
     } finally {
-        session.endSession(); // 세션 종료
+        session.endSession(); // Session ends
     }
 });
 
-// 리뷰 업데이트 (리뷰 작성자만 가능)
+// Review updates (review authors only)
 const updateReviewById = asyncHandler(async (req, res, next) => {
     const review = await Review.findById(req.params.reviewId);
 
@@ -148,7 +148,7 @@ const updateReviewById = asyncHandler(async (req, res, next) => {
         return next(new AppError('There are no reviews with that ID.', 404));
     }
 
-    // 리뷰 작성자와 현재 로그인한 사용자가 일치하는지 확인
+    // Verify that the reviewer matches the currently logged in user
     if (review.user.toString() !== req.user.id) {
         return next(new AppError('You do not have permission to edit this review.', 403));
     }
@@ -166,7 +166,7 @@ const updateReviewById = asyncHandler(async (req, res, next) => {
     });
 });
 
-// 리뷰 삭제 (리뷰 작성자 또는 관리자)
+// Delete a review (reviewer or administrator)
 const deleteReviewById = asyncHandler(async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -174,40 +174,40 @@ const deleteReviewById = asyncHandler(async (req, res, next) => {
     try {
         const review = await Review.findById(req.params.reviewId).session(session);
         if (!review) {
-            await session.abortTransaction(); // 리뷰가 없으면 롤백
+            await session.abortTransaction(); // Rollback if no reviews
             return next(new AppError('There are no reviews with that ID.', 404));
         }
 
-        // 리뷰 작성자 또는 관리자인지 확인
+        // Check if you are a reviewer or administrator
         if (review.user.toString() !== req.user.id && req.user.role !== 'admin') {
-            await session.abortTransaction(); // 권한 없으면 롤백
+            await session.abortTransaction(); // Rollback without permission
             return next(new AppError('You do not have permission to delete this review.', 403));
         }
 
-        // 1. Review 문서 삭제 (세션 포함)
+        // 1. Delete review document (including session)
         await Review.findByIdAndDelete(req.params.reviewId, { session });
 
-        // 2. CulturalSite의 reviews 배열에서 제거 (세션 포함)
+        // 2. Remove from CulturalSite's reviews array (including sessions)
         await CulturalSite.findByIdAndUpdate(
             review.culturalSite,
             { $pull: { reviews: review._id } },
             { session }
         );
 
-        // User.reviews 배열에서 제거 로직은 제거 (User 스키마에서 필드 제거)
+        // Remove removal logic from User.reviews array (remove field from User schema)
 
-        await session.commitTransaction(); // 모든 작업 성공 시 커밋
+        await session.commitTransaction(); // Commit when all operations are successful
 
-        res.status(204).json({ // 204 No Content는 성공적으로 삭제되었지만 응답 본문에 데이터가 없음을 의미합니다. [cite: 242]
+        res.status(204).json({ // 204 No Content means the deletion was successful, but there is no data in the response body. [cite: 242]
             status: 'success',
             data: null
         });
     } catch (error) {
-        await session.abortTransaction(); // 오류 발생 시 롤백
+        await session.abortTransaction(); // Rollback in case of error
         console.error('Review delete transaction failed:', error);
         return next(new AppError('An error occurred while deleting the review.', 500));
     } finally {
-        session.endSession(); // 세션 종료
+        session.endSession(); // Session ends
     }
 });
 

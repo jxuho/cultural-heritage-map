@@ -48,9 +48,9 @@ export const useNearbyOsm = (
   const queryResult = useQuery<Place[], ApiError>({
     queryKey: ['nearbyOsm', lat, lon],
     queryFn: () => getNearbyOsm(lat!, lon!),
-    enabled: false, // 기본값
+    enabled: false, 
     staleTime: 1000 * 60 * 10,
-    ...options, // 전달받은 options가 있다면 덮어씀
+    ...options,
   });
 
   return queryResult;

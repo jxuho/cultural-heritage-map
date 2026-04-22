@@ -1,31 +1,31 @@
 const express = require('express');
 const reviewController = require('../controllers/reviewController');
-const authController = require('../controllers/authController'); // 인증 미들웨어
+const authController = require('../controllers/authController'); // Authentication middleware
 
-// :culturalSiteId/reviews 라우트를 위해 mergeParams: true
-// 부모 라우터(culturalSitesRoutes)에서 넘어온 라우트 파라미터(여기서는 culturalSiteId)를 
-// 자식 라우터(reviewsRoutes)의 req.params에 병합(merge)시켜 줍니다.
+// mergeParams: true for the :culturalSiteId/reviews route
+// Route parameter (culturalSiteId in this case) passed from the parent router (culturalSitesRoutes) 
+// Merge it into req.params of the child router (reviewsRoutes).
 const router = express.Router({ mergeParams: true });
 
-// 특정 문화유산의 모든 리뷰 조회
+// View all reviews of a specific cultural property
 router.get('/', reviewController.getAllReviews);
 
-// 특정 문화유산에 대한 리뷰 생성
+// Create a review for a specific cultural heritage site
 router.post('/',
   authController.protect,
   authController.restrictTo('user', 'admin'),
   reviewController.createReview)
 
-// 특정 문화유산의 특정 리뷰 조회
+// View specific reviews of specific cultural heritage sites
 router.get('/:reviewId', reviewController.getReviewById);
 
-// 리뷰 수정 (사용자만 가능)
+// Edit review (user only)
 router.patch('/:reviewId',
   authController.protect,
   authController.restrictTo('user', 'admin'),
   reviewController.updateReviewById);
 
-// 리뷰 삭제
+// Delete review
 router.delete('/:reviewId',
   authController.protect,
   authController.restrictTo('user', 'admin'),

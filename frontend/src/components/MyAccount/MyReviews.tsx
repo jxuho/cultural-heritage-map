@@ -14,8 +14,8 @@ const MyReviews = () => {
   const [expandedReviewId, setExpandedReviewId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<
     "createdAt" | "culturalSiteName" | "rating"
-  >("createdAt"); // Default sort by creation date
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc"); // Default sort order (most recent first)
+  >("createdAt"); 
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc"); 
 
   const {
     data: reviews = [],
@@ -24,7 +24,7 @@ const MyReviews = () => {
     error: reviewsError,
   } = useMyReviews();
 
-  const reviewMutation = useReviewMutation(); // Call the custom hook
+  const reviewMutation = useReviewMutation();
 
   const handleReviewActionCompleted = useCallback(
     async (
@@ -94,14 +94,14 @@ const MyReviews = () => {
       }
     });
     return sortableReviews;
-  }, [reviews, sortBy, sortOrder]); // Re-run memoization when these dependencies change
+  }, [reviews, sortBy, sortOrder]); 
 
   const handleSortChange = (criteria: string) => {
     if (sortBy === criteria) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc"); // Toggle order if same criteria
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortBy(criteria as "createdAt" | "culturalSiteName" | "rating");
-      setSortOrder("asc"); // Default to ascending for new criteria
+      setSortOrder("asc"); 
     }
   };
 
@@ -112,7 +112,7 @@ const MyReviews = () => {
     return "";
   };
 
-  // --- 로딩/에러/빈 리뷰 상태 처리 ---
+  // Loading/Error/Empty Review Status Handling 
   const renderContent = () => {
     if (loadingReviews) {
       return (
@@ -143,7 +143,7 @@ const MyReviews = () => {
       );
     }
 
-    // 실제 리뷰 목록
+    // Real Review List
     return (
       <div className="space-y-4">
         {sortedReviews.map(

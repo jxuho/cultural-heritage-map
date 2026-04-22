@@ -83,7 +83,6 @@ const extendedCulturalSiteQuery = (radius, lat, lon) => {
 [out:json][timeout:60];
 area(${AREA_ID})->.searchArea;
 (
-  // 기존 문화 관련 요소
   node["tourism"="museum"](area.searchArea)${around};
   way["tourism"="museum"](area.searchArea)${around};
   relation["tourism"="museum"](area.searchArea)${around};

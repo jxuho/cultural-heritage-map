@@ -1,6 +1,6 @@
 /**
- * ../data/chemnitz_boundary.geojson파일을 바탕으로, 
- * isPointInChemnitz 함수는 전달받은 위,경도가 chemnitz 내부에 속하는지 판단한다
+ * Based on the ../data/chemnitz_boundary.geojson file, 
+ * The isPointInChemnitz function determines whether the received latitude and longitude fall within chemnitz.
  */
 const turf = require('@turf/turf');
 const fs = require('fs');
@@ -9,8 +9,8 @@ const path = require('path');
 let chemnitzBoundary = null;
 
 /**
- * Chemnitz 시 경계 GeoJSON 파일을 로드합니다.
- * 파일은 한 번만 로드되도록 합니다. ( app.js에서 실행됨. )
+ * Load the Chemnitz city limits GeoJSON file.
+ * Ensures that files are loaded only once. (Run in app.js.)
  */
 const loadChemnitzBoundary = () => {
     if (!chemnitzBoundary) {
@@ -18,12 +18,12 @@ const loadChemnitzBoundary = () => {
             const boundaryPath = path.join(__dirname, '../data/chemnitz_boundary.geojson');
             const geojsonData = fs.readFileSync(boundaryPath, 'utf8');
             chemnitzBoundary = JSON.parse(geojsonData);
-            // GeoJSON 파일이 FeatureCollection일 경우 첫 번째 Feature의 geometry를 사용합니다.
-            // 단일 Feature일 경우 직접 geometry를 사용합니다.
+            // If the GeoJSON file is a FeatureCollection, it uses the geometry of the first Feature.
+            // In the case of a single feature, geometry is used directly.
             if (chemnitzBoundary.type === 'FeatureCollection' && chemnitzBoundary.features.length > 0) {
                 chemnitzBoundary = chemnitzBoundary.features[0];
             }
-            // GeoJSON의 geometry가 Polygon 또는 MultiPolygon인지 확인
+            // Check if geometry in GeoJSON is Polygon or MultiPolygon
             if (!['Polygon', 'MultiPolygon'].includes(chemnitzBoundary.geometry.type)) {
                 throw new Error('Chemnitz boundary GeoJSON must contain a Polygon or MultiPolygon geometry.');
             }
@@ -35,10 +35,10 @@ const loadChemnitzBoundary = () => {
 };
 
 /**
- * 주어진 위도, 경도 지점이 Chemnitz 시 경계 내부에 있는지 확인합니다.
- * @param {number} lat - 위도
- * @param {number} lng - 경도
- * @returns {boolean} - 지점이 경계 내부에 있으면 true, 아니면 false
+ * Checks if a given latitude, longitude point is inside the city limits of Chemnitz.
+ * @param {number} lat -latitude
+ * @param {number} lng -hardness
+ * @returns {boolean} -true if the point is inside the boundary, false otherwise.
  */
 const isPointInChemnitz = (lat, lng) => {
     if (!chemnitzBoundary) {
@@ -50,42 +50,42 @@ const isPointInChemnitz = (lat, lng) => {
 };
 
 /**
- * 주어진 위도(lat), 경도(lng) 값이 유효한 지리적 범위 내에 있는지 확인합니다.
- * @param {*} lng - 경도 (문자열 또는 숫자)
- * @param {*} lat - 위도 (문자열 또는 숫자)
- * @returns {boolean} - 유효하면 true, 아니면 false
+ * Checks whether the given latitude (lat) and longitude (lng) values ​​are within a valid geographic range.
+ * @param {*} lng -longitude (string or number)
+ * @param {*} lat -latitude (string or number)
+ * @returns {boolean} -true if valid, false otherwise
  */
 const isValidLatLng = (lng, lat) => {
     const parsedLat = parseFloat(lat);
     const parsedLng = parseFloat(lng);
 
-    // 1. 숫자로 변환 가능한지 확인 (NaN이 아닌지)
+    // 1. Check if it can be converted to a number (not NaN)
     if (isNaN(parsedLat) || isNaN(parsedLng)) {
         return false;
     }
 
-    // 2. 유효한 위도 범위 (-90 ~ +90) 확인
-    // 위도는 북극(-90)에서 남극(+90)까지
+    // 2. Check the valid latitude range (-90 to +90)
+    // Latitude ranges from the North Pole (-90) to the South Pole (+90).
     if (parsedLat < -90 || parsedLat > 90) {
         return false;
     }
 
-    // 3. 유효한 경도 범위 (-180 ~ +180) 확인
-    // 경도는 서경(-180)에서 동경(+180)까지
+    // 3. Check the valid hardness range (-180 to +180)
+    // Longitude ranges from west longitude (-180) to east longitude (+180).
     if (parsedLng < -180 || parsedLng > 180) {
         return false;
     }
 
-    return true; // 모든 조건 충족 시 유효
+    return true; // Valid if all conditions are met
 };
 
 
 /**
- * 클라이언트에서 보낸 좌표와 OSM에서 가져온 좌표가 일정 거리 이내인지 확인
- * @param {number[]} clientCoord - 클라이언트에서 보낸 좌표 [lon, lat]
- * @param {number[]} osmCoord - OSM에서 가져온 좌표 [lon, lat]
- * @param {number} toleranceInMeters - 허용 거리(m 단위), 기본값 5m
- * @returns {boolean} - 좌표가 일치하면 true
+ * Check whether the coordinates sent from the client and the coordinates retrieved from OSM are within a certain distance.
+ * @param {number[]} clientCoord -Coordinates sent from client [lon, lat]
+ * @param {number[]} osmCoord -Coordinates taken from OSM [lon, lat]
+ * @param {number} toleranceInMeters -Allowed distance (in m), default 5m
+ * @returns {boolean} -true if the coordinates match
  */
 function areCoordinatesMatching(clientCoord, osmCoord, toleranceInMeters = 10) {
     const clientPoint = turf.point(clientCoord);

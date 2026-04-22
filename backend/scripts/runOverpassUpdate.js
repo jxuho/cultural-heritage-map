@@ -15,7 +15,7 @@ async function runUpdate() {
         console.log('Overpass Updater finished successfully.');
     } catch (error) {
         console.error('Error during manual Overpass Updater run:', error);
-        process.exitCode = 1; // 비정상 종료 코드 설정만
+        process.exitCode = 1;
     } finally {
         try {
             await mongoose.disconnect();
@@ -23,7 +23,7 @@ async function runUpdate() {
         } catch (disconnectError) {
             console.error('Error disconnecting DB:', disconnectError);
         }
-        process.exit(); // 종료는 여기서
+        process.exit();
     }
 }
 

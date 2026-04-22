@@ -1,40 +1,40 @@
-// 1. 환경 변수 로드 (항상 최상단)
+// 1. Load environment variables (always on top)
 require('dotenv').config();
-// 2. 핵심 Node.js/Express 프레임워크 및 미들웨어 (내장/공통)
+// 2. Core Node.js/Express framework and middleware (built-in/common)
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-// 3. 서드파티 미들웨어 
+// 3. Third-party middleware 
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
 const rateLimit = require('express-rate-limit');
-// 4. 모델 파일 (스키마 정의)
-// 라우트나 컨트롤러에서 모델을 참조하기 전에 먼저 정의되어야 합니다.
+// 4. Model file (schema definition)
+// The model must be defined before it can be referenced in a route or controller.
 require('./models/User');
 require('./models/CulturalSite');
 require('./models/Review');
-// 5. 유틸리티 파일 (애플리케이션 전반에 사용되는 헬퍼 함수/클래스)
+// 5. Utility files (helper functions/classes used throughout the application)
 const AppError = require('./utils/AppError')
-// 6. 컨트롤러 파일 (라우터에서 사용될 비즈니스 로직)
+// 6. Controller file (business logic to be used in the router)
 const errorController = require('./controllers/errorController')
-// 7. Passport 설정 파일 (전략 정의)
-// Passport 전략을 정의하고 초기화하는 부분이므로 라우터 전에 로드되어야 합니다.
+// 7. Passport configuration file (strategy definition)
+// This is the part that defines and initializes the Passport strategy, so it must be loaded before the router.
 require('./config/passport');
-// 8. 라우터 파일 (API 엔드포인트 정의)
-// 모든 모델, 유틸리티, 인증 설정 등이 로드된 후 라우터가 정의되어야 합니다.
+// 8. Router file (API endpoint definition)
+// After all models, utilities, authentication settings, etc. are loaded, the router must be defined.
 const culturalSitesRoutes = require('./routes/culturalSitesRoutes')
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes');
 const proposalRoutes = require('./routes/proposalRoutes');
 
-// chemnitz boundary 로드
+// chemnitz boundary load
 const { loadChemnitzBoundary } = require('./utils/locationUtils');
 
-// cron 관련 파일(스케줄링)
+// cron-related files (scheduling)
 const cron = require('node-cron');
 const { overpassUpdater } = require('./services/overpassService')
 
-// Swagger 관련 패키지
+// Swagger-related packages
 const path = require('path');
 const YAML = require('yamljs');
 const swaggerUi = require('swagger-ui-express');
@@ -47,18 +47,18 @@ app.set('trust proxy', 1);
 const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 5000;
 
-// API 속도 제한 (동일 IP에서 1시간 동안 1000회 요청으로 제한)
+// API rate limiting (limited to 1000 requests per hour from the same IP)
 const limiter = rateLimit({
   max: 1000,
   windowMs: 60 * 60 * 1000,
   message: 'Too many request on this ip.',
 });
-app.use('/api', limiter); // /api로 시작하는 모든 라우트에 적용
+app.use('/api', limiter); // Applies to all routes starting with /api
 
 
 const allowedOrigins = [
   'https://chemnitz-cultural-sites.onrender.com',
-  'http://localhost:5173', // Vite 기본 포트
+  'http://localhost:5173', // Vite default port
   'http://localhost:3000',
   'https://cultural-heritage-map.vercel.app'
 ];
@@ -88,19 +88,19 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/proposals', proposalRoutes);
 
-// Swagger UI 라우트 추가
+// Add Swagger UI route
 const swaggerDocument = YAML.load(path.join(__dirname, 'public/openapi.yaml'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// // 프론트 빌드 파일 경로
+// //Front build file path
 // const frontendPath = path.join(__dirname, '../frontend/dist');
 
-// // 정적 파일 서빙
+// //Serve static files
 // app.use(express.static(frontendPath));
 
-// // app.get('*', (req, res) => {
-// //   res.sendFile(path.join(frontendPath, 'index.html'));
-// // });
+// //app.get('*', (req, res) => {
+// //  res.sendFile(path.join(frontendPath, 'index.html'));
+// //});
 // app.get(/.*/, (req, res) => {
 //   res.sendFile(path.join(frontendPath, 'index.html'));
 // });
@@ -119,18 +119,18 @@ mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('Connected to MongoDB');
 
-    // chemnitz boundary 로드
+    // chemnitz boundary load
     try {
       loadChemnitzBoundary();
       console.log('Chemnitz boundary data loaded successfully.');
     } catch (error) {
       console.error('Failed to load Chemnitz boundary data:', error);
-      // 경계 데이터 로드에 실패하면 서버를 시작하지 않거나,
-      // 적절한 오류 처리 로직을 추가할 수 있습니다.
-      // process.exit(1); // 치명적인 오류로 간주하고 앱 종료
+      // If the boundary data load fails, the server will not start, or
+      // You can add appropriate error handling logic.
+      // process.exit(1); //Consider it a fatal error and terminate the app
     }
 
-    // cron 스케줄러 실행
+    // Run cron scheduler
     cron.schedule('0 0 * * 0', async () => {
       console.log('weekly Overpass data update task started...');
       try {
@@ -140,8 +140,8 @@ mongoose.connect(MONGO_URI)
         console.error('Error during weekly Overpass data update task:', error);
       }
     }, {
-      scheduled: true, // 스케줄을 즉시 활성화합니다.
-      timezone: "Europe/Berlin" // Chemnitz는 베를린 시간대이므로 명시적으로 지정합니다. 필요에 따라 변경.
+      scheduled: true, // Activate the schedule immediately.
+      timezone: "Europe/Berlin" // Chemnitz is the Berlin time zone, so we specify it explicitly. Change as needed.
     });
     console.log('Overpass data update scheduled for every Sunday 00:00.');
 

@@ -23,7 +23,7 @@ const createProposal = asyncHandler(async (req, res, next) => {
     let newProposal;
     const userId = req.user.id; // Get the ID of the proposing user
 
-    // --- NEW: Universal check for any existing pending proposal for the same cultural site by the same user
+    // ---NEW: Universal check for any existing pending proposal for the same cultural site by the same user
     // This applies to 'update' and 'delete' proposal types where 'culturalSite' ID is relevant.
     // 'create' proposals are handled separately as their uniqueness is based on 'sourceId'.
     if (proposalType === 'update' || proposalType === 'delete') {
@@ -35,7 +35,7 @@ const createProposal = asyncHandler(async (req, res, next) => {
         const existingPendingProposal = await Proposal.findOne({
             culturalSite: culturalSiteId,
             proposedBy: userId,
-            status: 'pending' // Check for *any* type of pending proposal
+            status: 'pending' // Check for *any*type of pending proposal
         });
 
         if (existingPendingProposal) {
@@ -225,14 +225,14 @@ const createProposal = asyncHandler(async (req, res, next) => {
     });
 });
 
-// user 본인이 작성한 proposals 가지고오기
+// Bring proposals written by the user
 const getProposalsByUserId = asyncHandler(async (req, res, next) => {
-    const userId = req.user.id; // 현재 로그인한 사용자의 ID를 가져옵니다.
+    const userId = req.user.id; // Gets the ID of the currently logged in user.
 
     const proposals = await Proposal.find({ proposedBy: userId })
-        .populate('culturalSite', 'name description category address website imageUrl openingHours') // 관련 문화유산 정보 포함
-        .populate('proposedBy', 'name email') // 제안한 사용자 정보 포함
-        .sort('-createdAt'); // 최신순으로 정렬
+        .populate('culturalSite', 'name description category address website imageUrl openingHours') // Includes relevant cultural heritage information
+        .populate('proposedBy', 'name email') // Include suggested user information
+        .sort('-createdAt'); // Sort by newest
 
     res.status(200).json({
         status: 'success',
@@ -243,9 +243,9 @@ const getProposalsByUserId = asyncHandler(async (req, res, next) => {
     });
 });
 
-// 모든 proposals 조회
+// View all proposals
 const getAllProposals = asyncHandler(async (req, res, next) => {
-    // 쿼리 파라미터로 필터링 (선택 사항: status, type 등)
+    // Filter by query parameters (optional: status, type, etc.)
     const filter = {};
     if (req.query.status) {
         filter.status = req.query.status;
@@ -255,9 +255,9 @@ const getAllProposals = asyncHandler(async (req, res, next) => {
     }
 
     const proposals = await Proposal.find(filter)
-        .populate('culturalSite', 'name description category address website imageUrl openingHours') // 관련 문화유산 정보 일부를 populate
-        .populate('proposedBy', 'name email') // 제안한 사용자 정보 populate
-        .sort('-createdAt'); // 최신 순으로 정렬
+        .populate('culturalSite', 'name description category address website imageUrl openingHours') // Populate some relevant cultural heritage information
+        .populate('proposedBy', 'name email') // Populate suggested user information
+        .sort('-createdAt'); // Sort by newest
 
     res.status(200).json({
         status: 'success',
@@ -268,7 +268,7 @@ const getAllProposals = asyncHandler(async (req, res, next) => {
     });
 });
 
-// 특정 제안 상세 조회
+// View specific offer details
 const getProposalById = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const proposal = await Proposal.findById(id)
@@ -288,12 +288,12 @@ const getProposalById = asyncHandler(async (req, res, next) => {
     });
 });
 
-// 제안 수락
+// accept offer
 const acceptProposal = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const { adminComment } = req.body;
 
-    // 트랜잭션 시작
+    // start transaction
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -309,11 +309,11 @@ const acceptProposal = asyncHandler(async (req, res, next) => {
         }
 
         let culturalSite;
-        let originalCulturalSite; // 삭제 제안 시 sourceId를 가져올 용도
+        let originalCulturalSite; // To get sourceId when suggesting deletion
 
         switch (proposal.proposalType) {
             case 'create':
-                // 새로운 문화유산 생성
+                // Creating new cultural heritage
                 const newCulturalSiteData = {
                     ...proposal.proposedChanges,
                     registeredBy: req.user.id,
@@ -383,7 +383,7 @@ const acceptProposal = asyncHandler(async (req, res, next) => {
                 throw new AppError('Unknown proposal type.', 400);
         }
 
-        // 제안 상태 업데이트
+        // Proposal status update
         proposal.status = 'accepted';
         proposal.reviewedBy = req.user.id;
         proposal.reviewedAt = Date.now();
@@ -410,10 +410,10 @@ const acceptProposal = asyncHandler(async (req, res, next) => {
     }
 });
 
-// 제안 거절
+// rejection of offer
 const rejectProposal = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
-    const { adminComment } = req.body; // 관리자의 거절 사유
+    const { adminComment } = req.body; // Administrator's reason for rejection
 
     const proposal = await Proposal.findById(id);
 

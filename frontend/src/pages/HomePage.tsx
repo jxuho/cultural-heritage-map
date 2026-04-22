@@ -7,7 +7,6 @@ import MapContextMenu from "../components/Map/MapContextMenu.jsx";
 const HomePage = () => {
   return (
     <>
-      {/* MapComponent에 페칭된 culturalSites 데이터 전달 */}
       <MapComponent />
       <div className="absolute top-4 left-4 z-20">
         <FilterPanel />

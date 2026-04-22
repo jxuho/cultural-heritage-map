@@ -6,7 +6,6 @@ import { FaLandmark, FaPalette, FaBuilding, FaUtensils, FaTheaterMasks, FaUsers,
 import { categoryBorderColors } from '../../config/colors';
 import { Place } from '@/types/place';
 
-// 카테고리 아이콘 매핑
 const categoryIconComponents: { [key: string]: React.ReactNode } = {
     artwork: <FaPalette />,
     gallery: <FaBuilding />,
@@ -20,14 +19,12 @@ const categoryIconComponents: { [key: string]: React.ReactNode } = {
     other: <FaQuestionCircle />,
 };
 
-// L.divIcon을 생성하는 헬퍼 함수
 const createCustomIcon = (category: string, isSelected = false) => {
     const IconComponent = categoryIconComponents[category] || categoryIconComponents.other;
 
     const backgroundColor = isSelected ? 'red' : 'white';
-    // Use the direct hex value from the imported JS object
     const defaultBorderColor = categoryBorderColors[category] || categoryBorderColors.other;
-    const borderColor = isSelected ? 'red' : defaultBorderColor; // <--- USE DIRECT VALUE
+    const borderColor = isSelected ? 'red' : defaultBorderColor; 
     const iconColor = isSelected ? 'white' : '#333';
     const boxShadow = isSelected ? '0 2px 8px rgba(255,0,0,0.5)' : '0 2px 5px rgba(0,0,0,0.3)';
     const size = isSelected ? '35px' : '30px';
@@ -45,7 +42,7 @@ const createCustomIcon = (category: string, isSelected = false) => {
             boxShadow: boxShadow,
             fontSize: fontSize,
             color: iconColor,
-            border: `3.5px solid ${borderColor}` // This will now receive a hex code, not a CSS variable string
+            border: `3.5px solid ${borderColor}` 
         }}>
             {IconComponent}
         </div>
@@ -62,7 +59,7 @@ const createCustomIcon = (category: string, isSelected = false) => {
     });
 };
 
-// 개별 마커를 위한 컴포넌트
+// Components for individual markers
 const MemoizedCulturalSiteMarker = React.memo(({ culturalSite, openSidePanel, isSelected }: { culturalSite: Place; openSidePanel: (site: Place) => void; isSelected: boolean }) => {
     const iconToRender = createCustomIcon(culturalSite.category, isSelected);
 

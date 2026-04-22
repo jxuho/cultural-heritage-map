@@ -6,7 +6,6 @@ import { useSubmitProposal } from "../../hooks/data/useProposalQueries";
 import { CULTURAL_CATEGORY } from "../../config/culturalSiteConfig";
 import { Place } from "../../types/place";
 
-// 폼 내부 상태를 위한 인터페이스
 interface UpdateFormData {
   _id: string;
   name: string;
@@ -130,9 +129,7 @@ const UpdateForm: React.FC = () => {
     }
 
     if (role !== "admin" && proposalType === "update" && formData.initialData) {
-      // 원본 로직의 변경 감지 (일부 필드 제외)
       const hasChanges = (Object.keys(formData) as Array<keyof UpdateFormData>).some((key) => {
-        // 원본의 "^id" 오타 수정 포함 (_id)
         if (["_id", "proposalMessage", "initialData", "proposalType"].includes(key)) {
           return false;
         }
@@ -144,7 +141,6 @@ const UpdateForm: React.FC = () => {
             currentCoords?.[1] !== initialCoords?.[1]
           );
         }
-        // 타입 안전성을 위해 인덱스 시그니처 대응
         return formData[key] !== (formData.initialData as any)[key];
       });
 
@@ -242,7 +238,6 @@ const UpdateForm: React.FC = () => {
     }
   };
 
-  // React Query 버전에 따라 isLoading 또는 isPending 사용
   const isSubmitting = role === "admin"
     ? updateCulturalSiteMutation.isPending
     : submitProposalMutation.isPending;

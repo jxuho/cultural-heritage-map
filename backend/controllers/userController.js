@@ -8,10 +8,10 @@ const mongoose = require('mongoose')
 const asyncHandler = require('../utils/asyncHandler')
 
 
-// 내 정보 조회 Get my information (GET /api/v1/users/me)
+// Get my information (GET /api/v1/users/me)
 const getMe = asyncHandler(async (req, res, next) => {
-    // req.user는 인증 미들웨어(authController.protect)에서 설정한 현재 로그인 사용자 객체입니다.
-    // 이 객체는 MongoDB에서 조회된 사용자 문서입니다.
+    // req.user is the current login user object set by the authentication middleware (authController.protect).
+    // This object is a user document retrieved from MongoDB.
     if (!req.user) {
         return next(new AppError('Cannot find the user.', 401));
     }
@@ -24,7 +24,7 @@ const getMe = asyncHandler(async (req, res, next) => {
     });
 });
 
-// 내 정보 수정 Update my information (PATCH /api/v1/users/updateMe)
+// Update my information (PATCH /api/v1/users/updateMe)
 const updateMe = asyncHandler(async (req, res, next) => {
     // 1. Allowed fields
     const filteredBody = {};
@@ -39,7 +39,7 @@ const updateMe = asyncHandler(async (req, res, next) => {
     // 2. Update User Info.
     const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
         new: true, // Returning updated doc.
-        runValidators: true // model schema validity check. 모델 스키마의 유효성 검사 실행
+        runValidators: true // model schema validity check. Run validation of model schema
     });
 
     res.status(200).json({
@@ -51,7 +51,7 @@ const updateMe = asyncHandler(async (req, res, next) => {
     });
 });
 
-// 내 계정 삭제 Delete my information (DELETE /api/v1/users/deleteMe)
+// Delete my account Delete my information (DELETE /api/v1/users/deleteMe)
 const deleteMe = asyncHandler(async (req, res, next) => {
     const userToDelete = await User.findById(req.user.id);
 
@@ -66,33 +66,33 @@ const deleteMe = asyncHandler(async (req, res, next) => {
         const userId = userToDelete._id;
         const userFavoriteSites = userToDelete.favoriteSites;
 
-        // 1. 사용자 하드 삭제 User hard delete
+        // 1. User hard delete
         await User.findByIdAndDelete(userId, { session });
 
-        // 2. 이 사용자가 proposedBy로 있는 CulturalSite 문서의 해당 필드 값을 null로 변경
+        // 2. Change the value of the corresponding field in the CulturalSite document with this user as proposedBy to null
         await CulturalSite.updateMany(
             { proposedBy: userId },
             { $set: { proposedBy: null } },
             { session }
         );
 
-        // 3. 이 사용자가 작성한 모든 리뷰들을 하드삭제
-        //    (그리고 해당 리뷰들이 속한 CulturalSite의 reviewsCount 감소 및 reviews 배열에서 ObjectId 제거)
+        // 3. Hard delete all reviews written by this user
+        //    (And reduce the reviewsCount of the CulturalSite to which the reviews belong and remove the ObjectId from the reviews array)
         const reviewsToDelete = await Review.find({ user: userId }).session(session);
 
         if (reviewsToDelete.length > 0) {
-            // 삭제할 리뷰들의 ID 목록을 먼저 추출
+            // First extract the ID list of reviews to be deleted
             const reviewIdsToDelete = reviewsToDelete.map(review => review._id);
 
-            // Review 문서 자체를 삭제
+            // Delete the review document itself
             await Review.deleteMany({ user: userId }, { session });
 
-            // 해당 리뷰들이 연결된 모든 CulturalSite ID를 중복 없이 수집
+            // Collect all CulturalSite IDs linked to the reviews without duplication
             const affectedCulturalSiteIds = [...new Set(reviewsToDelete.map(review => review.culturalSite.toString()))];
 
-            // 각 CulturalSite에 대해 reviews 배열에서 삭제된 리뷰 ID를 제거하고, reviewsCount를 정확히 감소
+            // For each CulturalSite, remove deleted review IDs from the reviews array and accurately decrease reviewsCount.
             for (const siteId of affectedCulturalSiteIds) {
-                // 이 사용자가 이 특정 문화유산에 몇 개의 리뷰를 작성했는지 계산
+                // Calculate how many reviews this user has written for this specific cultural property
                 const reviewsCountForThisSiteByUser = reviewsToDelete.filter(
                     review => review.culturalSite.toString() === siteId
                 ).length;
@@ -100,18 +100,18 @@ const deleteMe = asyncHandler(async (req, res, next) => {
                 await CulturalSite.findByIdAndUpdate(
                     siteId,
                     {
-                        $pullAll: { reviews: reviewIdsToDelete }, // CulturalSite의 reviews 배열에서 해당 ID들 제거
-                        $inc: { reviewsCount: -reviewsCountForThisSiteByUser } // 해당 문화유산의 reviewsCount 감소
+                        $pullAll: { reviews: reviewIdsToDelete }, // Remove corresponding IDs from CulturalSite's reviews array
+                        $inc: { reviewsCount: -reviewsCountForThisSiteByUser } // Decrease the reviewsCount of the cultural heritage
                     },
                     { session }
                 );
             }
         }
 
-        // 4. 이 사용자가 제안한 모든 Proposals 문서를 하드 삭제
+        // 4. Hard delete all Proposals documents proposed by this user
         await Proposal.deleteMany({ proposedBy: userId }, { session });
 
-        // 5. 이 사용자가 favorite으로 추가했던 모든 CulturalSite의 favoritesCount를 -1
+        // 5. Set the favoritesCount of all CulturalSites added as favorites by this user to -1
         if (userFavoriteSites && userFavoriteSites.length > 0) {
             await CulturalSite.updateMany(
                 { _id: { $in: userFavoriteSites } },
@@ -124,9 +124,9 @@ const deleteMe = asyncHandler(async (req, res, next) => {
 
         res.cookie('jwt', 'loggedout', {
             expires: new Date(0),
-            httpOnly: true, // 자바스크립트 접근 방지 (보안 권장)
-            sameSite: 'Lax', // CSRF 보호 (상황에 따라 'None' 또는 'Strict' 선택)
-            secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 전송 (운영 환경 필수)
+            httpOnly: true, // Prevent JavaScript access (recommended for security)
+            sameSite: 'Lax', // CSRF protection (select 'None' or 'Strict' depending on situation)
+            secure: process.env.NODE_ENV === 'production', // Transmit only in HTTPS environment (operating environment required)
             path: '/'
         });
 
@@ -144,15 +144,15 @@ const deleteMe = asyncHandler(async (req, res, next) => {
     }
 });
 
-// 사용자 가지고 오기 Get the user by id (GET /api/v1/users/:userId)
+// Get the user by id (GET /api/v1/users/:userId)
 const getUserById = asyncHandler(async (req, res, next) => {
     const { userId } = req.params;
 
-    // 원하는 필드만 선택
+    // Select only the fields you want
     const user = await User.findById(userId).select('_id username email profileImage bio');
 
     if (!user) {
-        return next(new AppError('해당 ID를 가진 사용자를 찾을 수 없습니다.', 404));
+        return next(new AppError('No user with that ID found.', 404));
     }
 
     res.status(200).json({
@@ -163,7 +163,7 @@ const getUserById = asyncHandler(async (req, res, next) => {
     });
 });
 
-// 모든 사용자 목록 조회 Get all users (GET /api/v1/users)
+// Get all users list Get all users (GET /api/v1/users)
 const getAllUsers = asyncHandler(async (req, res, next) => {
   const users = await User.find();
 
@@ -179,7 +179,7 @@ const getAllUsers = asyncHandler(async (req, res, next) => {
 
 
 
-// 즐겨찾기 추가
+// Add to favorites
 const addFavoriteSite = asyncHandler(async (req, res, next) => {
     const { siteId } = req.params;
 
@@ -187,8 +187,8 @@ const addFavoriteSite = asyncHandler(async (req, res, next) => {
         return next(new AppError('The cultural site ID to be added is essential.', 400));
     }
 
-    // CulturalSite 및 User 존재 여부 확인은 트랜잭션 외부에서 먼저 수행
-    // 이는 존재하지 않는 문서에 대해 트랜잭션을 시작하지 않도록 하여 효율성을 높입니다.
+    // Checking for CulturalSite and User existence is first performed outside of the transaction.
+    // This increases efficiency by avoiding starting transactions on non-existent documents.
     const culturalSite = await CulturalSite.findById(siteId);
     if (!culturalSite) {
         return next(new AppError('Cannot find a cultural site with that ID..', 404));
@@ -203,53 +203,53 @@ const addFavoriteSite = asyncHandler(async (req, res, next) => {
         return next(new AppError('Already added.', 400));
     }
 
-    const session = await mongoose.startSession(); // 세션 시작
-    session.startTransaction(); // 트랜잭션 시작
+    const session = await mongoose.startSession(); // Start session
+    session.startTransaction(); // start transaction
 
     try {
-        // 1. 사용자의 favoriteSites 배열에 추가 (세션과 함께)
-        // Mongoose의 $addToSet 연산자를 사용하여 중복 추가를 방지하고 더 효율적으로 업데이트할 수 있습니다.
+        // 1. Add to the user's favoriteSites array (along with the session)
+        // You can use Mongoose's $addToSet operator to avoid duplicate additions and make updates more efficient.
         const updatedUser = await User.findByIdAndUpdate(
             req.user.id,
-            { $addToSet: { favoriteSites: siteId } }, // siteId를 배열에 추가 (중복이면 추가 안 함)
-            { new: true, runValidators: false, session } // 세션 전달
+            { $addToSet: { favoriteSites: siteId } }, // Add siteId to array (do not add if duplicate)
+            { new: true, runValidators: false, session } // Session Delivery
         );
 
-        if (!updatedUser) { // 사용자가 동시에 삭제되는 등의 예외적인 경우
+        if (!updatedUser) { // In exceptional cases, such as users being deleted at the same time
             await session.abortTransaction();
             session.endSession();
             return next(new AppError('Cannot find the user.', 404));
         }
 
-        // 2. 해당 문화유산의 favoritesCount 1 증가 (세션과 함께)
+        // 2. FavoritesCount of the cultural heritage increases by 1 (with session)
         const updatedCulturalSite = await CulturalSite.findByIdAndUpdate(
             siteId,
-            { $inc: { favoritesCount: 1 } }, // favoritesCount 필드를 1 증가
-            { new: true, runValidators: true, session } // 세션 전달
+            { $inc: { favoritesCount: 1 } }, // Increment favoritesCount field by 1
+            { new: true, runValidators: true, session } // Session Delivery
         );
 
-        if (!updatedCulturalSite) { // 문화유산이 동시에 삭제되는 등의 예외적인 경우
+        if (!updatedCulturalSite) { // In exceptional cases, such as when cultural heritage is simultaneously deleted
             await session.abortTransaction();
             session.endSession();
             return next(new AppError('Cannot find the cultural site', 404));
         }
 
-        await session.commitTransaction(); // 모든 작업이 성공하면 커밋
-        session.endSession(); // 세션 종료
+        await session.commitTransaction(); // Commit if all operations are successful
+        session.endSession(); // Session ends
 
         res.status(200).json({
             status: 'success',
             message: 'Successfully added.',
             data: {
-                user: updatedUser, // 업데이트된 사용자 정보를 반환
-                culturalSite: updatedCulturalSite // 업데이트된 문화유산 정보도 함께 반환
+                user: updatedUser, // Returns updated user information
+                culturalSite: updatedCulturalSite // Updated cultural heritage information is also returned.
             }
         });
     } catch (error) {
-        await session.abortTransaction(); // 오류 발생 시 모든 변경사항 롤백
+        await session.abortTransaction(); // Rollback all changes in case of error
         session.endSession();
         console.error('Transaction error:', error);
-        // 클라이언트에게 좀 더 명확한 오류 메시지 제공
+        // Provide clearer error messages to clients
         if (error.name === 'ValidationError') {
             return next(new AppError(`Data validation error: ${error.message}`, 400));
         }
@@ -257,7 +257,7 @@ const addFavoriteSite = asyncHandler(async (req, res, next) => {
     }
 });
 
-// 즐겨찾기 제거
+// Remove favorites
 const removeFavoriteSite = asyncHandler(async (req, res, next) => {
     const { siteId } = req.params;
 
@@ -275,34 +275,34 @@ const removeFavoriteSite = asyncHandler(async (req, res, next) => {
         return next(new AppError('Cannot find the user.', 404));
     }
 
-    const session = await mongoose.startSession(); // 세션 시작
-    session.startTransaction(); // 트랜잭션 시작
+    const session = await mongoose.startSession(); // Start session
+    session.startTransaction(); // start transaction
 
     try {
         const initialLength = user.favoriteSites.length;
 
-        // 1. 사용자의 favoriteSites 배열에서 제거 (세션과 함께)
+        // 1. Remove from the user's favoriteSites array (along with the session)
         user.favoriteSites = user.favoriteSites.filter(
             (favSiteId) => favSiteId.toString() !== siteId.toString()
         );
 
         if (user.favoriteSites.length === initialLength) {
-            await session.abortTransaction(); // 변경사항 없으면 롤백
+            await session.abortTransaction(); // Rollback if no changes are made
             session.endSession();
             return next(new AppError('There is no cultural site in the favorites.', 404));
         }
 
-        await user.save({ validateBeforeSave: false, session }); // 세션 전달
+        await user.save({ validateBeforeSave: false, session }); // Session Delivery
 
-        // 2. 해당 문화유산의 favoritesCount 1 감소 (세션과 함께)
+        // 2. Decrease favoritesCount of the cultural heritage by 1 (with session)
         await CulturalSite.findByIdAndUpdate(
             siteId,
             { $inc: { favoritesCount: -1 } },
-            { new: true, runValidators: true, session } // 세션 전달
+            { new: true, runValidators: true, session } // Session Delivery
         );
 
-        await session.commitTransaction(); // 모든 작업이 성공하면 커밋
-        session.endSession(); // 세션 종료
+        await session.commitTransaction(); // Commit if all operations are successful
+        session.endSession(); // Session ends
 
         res.status(200).json({
             status: 'success',
@@ -312,82 +312,82 @@ const removeFavoriteSite = asyncHandler(async (req, res, next) => {
             }
         });
     } catch (error) {
-        await session.abortTransaction(); // 오류 발생 시 모든 변경사항 롤백
+        await session.abortTransaction(); // Rollback all changes in case of error
         session.endSession();
         console.error('Transaction error:', error);
         return next(new AppError('An error occured. please try again.', 500));
     }
 });
 
-// 즐겨찾기 조회
+// View favorites
 const getFavoriteSites = asyncHandler(async (req, res, next) => {
-    // 1. 현재 로그인한 사용자의 ID를 가져옵니다. (req.user.id는 인증 미들웨어를 통해 설정된다고 가정)
+    // 1. Get the ID of the currently logged in user. (assuming req.user.id is set via authentication middleware)
     const userId = req.user.id;
 
-    // 2. 사용자 문서를 찾아서 favoriteSites 필드에서 문화유적지 ID 배열을 가져옵니다.
+    // 2. Find the user document and get an array of heritage site IDs from the favoriteSites field.
     const user = await User.findById(userId).select('favoriteSites');
 
     if (!user) {
         return next(new AppError('cannot find the user.', 404));
     }
 
-    // 사용자의 즐겨찾기 ID 목록
+    // List of user's favorite IDs
     const favoriteSiteIds = user.favoriteSites;
 
-    // 3. CulturalSite 컬렉션에서 즐겨찾기 ID에 해당하는 문화유적지를 찾고,
-    //    각 문화유적지의 averageRating과 reviewCount를 계산하기 위한 애그리게이션 파이프라인을 생성합니다.
+    // 3. Find the cultural site corresponding to your favorite ID in the CulturalSite collection,
+    //    Create an aggregation pipeline to calculate the averageRating and reviewCount of each cultural heritage site.
     const pipeline = [];
 
-    // 3.1. $match: 사용자의 favoriteSites 배열에 있는 ID와 일치하는 문화유적지만 선택
+    // 3.1. $match: Select only cultural sites that match IDs in the user's favoriteSites array
     pipeline.push({
         $match: {
             _id: { $in: favoriteSiteIds }
         }
     });
 
-    // 3.2. $lookup: 리뷰 컬렉션과 조인하여 각 문화유적지의 리뷰 데이터를 가져옵니다.
+    // 3.2. $lookup: Joins with the review collection to retrieve review data for each cultural heritage site.
     pipeline.push({
         $lookup: {
-            from: 'reviews', // Review 모델의 컬렉션 이름 (MongoDB에서는 일반적으로 소문자, 복수형)
-            localField: 'reviews', // CulturalSite 모델의 reviews 필드 (리뷰 ObjectId 배열)
-            foreignField: '_id', // Review 모델의 _id 필드
-            as: 'reviewsData' // 조인된 리뷰 데이터가 저장될 임시 필드 이름
+            from: 'reviews', // Collection name for the Review model (usually lowercase, plural in MongoDB)
+            localField: 'reviews', // The reviews field in the CulturalSite model (array of reviews ObjectIds)
+            foreignField: '_id', // _id field in Review model
+            as: 'reviewsData' // Temporary field name where joined review data will be stored
         }
     });
 
-    // 3.3. $addFields: averageRating과 reviewCount를 계산하여 새로운 필드로 추가합니다.
+    // 3.3. $addFields: Calculates averageRating and reviewCount and adds them as new fields.
     pipeline.push({
         $addFields: {
-            averageRating: { $ifNull: [{ $avg: '$reviewsData.rating' }, 0] }, // reviewsData의 rating 필드 평균 계산, 없으면 0
-            reviewCount: { $size: '$reviewsData' } // reviewsData 배열의 크기 (리뷰 개수) 계산
+            averageRating: { $ifNull: [{ $avg: '$reviewsData.rating' }, 0] }, // Calculate the average of the rating field in reviewsData, otherwise 0
+            reviewCount: { $size: '$reviewsData' } // Calculate the size (number of reviews) of the reviewsData array
         }
     });
 
-    // 3.4. $project: 최종 응답에 포함될 필드를 선택합니다.
-    // getAllCulturalSites에서 사용된 필드와 유사하게 필요한 모든 필드를 포함시킵니다.
+    // 3.4. $project: Select fields to be included in the final response.
+    // Include all required fields, similar to those used in getAllCulturalSites.
     pipeline.push({
         $project: {
             name: 1,
             description: 1,
             category: 1,
-            location: 1, // 지리 정보
+            location: 1, // geographic information
             address: 1,
             website: 1,
-            imageUrl: 1, // 이미지 URL
+            imageUrl: 1, // image url
             openingHours: 1,
             licenseInfo: 1,
             sourceId: 1,
-            favoritesCount: 1, // 즐겨찾기 수는 CulturalSite 모델에 있다면 포함
+            favoritesCount: 1, // Number of favorites included if present in CulturalSite model
             proposedBy: 1,
             registeredBy: 1,
             createdAt: 1,
             updatedAt: 1,
-            averageRating: 1, // 새로 계산된 평균 평점
-            reviewCount: 1 // 새로 계산된 리뷰 개수
+            averageRating: 1, // Newly calculated average rating
+            reviewCount: 1 // Newly calculated number of reviews
         }
     });
 
-    // 4. 애그리게이션 파이프라인 실행
+    // 4. Run the aggregation pipeline
     const favoriteSitesWithRatings = await CulturalSite.aggregate(pipeline);
 
     res.status(200).json({
@@ -401,27 +401,27 @@ const getFavoriteSites = asyncHandler(async (req, res, next) => {
 
 
 const getMyReviews = asyncHandler(async (req, res, next) => {
-  // 현재 로그인한 사용자 ID를 기준으로 리뷰를 찾습니다.
-  // req.user는 protect 미들웨어에서 설정된 사용자 정보입니다.
+  // Find reviews based on the currently logged in user ID.
+  // req.user is user information set in the protect middleware.
   if (!req.user || !req.user.id) {
     return next(new AppError('There is no user info.', 401));
   }
 
   const queryObj = { user: req.user.id };
 
-  // APIFeatures를 사용하여 쿼리 파라미터(정렬 등)를 적용합니다.
+  // Apply query parameters (sorting, etc.) using APIFeatures.
   let query = Review.find(queryObj);
 
-  // 리뷰에 연결된 culturalSite와 user 정보도 populate합니다.
+  // We also populate culturalSite and user information linked to the review.
   query = query.populate({
     path: 'culturalSite',
-    select: 'name imageUrl address' // 필요한 필드만 선택
+    select: 'name imageUrl address' // Select only the fields you need
   }).populate({
     path: 'user',
-    select: 'username profileImage' // 필요한 필드만 선택
+    select: 'username profileImage' // Select only the fields you need
   });
 
-  // 정렬 로직 (클라이언트에서 reviewSort 쿼리 파라미터로 받음)
+  // Sorting logic (received from the client as a reviewSort query parameter)
   if (req.query.reviewSort === 'newest') {
     query = query.sort('-createdAt');
   } else if (req.query.reviewSort === 'highestRating') {
@@ -429,7 +429,7 @@ const getMyReviews = asyncHandler(async (req, res, next) => {
   } else if (req.query.reviewSort === 'lowestRating') {
     query = query.sort('rating');
   } else {
-    // 기본 정렬: 최신순
+    // Default sorting: Newest
     query = query.sort('-createdAt');
   }
 

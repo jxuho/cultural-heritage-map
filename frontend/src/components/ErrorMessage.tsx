@@ -11,7 +11,7 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, onClose }) => {
       {onClose && (
         <div className="absolute top-4 right-4">
           <button
-            type="button" // 폼 내부에서 의도치 않은 제출 방지
+            type="button"
             className="text-gray-500 hover:text-gray-700 text-4xl font-bold hover:cursor-pointer p-1"
             onClick={onClose}
             aria-label="Close error message"
@@ -20,7 +20,6 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, onClose }) => {
           </button>
         </div>
       )}
-      {/* 에러 메시지 렌더링 */}
       <p className="pr-10">Error: {message}</p> 
     </div>
   );

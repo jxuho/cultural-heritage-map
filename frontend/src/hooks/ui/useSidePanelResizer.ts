@@ -1,15 +1,14 @@
-// src/hooks/ui/useSidePanelResizer.js
 import { useCallback, useEffect, useState } from "react";
 import useUiStore from "../../store/uiStore";
 import useViewport from "./useViewPort";
 
-// detailRef를 인자로 받도록 변경합니다.
+// Change to accept detailRef as an argument.
 const useSidePanelResizer = (detailRef: React.RefObject<HTMLDivElement>) => {
   const sidePanelWidth = useUiStore((state) => state.sidePanelWidth);
   const setSidePanelWidth = useUiStore((state) => state.setSidePanelWidth);
   const { width: viewportWidth } = useViewport();
 
-  // detailRef는 이제 외부에서 주입받습니다.
+  // detailRef is now externally injected.
   const [isResizing, setIsResizing] = useState(false);
   const [isHover, setIsHover] = useState(false);
   const [resizerPosition, setResizerPosition] = useState(sidePanelWidth);
@@ -30,7 +29,7 @@ const useSidePanelResizer = (detailRef: React.RefObject<HTMLDivElement>) => {
 
   const resizeHandler = useCallback(
     (event: MouseEvent) => {
-      // 주입받은 detailRef를 사용합니다.
+      // Use the injected detailRef.
       if (!isResizing || !detailRef.current) return;
       let calculatedPosition =
         detailRef.current.getBoundingClientRect().right - event.clientX;
@@ -42,7 +41,7 @@ const useSidePanelResizer = (detailRef: React.RefObject<HTMLDivElement>) => {
       }
       setResizerPosition(calculatedPosition);
     },
-    [isResizing, detailRef] // detailRef도 의존성에 추가
+    [isResizing, detailRef] // Add detailRef to dependencies as well
   );
 
   useEffect(() => {

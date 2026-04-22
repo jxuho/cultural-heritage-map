@@ -158,7 +158,7 @@ export const Menu = ({ children }: MenuProps) => {
             style={floatingStyles}
             {...getFloatingProps({
               onContextMenu: (e) => {
-                e.preventDefault(); // 기본 브라우저 컨텍스트 메뉴를 막습니다.
+                e.preventDefault(); 
               },
             })}
           >

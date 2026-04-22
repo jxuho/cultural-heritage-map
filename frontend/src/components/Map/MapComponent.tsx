@@ -23,7 +23,6 @@ import useViewport from "../../hooks/ui/useViewPort";
 
 import { Place } from "@/types/place.ts";
 
-// MapEventsHandler 컴포넌트
 const MapEventsHandler = () => {
   const openContextMenu = useUiStore((state) => state.openContextMenu);
   const setSelectedLatLng = useUiStore((state) => state.setSelectedLatLng);
@@ -38,16 +37,15 @@ const MapEventsHandler = () => {
   return null;
 };
 
-// MapCenterUpdater 컴포넌트 재도입 및 jumpToPlace 로직 통합
 const MapCenterUpdater = () => {
-  const map = useMap(); // Leaflet map 인스턴스를 가져옵니다.
+  const map = useMap();
   const jumpToPlace = useUiStore((state) => state.jumpToPlace);
   const clearJumpToPlace = useUiStore((state) => state.clearJumpToPlace);
   const sidePanelWidth = useUiStore((state) => state.sidePanelWidth);
   const isSidePanelOpen = useUiStore((state) => state.isSidePanelOpen);
   const { width: viewportWidth } = useViewport();
 
-  // jumpToPlace에 따라 지도 중심 이동
+  // Move map center based on jumpToPlace
   useEffect(() => {
     if (jumpToPlace) {
       const lat = jumpToPlace.location.coordinates[1];
@@ -57,7 +55,7 @@ const MapCenterUpdater = () => {
         duration: 1.5,
       });
 
-      // 마커로 이동 후, sidebar 고려해서 중심으로 이동
+      // Move to the marker, then move to the center considering the sidebar
       if (isSidePanelOpen && sidePanelWidth > 0 && viewportWidth > 450) {
         setTimeout(() => {
           let offsetX = sidePanelWidth / 2 - 20;
@@ -105,21 +103,21 @@ const MapComponent = () => {
     state.searchQuery.toLowerCase()
   );
 
-  // address 등 모든 정보 포함하기
+  // Include all information, including address
   const memoizedFilteredSites = useMemo(() => {
     return culturalSites.filter((site) => {
       const matchesCategory =
         selectedCategories.length === 0 ||
         selectedCategories.includes(site.category);
 
-      // 검색어가 비어있으면 모든 항목을 일치시킵니다.
+      // If the search term is empty, it matches all entries.
       if (!searchQuery) {
         return matchesCategory;
       }
 
       const lowerCaseSearchQuery = searchQuery.toLowerCase();
 
-      // 각 필드를 검색어와 비교합니다.
+      // Compare each field to your search term.
       const matchesSearch =
         site.name.toLowerCase().includes(lowerCaseSearchQuery) ||
         (site.description &&
@@ -131,7 +129,7 @@ const MapComponent = () => {
         (site.website &&
           site.website.toLowerCase().includes(lowerCaseSearchQuery)) ||
         (site.sourceId &&
-          String(site.sourceId).toLowerCase().includes(lowerCaseSearchQuery)); // sourceId는 숫자일 수 있으므로 문자열로 변환
+          String(site.sourceId).toLowerCase().includes(lowerCaseSearchQuery)); // sourceId can be a number, so convert it to a string
 
       return matchesCategory && matchesSearch;
     });

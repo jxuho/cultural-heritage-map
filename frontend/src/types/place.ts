@@ -1,11 +1,11 @@
 export interface Place {
-  _id: string; // MongoDB의 기본 ID
+  _id: string; 
   name: string;
   description?: string;
-  category: string; // config에서 가져온 CULTURAL_CATEGORY 기반
+  category: string; 
   location: {
     type: "Point";
-    coordinates: [number, number]; // [longitude, latitude]
+    coordinates: [number, number]; 
   };
   address?: string;
   website?: string;
@@ -13,15 +13,15 @@ export interface Place {
   openingHours?: string;
   licenseInfo?: string;
   sourceId: string;
-  reviews: string[]; // Review ID 배열
+  reviews: string[]; 
   favoritesCount: number;
-  originalTags: any; // Mixed 타입이므로 any 또는 Record<string, any>
-  proposedBy?: string; // User ID
-  registeredBy?: string; // Admin User ID
+  originalTags: any;
+  proposedBy?: string; 
+  registeredBy?: string; 
   createdAt: string;
   updatedAt: string;
   
-  // 만약 API 응답에서 가공된 데이터(평균 평점 등)가 온다면 추가
+
   averageRating?: number;
   reviewCount?: number;
 }

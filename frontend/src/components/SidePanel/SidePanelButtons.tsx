@@ -94,7 +94,7 @@ const SidePanelButtons: React.FC = () => {
     );
   };
 
-  // UI 노출 조건 계산
+  // Calculate UI exposure conditions
   const showButtons =
     !!selectedPlaceData &&
     !isCreateFormOpen &&

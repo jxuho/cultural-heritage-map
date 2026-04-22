@@ -5,20 +5,20 @@ import { AxiosError } from "axios";
 import { ApiResponse } from "../../types/api";
 
 /**
- * 내 즐겨찾기 목록 가져오기 훅
+ * My Favorites List Import Hook
  */
 export const useMyFavorites = (userId: string | undefined) => {
   return useQuery<Place[], AxiosError<ApiResponse<null>>>({
     queryKey: ['myFavorites', userId],
     queryFn: fetchMyFavorites,
-    // userId가 있을 때만 쿼리 활성화
+    // Enable query only when userId exists
     enabled: !!userId,
-    staleTime: 1000 * 60 * 5, // 5분
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
 /**
- * 즐겨찾기 추가/삭제 액션 타입 정의
+ * Define add/delete favorite action type
  */
 interface FavoriteMutationParams {
   actionType: 'add' | 'delete';
@@ -26,7 +26,7 @@ interface FavoriteMutationParams {
 }
 
 /**
- * 즐겨찾기 추가/삭제 뮤테이션 훅
+ * Add/delete favorites Mutation hook
  */
 export const useFavoriteMutation = () => {
   const queryClient = useQueryClient();
@@ -41,16 +41,16 @@ export const useFavoriteMutation = () => {
       throw new Error('Invalid favorite action type.');
     },
     onSuccess: (_, variables) => {
-      // 1. 내 즐겨찾기 목록 무효화 (목록 갱신)
+      // 1. Invalidate my favorites list (update list)
       queryClient.invalidateQueries({ queryKey: ['myFavorites'] });
       
-      // 2. 특정 문화재 상세 정보 무효화 (즐겨찾기 상태 반영)
+      // 2. Invalidate detailed information on specific cultural assets (reflects favorite status)
       queryClient.invalidateQueries({ 
         queryKey: ['culturalSite', variables.culturalSiteId] 
       });
     },
     onError: (error) => {
-      // API 응답의 message가 있으면 출력, 없으면 기본 메시지
+      // If there is a message in the API response, output, otherwise the default message
       const errorMessage = error.response?.data?.message || error.message || "Unknown error";
       console.error("Favorite action fail:", error);
       alert(`Favorite process fail: ${errorMessage}`);

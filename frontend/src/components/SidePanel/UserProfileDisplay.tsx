@@ -27,7 +27,7 @@ const UserProfileDisplay = () => {
   }
 
   return (
-    <div className="flex-grow p-4 overflow-y-auto">
+    <div className="grow p-4 overflow-y-auto">
       {/* Header Section with Back Button and Close */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex-1 flex justify-start">
@@ -48,7 +48,7 @@ const UserProfileDisplay = () => {
                 <FaArrowLeft size='18px' /> {/* Only the icon, no text or conditional class */}
               </button>
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 break-words flex-grow text-center">
+        <h2 className="text-2xl font-bold text-gray-800 wrap-break-words grow text-center">
           Profile
         </h2>
         <div className="flex-1 flex justify-end">

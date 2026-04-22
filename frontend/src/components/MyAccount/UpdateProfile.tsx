@@ -11,7 +11,6 @@ const UpdateProfile = () => {
   const USERNAME_MAX_LENGTH = 20;
   const BIO_MAX_LENGTH = 200;
 
-  // useAuthStore에서 user와 updateUser 액션 가져오기
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
   const navigate = useNavigate();
@@ -30,7 +29,6 @@ const UpdateProfile = () => {
     apiErrorMessage: "",
   });
 
-  // useUpdateProfile 훅 사용
   const updateProfileMutation = useUpdateProfile();
 
   const nameInputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +84,7 @@ const UpdateProfile = () => {
       apiErrorMessage: "",
     }));
 
-    // --- 사용자 이름 유효성 검사 (Submit 시) ---
+    // ---Username validation (when submitting) ---
     if (userName.trim() === "") {
       setNameMessage("Please tye username.");
       setShowMessage((prevState) => ({ ...prevState, showNameMessage: true }));
@@ -108,7 +106,7 @@ const UpdateProfile = () => {
       setNameMessage("");
     }
 
-    // --- 자기소개 유효성 검사 (Submit 시) ---
+    // ---Self-introduction validation (when submitting) ---
     if (bio.length > BIO_MAX_LENGTH) {
       setBioMessage(`bio must be less than ${BIO_MAX_LENGTH} characters.`);
       setShowMessage((prevState) => ({ ...prevState, showBioMessage: true }));
@@ -124,15 +122,15 @@ const UpdateProfile = () => {
 
     const updateData: Partial<User> = {};
     if (userName !== user?.username) {
-      // 이름이 변경되었을 경우에만 전송
+      // Sent only when name has changed
       updateData.username = userName;
     }
     if (bio !== user?.bio) {
-      // 자기소개가 변경되었을 경우에만 전송
+      // Sent only when self-introduction changes
       updateData.bio = bio;
     }
 
-    // 변경된 필드가 없으면 API 호출하지 않음
+    // Do not call API if no fields have changed
     if (Object.keys(updateData).length === 0) {
       setShowMessage((prevState) => ({ ...prevState, changeSuccess: true }));
       return;
@@ -161,7 +159,7 @@ const UpdateProfile = () => {
     }
   };
 
-  // --- Success message display ---
+  // ---Success message display ---
   if (showMessage.changeSuccess) {
     return (
       <div className="w-full h-full flex justify-center items-center">
@@ -195,7 +193,7 @@ const UpdateProfile = () => {
     );
   }
 
-  // --- Main Update Profile Form ---
+  // ---Main Update Profile Form ---
   return (
     <div className="w-full h-full flex justify-center items-center">
       <div
@@ -300,7 +298,7 @@ const UpdateProfile = () => {
             <button
               className="mr-6 py-1.5 px-8 rounded-sm border bg-blue text-white hover:bg-blue-hover transition-colors hover:cursor-pointer"
               type="submit"
-              disabled={updateProfileMutation.isPending} // 뮤테이션 진행 중에는 버튼 비활성화 (TanStack Query v5에서는 isLoading 대신 isPending 사용)
+              disabled={updateProfileMutation.isPending} // Disable button while mutation is in progress (TanStack Query v5 uses isPending instead of isLoading)
             >
               {updateProfileMutation.isPending ? "Saving..." : "Save"}
             </button>

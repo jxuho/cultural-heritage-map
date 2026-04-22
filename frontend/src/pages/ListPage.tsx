@@ -2,19 +2,19 @@ import React, { ChangeEvent } from "react";
 import { useNavigate } from "react-router";
 import { FaHeart, FaCommentAlt } from "react-icons/fa";
 
-// 타입 및 커스텀 훅 임포트
+// Import types and custom hooks
 import { Place } from "../types/place";
 import { useAllCulturalSites } from "../hooks/data/useCulturalSitesQueries";
 import useFilterStore from "../store/filterStore"; 
 import useUiStore from "../store/uiStore";
 
-// 컴포넌트 임포트
+// Component import
 import FilterPanel from "../components/Filter/FilterPanel";
 import StarIcon from "../components/StarIcon";
 import GoToTopButton from "../components/GoToTopButton";
 
 /**
- * 카테고리 식별자를 읽기 좋은 형태의 문자열로 변환하는 헬퍼 함수
+ * A helper function that converts category identifiers into readable strings.
  */
 const formatCategoryName = (name: string): string => {
   if (!name) return "";
@@ -28,7 +28,7 @@ const formatCategoryName = (name: string): string => {
 const ListPage: React.FC = () => {
   const navigate = useNavigate();
 
-  // 1. API 데이터 페칭
+  // 1. API data fetching
   const {
     data: culturalSites = [],
     isLoading,
@@ -36,7 +36,7 @@ const ListPage: React.FC = () => {
     error,
   } = useAllCulturalSites();
 
-  // 2. 전역 상태 관리 (구조 분해 대신 개별 선택을 사용하면 리렌더링 최적화에 유리합니다)
+  // 2. Global state management (using individual selection instead of destructuring is advantageous for re-rendering optimization)
   const selectedCategories = useFilterStore((state) => state.selectedCategories);
   const searchQuery = useFilterStore((state) => state.searchQuery);
   const sortBy = useFilterStore((state) => state.sortBy);
@@ -45,7 +45,7 @@ const ListPage: React.FC = () => {
   const openSidePanel = useUiStore((state) => state.openSidePanel);
   const setJumpToPlace = useUiStore((state) => state.setJumpToPlace);
 
-  // 3. 이벤트 핸들러
+  // 3. Event handler
   const handleCardClick = (site: Place): void => {
     navigate("/");
     openSidePanel(site);
@@ -53,11 +53,11 @@ const ListPage: React.FC = () => {
   };
 
   const handleSortChange = (e: ChangeEvent<HTMLSelectElement>): void => {
-    // Store에 정의된 타입('alphabetical' | 'favorites' | 'reviews')으로 단언
+    // Asserting with a type defined in Store ('alphabetical' | 'favorites' | 'reviews')
     setSortBy(e.target.value as 'alphabetical' | 'favorites' | 'reviews');
   };
 
-  // 4. 로딩 및 에러 처리
+  // 4. Loading and error handling
   if (isLoading) {
     return (
       <div className="container mx-auto p-4 text-center mt-10">
@@ -76,10 +76,10 @@ const ListPage: React.FC = () => {
     );
   }
 
-  // 5. 필터링 및 정렬 통합 로직
+  // 5. Filtering and sorting integration logic
   const query = searchQuery.toLowerCase();
   
-  // 필터링
+  // filtering
   let processedSites = culturalSites.filter((site: Place) => {
     const matchesCategory =
       selectedCategories.length === 0 ||
@@ -92,14 +92,14 @@ const ListPage: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
 
-  // 정렬 (방어적 코드 적용)
+  // Alignment (applies defensive code)
   processedSites.sort((a, b) => {
     switch (sortBy) {
       case "alphabetical":
         return (a.name || "").localeCompare(b.name || "");
 
       case "reviews":
-        // site.reviewCount가 없을 경우 reviews 배열의 길이를 대안으로 사용 가능
+        // If site.reviewCount is not available, the length of the reviews array can be used as an alternative.
         const countA = a.reviewCount ?? a.reviews?.length ?? 0;
         const countB = b.reviewCount ?? b.reviews?.length ?? 0;
         return countB - countA;
@@ -114,7 +114,7 @@ const ListPage: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4 mt-5">
-      {/* 컨트롤 바 */}
+      {/* control bar */}
       <div className="flex justify-between items-start mb-4">
         <div className="text-left">
           <FilterPanel />
@@ -165,7 +165,7 @@ const ListPage: React.FC = () => {
                 {site.name}
               </h2>
 
-              {/* 통계 바 */}
+              {/* statistics bar */}
               <div className="flex flex-wrap items-center text-sm text-gray-700 mb-3 gap-3">
                 {site.averageRating != null && (
                   <div className="flex items-center">
@@ -176,7 +176,7 @@ const ListPage: React.FC = () => {
                         index={i}
                         className="w-4 h-4"
                         displayMode="averageRating"
-                        onClick={() => {}} // 필수 props 에러 방지
+                        onClick={() => {}} // Prevent essential props errors
                       />
                     ))}
                     <span className="ml-1 font-semibold">{site.averageRating.toFixed(1)}</span>

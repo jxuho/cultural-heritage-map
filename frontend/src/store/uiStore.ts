@@ -7,7 +7,7 @@ import { Place } from '../types/place';
 interface UiState {
   // modal
   isModalOpen: boolean;
-  modalContent: ReactNode | null; // JSX나 컴포넌트가 들어감
+  modalContent: ReactNode | null; 
   openModal: (content: ReactNode) => void;
   closeModal: () => void;
 
@@ -72,7 +72,7 @@ interface UiState {
 const useUiStore = create<UiState>()(devtools((set) => ({
   // modal
   isModalOpen: false,
-  modalContent: null, // 모달 내부에 렌더링할 JSX 또는 컴포넌트
+  modalContent: null, 
   openModal: (content) => set({ isModalOpen: true, modalContent: content }),
   closeModal: () => set({ isModalOpen: false, modalContent: null }),
 

@@ -20,9 +20,8 @@ const ProfileView = () => {
   const openModal = useUiStore((state) => state.openModal);
   const closeModal = useUiStore((state) => state.closeModal);
 
-  // user 정보가 없을 경우를 대비한 로딩 또는 에러 처리
+
   if (!user) {
-    // 로딩 스피너 또는 메시지 표시
     return <div className="text-center p-4">Loading user data...</div>;
   }
 
@@ -35,7 +34,7 @@ const ProfileView = () => {
           onClick={() => {
             closeModal();
             logout();
-            window.location.reload(); // 새로고침은 JWT 쿠키 방식에서 필요할 수 있습니다.
+            window.location.reload(); 
           }}
           className="mt-3 px-3 py-1.5 bg-red-500 text-white rounded hover:cursor-pointer font-semibold"
         >
@@ -205,7 +204,6 @@ const ProfileView = () => {
         </div>
       </div>
 
-      {/* ✨ NEW: My Proposals Card (Conditionally Rendered for 'user' role) */}
       {user.role === "user" && (
         <div
           className="flex flex-col max-w-xs p-4 bg-white rounded h-full row-span-1"
@@ -219,7 +217,7 @@ const ProfileView = () => {
               <div className="text-2xl font-normal pb-4 max-[400px]:text-lg">
                 My Proposals
               </div>
-              <PiFileTextThin // 새로운 아이콘 사용
+              <PiFileTextThin 
                 className="text-light-text"
                 size={"60px"}
               />
@@ -229,7 +227,7 @@ const ProfileView = () => {
             </div>
             <Link
               className="font-medium text-chemnitz-blue flex hover:underline hover:cursor-pointer pb-2 pt-4 border-t"
-              to="my-proposals" // 백엔드 라우트와 일치하는 프론트엔드 라우트
+              to="my-proposals" 
             >
               <span
                 className="uppercase max-[400px]:text-sm"

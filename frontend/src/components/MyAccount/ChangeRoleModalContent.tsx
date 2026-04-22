@@ -21,7 +21,6 @@ export const ChangeRoleModalContent = ({ user }: { user: any }) => {
         userId: user._id,
         newRole: selectedRole,
       });
-      // If mutation is successful, it will invalidate queries and update UI automatically.
       closeModal();
     } catch (error) {
       console.error("Failed to change role in modal:", error);

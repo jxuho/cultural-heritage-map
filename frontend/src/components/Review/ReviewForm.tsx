@@ -27,7 +27,6 @@ const ReviewForm = ({
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState<string>("");
 
-  // userReview prop이 변경될 때마다 폼을 초기화하거나 기존 리뷰로 채웁니다.
   useEffect(() => {
     if (userReview) {
       setRating(userReview.rating);
@@ -61,7 +60,6 @@ const ReviewForm = ({
 
     try {
       if (userReview) {
-        // actionType, newRating, oldRating, comment 순서
         await onReviewActionCompleted('update', rating, userReview.rating, comment);
       } else {
         await onReviewActionCompleted('create', rating, null, comment);
@@ -82,7 +80,6 @@ const ReviewForm = ({
     }
 
     try {
-      // delete 시 newRating은 null, oldRating은 기존 평점 전달
       await onReviewActionCompleted('delete', null, userReview.rating);
     } catch (error) {
       console.error("Delete error:", error);

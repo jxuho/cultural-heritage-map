@@ -8,7 +8,7 @@ import {
 } from "../../api/proposalApi";
 import { Proposal } from "../../types/proposal";
 
-// API 응답 구조가 보통 { data: { proposal: Proposal } } 형태인 경우를 가정한 인터페이스
+// An interface assuming that the API response structure is usually in the form { data: { proposal: Proposal } }
 interface ProposalResponse {
   data: {
     proposal: Proposal;
@@ -33,12 +33,12 @@ export const useProposals = () => {
   return useQuery<Proposal[], Error>({
     queryKey: ['proposals'],
     queryFn: fetchAllProposals,
-    // v5부터는 staleTime 등을 queryClient 기본값에서 조정하거나 여기서 설정
+    // From v5, staleTime, etc. can be adjusted in queryClient defaults or set here.
     staleTime: 1000 * 60, 
   });
 };
 
-// 뮤테이션 인자를 위한 타입 정의
+// Type definitions for mutation arguments
 interface ModerationVariables {
   proposalId: string;
   actionType: 'accept' | 'reject';
@@ -61,15 +61,15 @@ export const useProposalModeration = () => {
       const { proposalId, actionType } = variables;
       console.log(`Proposal ${proposalId} ${actionType}ed successfully!`, data);
 
-      // 제안 목록 무효화
+      // Invalidate suggestion list
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
 
-      // 신규 생성 제안이 승인된 경우 문화재 목록 갱신
+      // Update the list of cultural properties if a new creation proposal is approved.
       if (data?.data?.proposal?.proposalType === 'create' && actionType === 'accept') {
         queryClient.invalidateQueries({ queryKey: ['culturalSites'] });
       }
 
-      // 특정 문화재 수정 제안이 승인된 경우 해당 문화재 상세 정보 갱신
+      // If a proposal to modify a specific cultural property is approved, update the details of the cultural property
       if (actionType === 'accept' && data?.data?.proposal?.culturalSite) {
         queryClient.invalidateQueries({ 
           queryKey: ['culturalSite', data.data.proposal.culturalSite] 
@@ -90,8 +90,8 @@ export const useMyProposals = () => {
     queryKey: ['myProposals'],
     queryFn: fetchMyProposals,
     staleTime: 5 * 60 * 1000,
-    // TanStack Query v4/v5에서는 cacheTime이 gcTime으로 이름이 변경되었습니다.
-    // v5를 사용 중이시라면 gcTime을 사용하세요.
+    // In TanStack Query v4/v5, cacheTime was renamed to gcTime.
+    // If you are using v5, use gcTime.
     gcTime: 10 * 60 * 1000, 
   });
 };

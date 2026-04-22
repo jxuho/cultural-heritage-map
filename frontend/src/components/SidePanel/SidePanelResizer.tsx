@@ -1,17 +1,17 @@
 import useSidePanelResizer from '../../hooks/ui/useSidePanelResizer';
 
 interface SidePanelResizerProps {
-  detailRef: React.RefObject<HTMLDivElement>; // detailRef를 prop으로 받습니다.
+  detailRef: React.RefObject<HTMLDivElement>; 
 }
 
-const SidePanelResizer = ({ detailRef }: SidePanelResizerProps) => { // detailRef를 prop으로 받습니다.
+const SidePanelResizer = ({ detailRef }: SidePanelResizerProps) => { 
   const {
     resizerPosition,
     isHover,
     isResizing,
     resizerMouseDownHandler,
     setIsHover,
-  } = useSidePanelResizer(detailRef); // detailRef를 훅에 전달
+  } = useSidePanelResizer(detailRef);
 
   return (
     <div

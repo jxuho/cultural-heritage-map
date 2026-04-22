@@ -32,12 +32,12 @@ const FilterPanel = () => {
         {...getReferenceProps()}
       />
 
-      {isOpen && ( // isOpen일 때만 Portal을 통해 렌더링
+      {isOpen && ( 
         <FloatingPortal>
           <FilterContent
             ref={refs.setFloating}
             isOpen={isOpen}
-            floatingStyles={floatingStyles} // Floating UI에서 계산된 스타일 전달
+            floatingStyles={floatingStyles} 
             {...getFloatingProps()}
           />
         </FloatingPortal>

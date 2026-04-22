@@ -92,9 +92,9 @@ const SidePanelItems = ({
   const handleReviewActionCompleted = useCallback(
     async (
       actionType: "create" | "update" | "delete",
-      newRating: number | null, // null 허용
+      newRating: number | null,
       oldRating: number | null, 
-      comment?: string, // 선택적 인자로 변경
+      comment?: string,
     ) => {
       if (!currentUser) {
         alert("Please sign in...");
@@ -114,7 +114,7 @@ const SidePanelItems = ({
           actionType === "delete"
             ? undefined
             : {
-                rating: newRating ?? 0, // null일 경우 기본값 처리
+                rating: newRating ?? 0,
                 comment: comment ?? "",
               },
         oldRating: oldRating ?? undefined,

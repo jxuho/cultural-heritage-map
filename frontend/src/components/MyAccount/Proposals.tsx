@@ -6,8 +6,7 @@ import { useProposals } from "../../hooks/data/useProposalQueries";
 import BackButton from "../BackButton";
 
 const Proposals = () => {
-  const [sortOption, setSortOption] = useState<string>("-createdAt"); // 기본 정렬: 최신 순
-  // adminNote를 각 proposal._id에 매핑하여 저장하는 객체 상태로 변경
+  const [sortOption, setSortOption] = useState<string>("-createdAt");
   const [adminComment, setadminComment] = useState<{ [key: string]: string }>({});
 
   const { data: proposals = [], isLoading, isError, error } = useProposals();
@@ -60,7 +59,7 @@ const Proposals = () => {
     return sortableProposals;
   }, [proposals, sortOption]);
 
-  // 각 proposal의 adminNote를 업데이트하는 헬퍼 함수
+  // Helper function to update adminNote for each proposal
   const handleAdminNoteChange = (proposalId: string, note: string) => {
     setadminComment((prevNotes) => ({
       ...prevNotes,
@@ -68,7 +67,7 @@ const Proposals = () => {
     }));
   };
 
-  // 제안 승인 핸들러
+  // Proposal Approval Handler
   const handleAccept = (proposalId: string) => {
     const note = adminComment[proposalId] || "";
     if (!note.trim()) {
@@ -78,7 +77,7 @@ const Proposals = () => {
     moderateProposal({ proposalId, actionType: "accept", adminComment: note });
   };
 
-  // 제안 거절 핸들러
+  // Proposal Rejection Handler
   const handleReject = (proposalId: string) => {
     const note = adminComment[proposalId] || "";
     if (!note.trim()) {
@@ -316,7 +315,7 @@ const Proposals = () => {
               </p>
             )}
 
-            {/* 관리자 메모 입력 필드 (각 카드 내부) */}
+            {/* Administrator note entry field (inside each card)*/}
             {proposal.status === "pending" && (
               <div className="mt-4 p-3 border rounded-md bg-gray-50">
                 <label
@@ -339,7 +338,7 @@ const Proposals = () => {
                   <button
                     onClick={() => handleAccept(proposal._id)}
                     className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    // 해당 제안의 메모가 없거나, 처리 중일 경우 비활성화
+                    // Disable if there are no notes for the proposal or if it is being processed
                     disabled={
                       isModerationPending || !adminComment[proposal._id]?.trim()
                     }
@@ -349,7 +348,7 @@ const Proposals = () => {
                   <button
                     onClick={() => handleReject(proposal._id)}
                     className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    // 해당 제안의 메모가 없거나, 처리 중일 경우 비활성화
+                    // Disable if there are no notes for the proposal or if it is being processed
                     disabled={
                       isModerationPending || !adminComment[proposal._id]?.trim()
                     }

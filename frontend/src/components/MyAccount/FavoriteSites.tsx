@@ -16,8 +16,8 @@ type SortOrder = "asc" | "desc";
 const FavoriteSites = () => {
   const currentUser = useAuthStore((state) => state.user);
   const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<SortCriteria>("name"); // Default sort by name
-  const [sortOrder, setSortOrder] = useState<SortOrder>("asc"); // Default sort order
+  const [sortBy, setSortBy] = useState<SortCriteria>("name");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc"); 
 
   const {
     data: myFavorites,
@@ -69,14 +69,14 @@ const FavoriteSites = () => {
           valB = b.name || "";
           break;
         case "averageRating":
-          valA = a.averageRating || 0; // Treat undefined/null as 0 for sorting
+          valA = a.averageRating || 0;
           valB = b.averageRating || 0;
           break;
         case "reviewCount":
           valA = a.reviewCount || 0;
           valB = b.reviewCount || 0;
           break;
-        default: // Default to name
+        default: 
           valA = a.name || "";
           valB = b.name || "";
           break;

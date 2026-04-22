@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import { FaArrowLeft } from 'react-icons/fa'; // For a simple left arrow icon
+import { FaArrowLeft } from 'react-icons/fa'; 
 
 const BackButton = ({
   className = '', 
@@ -27,7 +27,7 @@ const BackButton = ({
       aria-label="Go Back"
       title="Go back to the previous page"
     >
-      <FaArrowLeft size={iconSize} /> {/* Only the icon, no text or conditional class */}
+      <FaArrowLeft size={iconSize} /> 
     </button>
   );
 };
