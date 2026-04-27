@@ -57,7 +57,6 @@ app.use('/api', limiter); // Applies to all routes starting with /api
 
 
 const allowedOrigins = [
-  'https://chemnitz-cultural-sites.onrender.com',
   'http://localhost:5173', // Vite default port
   'http://localhost:3000',
   'https://cultural-heritage-map.vercel.app'

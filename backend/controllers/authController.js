@@ -57,7 +57,7 @@ const googleAuthCallback = asyncHandler(async (req, res, next) => {
     // Set frontend URL based on environment
     const isProduction = process.env.NODE_ENV === 'production';
     const frontendUrl = isProduction
-        ? 'https://chemnitz-cultural-sites.onrender.com'
+        ? 'https://cultural-heritage-map.vercel.app/'
         : 'http://localhost:3000';
 
     // Redirect directly to frontend instead of sending JSON

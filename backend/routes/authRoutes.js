@@ -14,7 +14,7 @@ router.get('/google', passport.authenticate('google', {
 router.get(
 	'/google/callback',
 	passport.authenticate('google', {
-		failureRedirect: 'https://chemnitz-cultural-sites.onrender.com/', // Frontend URL to redirect to when authentication fails
+		failureRedirect: 'https://cultural-heritage-map.vercel.app/', // Frontend URL to redirect to when authentication fails
 		session: false // Since it uses JWT, no session is used.
 	}),
 	authController.googleAuthCallback // Issue JWT and handle response on success
