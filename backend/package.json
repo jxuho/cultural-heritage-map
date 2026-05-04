@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "@turf/turf": "^7.2.0",
     "axios": "^1.9.0",
     "cookie-parser": "^1.4.7",
@@ -22,10 +23,11 @@
     "node-cron": "^4.0.7",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "yamljs": "^0.3.0",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "prisma": "^6.19.3"
   }
 }
