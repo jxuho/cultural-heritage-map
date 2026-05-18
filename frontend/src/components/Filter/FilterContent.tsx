@@ -58,16 +58,17 @@ const FilterContent = React.forwardRef<HTMLDivElement, FilterContentProps>(
     return (
       <div
         ref={ref}
-        style={floatingStyles}
+        style={{ ...floatingStyles }}
         className={`
           z-50 bg-white text-black border-2 border-black p-0
-          w-[95vw] sm:w-[550px] overflow-hidden 
+          w-[95vw] sm:w-[550px] 
+          flex flex-col overflow-hidden 
           ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}
         `}
         {...props}
       >
-        {/* 1. Header Area */}
-        <div className="bg-black text-white px-6 py-4 flex items-center justify-between">
+        {/* 1. Header Area (상단 고정) */}
+        <div className="bg-black text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
           <div className="flex flex-col gap-1">
             <h3 className="text-[10px] font-black uppercase tracking-[0.4em] leading-none">
               Filter Criteria
@@ -87,7 +88,7 @@ const FilterContent = React.forwardRef<HTMLDivElement, FilterContentProps>(
           )}
         </div>
 
-        <div className="p-8">
+        <div className="p-8 overflow-y-auto flex-1 custom-scrollbar">
           {/* 2. Category Selection Area */}
           <div className="mb-8">
             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-gray-400">
@@ -145,8 +146,8 @@ const FilterContent = React.forwardRef<HTMLDivElement, FilterContentProps>(
           </div>
         </div>
 
-        {/* 4. Footer Decorative Bar */}
-        <div className="h-2 bg-black w-full" />
+        {/* 4. Footer Decorative Bar  */}
+        <div className="h-2 bg-black w-full flex-shrink-0" />
       </div>
     );
   },

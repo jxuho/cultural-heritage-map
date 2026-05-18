@@ -19,13 +19,12 @@ const { refs, floatingStyles, context } = useFloating({
     onOpenChange: setIsOpen,
     middleware: [
       flip(), 
-      shift({ padding: 10 }), // 화면 끝에서 10px 여유 확보
+      shift({ padding: 10 }),
       size({
         apply({ availableWidth, availableHeight, elements }) {
-          // 뷰포트 가용 범위 내에서만 크기를 가지도록 제한
           Object.assign(elements.floating.style, {
             maxWidth: `${availableWidth - 20}px`,
-            maxHeight: `${availableHeight - 20}px`,
+            maxHeight: `${Math.max(200, availableHeight - 20)}px`,
           });
         },
       }),

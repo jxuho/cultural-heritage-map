@@ -173,11 +173,11 @@ const Header: React.FC = () => {
             </div>
           ) : (
             <button
-              onClick={() => openAccountManager()}
+              onClick={() => navigate('/sign-in')}
               className="flex items-center gap-2 md:gap-3 group text-black transition-all"
             >
-              <span className="hidden sm:inline text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] border-b border-black pb-0.5 whitespace-nowrap">
-                Access Archive
+              <span className="hidden sm:inline text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] border-b border-black pb-0.5 whitespace-nowrap hover:cursor-pointer">
+                Sign-In / Sign-Up
               </span>
               <FaArrowRight
                 size={12}
