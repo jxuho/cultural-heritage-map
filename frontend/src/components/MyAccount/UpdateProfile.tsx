@@ -123,7 +123,7 @@ const UpdateProfile = () => {
 
       <header className="mb-12">
         <div className="inline-block bg-black text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] mb-4">
-          Record Modification
+          Site Modification
         </div>
         <h1 className="text-5xl md:text-6xl font-black tracking-tighter uppercase leading-none">
           Edit <br /> Profile

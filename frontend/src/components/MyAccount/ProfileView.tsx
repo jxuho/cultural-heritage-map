@@ -21,7 +21,7 @@ const ProfileView = () => {
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-[50vh] font-mono uppercase tracking-widest text-xs">
-        Accessing User Records...
+        Accessing User Profile...
       </div>
     );
   }
@@ -107,7 +107,7 @@ const ProfileView = () => {
         <div className={cardClass}>
           <div>
             <PiUserCircleThin size={48} className={iconClass} />
-            <h3 className={titleClass}>Records</h3>
+            <h3 className={titleClass}>Profile</h3>
             <p className="text-xs font-mono text-gray-500">Update personal archival information.</p>
           </div>
           <Link to="update-profile" className={linkClass}>
@@ -119,7 +119,7 @@ const ProfileView = () => {
         <div className={cardClass}>
           <div>
             <PiMapPinLineThin size={48} className={iconClass} />
-            <h3 className={titleClass}>Saved</h3>
+            <h3 className={titleClass}>Favorites</h3>
             <p className="text-xs font-mono text-gray-500">Review your bookmarked cultural sites.</p>
           </div>
           <Link to="favorite-sites" className={linkClass}>
@@ -145,7 +145,7 @@ const ProfileView = () => {
             <div>
               <PiFileTextThin size={48} className={iconClass} />
               <h3 className={titleClass}>Proposals</h3>
-              <p className="text-xs font-mono text-gray-500">View your submitted site records.</p>
+              <p className="text-xs font-mono text-gray-500">View your submitted site proposals.</p>
             </div>
             <Link to="my-proposals" className={linkClass}>
               My Entries <MdKeyboardArrowRight size={18} />
@@ -156,7 +156,7 @@ const ProfileView = () => {
             <div className={cardClass}>
               <div>
                 <PiClipboardTextThin size={48} className={iconClass} />
-                <h3 className={titleClass}>Inbox</h3>
+                <h3 className={titleClass}>Proposals</h3>
                 <p className="text-xs font-mono text-gray-500">Review pending user proposals.</p>
               </div>
               <Link to="proposals" className={linkClass}>
@@ -166,7 +166,7 @@ const ProfileView = () => {
             <div className={cardClass}>
               <div>
                 <PiUsersThreeThin size={48} className={iconClass} />
-                <h3 className={titleClass}>Access</h3>
+                <h3 className={titleClass}>Users</h3>
                 <p className="text-xs font-mono text-gray-500">Database user management panel.</p>
               </div>
               <Link to="users" className={linkClass}>
@@ -180,7 +180,7 @@ const ProfileView = () => {
         <div className={`${cardClass} border-red-500 hover:bg-red-50`}>
           <div>
             <PiTrashThin size={48} className="text-red-500 mb-4" />
-            <h3 className={`${titleClass} text-red-500`}>Purge</h3>
+            <h3 className={`${titleClass} text-red-500`}>Delete account</h3>
             <p className="text-xs font-mono text-red-400">Permanently erase account from archive.</p>
           </div>
           <Link to="delete-account" className={`${linkClass} border-red-500 text-red-500`}>

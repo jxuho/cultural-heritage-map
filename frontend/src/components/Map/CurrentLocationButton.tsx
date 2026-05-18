@@ -55,7 +55,7 @@ const CurrentLocationButton = ({
       onClick={handleClick}
       disabled={isLoading}
       className={`
-        absolute bottom-6 right-6 z-[1000]
+        absolute bottom-12 left-6 z-[1000]
         flex items-center gap-2 px-3 py-2
         bg-white border-2 border-black
         transition-all duration-75
@@ -63,6 +63,7 @@ const CurrentLocationButton = ({
         shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]
         active:shadow-none active:translate-x-[2px] active:translate-y-[2px]
         disabled:opacity-50 cursor-pointer
+        rounded-none 
       `}
     >
       <div className="flex items-center justify-center">
@@ -79,9 +80,8 @@ const CurrentLocationButton = ({
         {isLoading ? 'SYNC' : isLocationOutsideBounds ? 'OUT' : 'Location'}
       </span>
 
-      {/* 상태 표시용 작은 점 */}
       {!isLoading && !isLocationOutsideBounds && (
-        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse ml-0.5"></div>
+        <div className="w-1.5 h-1.5 bg-green-500 rounded-none animate-pulse ml-0.5"></div>
       )}
     </button>
   );

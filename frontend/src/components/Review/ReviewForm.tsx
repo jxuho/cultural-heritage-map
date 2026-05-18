@@ -155,7 +155,7 @@ const ReviewForm = ({
               userReview ? <Edit3 size={16} /> : <Send size={16} />
             )}
             <span className="text-[11px] font-black uppercase tracking-widest">
-              {isSubmitting ? 'Syncing...' : userReview ? 'Update Entry' : 'Post Entry'}
+              {isSubmitting ? 'Syncing...' : userReview ? 'Update Review' : 'Post Review'}
             </span>
           </button>
         </div>

@@ -73,7 +73,7 @@ const FilterContent = React.forwardRef<HTMLDivElement, FilterContentProps>(
               Filter Criteria
             </h3>
             <p className="text-[9px] font-mono opacity-60 uppercase">
-              Current selection yields {filteredCount} matching records
+              Current selection yields {filteredCount} matching sites
             </p>
           </div>
           {isFiltered && (

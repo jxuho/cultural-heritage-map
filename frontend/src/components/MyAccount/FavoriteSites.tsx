@@ -96,7 +96,7 @@ const FavoriteSites = () => {
 
     if (sortedFavorites.length === 0) return (
       <div className="py-20 text-center border-2 border-dashed border-zinc-300">
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">No bookmark records found.</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">No bookmark sites found.</p>
       </div>
     );
 

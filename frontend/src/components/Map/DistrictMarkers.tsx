@@ -27,7 +27,7 @@ const DistrictMarkers = ({
     return `
       <div class="district-tooltip-container">
         <div class="district-tooltip-label">${name.toUpperCase()}</div>
-        <div class="district-tooltip-value font-mono">${count.toString().padStart(3, '0')} RECORDS</div>
+        <div class="district-tooltip-value font-mono">${count.toString().padStart(3, '0')} SITES</div>
       </div>
     `;
   };
@@ -51,10 +51,10 @@ const DistrictMarkers = ({
   }, [stats]);
 
   const defaultStyle = {
-    color: '#000000',
+    color: '#333333',
     weight: 1,
     dashArray: '',
-    fillColor: '#000000',
+    fillColor: '#333333',
     fillOpacity: 0.04,
   };
 
@@ -95,7 +95,7 @@ const DistrictMarkers = ({
           mouseover: () => {
             const pathLayer = geoLayer as unknown as LeafletPath;
             pathLayer.setStyle(hoverStyle);
-            pathLayer.bringToFront(); // 경계선을 강조하기 위해 앞으로 가져옴
+            pathLayer.bringToFront(); 
             tooltip.openTooltip();
           },
           mouseout: () => {

@@ -77,7 +77,7 @@ const PlaceCard: React.FC<PlaceCardProps> = React.memo(({ site, onClick }) => {
           {/* Action: "View Details" 애니메이션 최적화 */}
           <div className="flex items-center gap-2 text-black translate-y-[5px] group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out">
             <span className="text-[9px] font-black uppercase tracking-[0.2em]">
-              Open Archive
+              Go To Map
             </span>
             <FaArrowRight size={10} />
           </div>

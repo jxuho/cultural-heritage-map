@@ -1,7 +1,7 @@
 @import 'tailwindcss';
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource-variable/geist';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -55,7 +55,10 @@ body {
 
 .leaflet-tile {
   outline: 2px solid transparent;
-  margin-left: -2px;
+  /* margin-left: -2px;
+  
+  */
+  /* margin-bottom: -2px; */
 }
 
 @theme inline {
@@ -181,3 +184,97 @@ body {
     @apply font-sans;
   }
 }
+.leaflet-touch .leaflet-bar {
+  border: 1px solid #000000 !important;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 0px !important;
+  overflow: hidden !important;
+}
+
+.leaflet-touch .leaflet-bar a {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-bottom: 1px solid #000000 !important;
+  
+  width: 44px !important;
+  height: 44px !important;
+  line-height: 44px !important; 
+  font-size: 22px !important;  
+  
+  font-weight: 800 !important;
+  font-family: 'Geist Variable', 'Inter', 'Helvetica', sans-serif !important;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out !important;
+}
+
+.leaflet-touch .leaflet-bar a:last-child {
+  border-bottom: none !important;
+}
+
+.leaflet-touch .leaflet-bar a:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.leaflet-touch .leaflet-bar a.leaflet-disabled {
+  background-color: #ffffff !important;
+  color: #cccccc !important;
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+}
+
+.leaflet-container .leaflet-control-attribution {
+  background: #ffffff !important;
+  border: 1px solid #000000 !important;
+  border-top: 1px solid #000000 !important;
+  border-bottom: 1px solid #000000 !important;
+  border-left: 1px solid #000000 !important;
+  border-right: 1px solid #000000 !important;
+  padding: 4px 8px !important;
+  font-size: 10px !important;
+  font-family: 'Geist Variable', 'Inter', sans-serif !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  color: #666666 !important;
+}
+
+.leaflet-container .leaflet-control-attribution a {
+  color: #000000 !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+.leaflet-container .leaflet-control-attribution a:hover {
+  text-decoration: underline !important;
+}
+
+@media (max-width: 768px) {
+  .leaflet-bottom.leaflet-left button {
+    bottom: 12px !important;
+    left: 12px !important;
+  }
+
+  .leaflet-bottom.leaflet-left .leaflet-control-attribution {
+    margin-left: 0 !important;
+    margin-bottom: 0 !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-top: 1px solid #000000 !important;
+    border-right: 1px solid #000000 !important;
+    padding-left: 110px !important;
+    background: #ffffff !important;
+    font-size: 9px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .leaflet-bottom.leaflet-left .leaflet-control-attribution {
+    padding-left: 105px !important;
+    letter-spacing: 0.05em !important;
+  }
+}
+
+.leaflet-bottom.leaflet-right .leaflet-control-zoom {
+  margin-right: 32px !important; 
+  margin-bottom: 32px !important; 
+}
+

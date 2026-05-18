@@ -112,7 +112,7 @@ const SidePanelItems = ({
       >
         <div className="flex items-center gap-4">
           <span className="text-[11px] font-black uppercase tracking-widest">
-            Community Archive ({selectedPlaceData.reviewCount || 0})
+            Community Review ({selectedPlaceData.reviewCount || 0})
           </span>
           {selectedPlaceData.averageRating ? (
             <div className="flex items-center gap-2 border-l border-current pl-4">
@@ -199,7 +199,7 @@ const SidePanelItems = ({
               ) : (
                 <div className="py-8 px-5 border border-dashed border-gray-300 text-center">
                   <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">
-                    No general information registered for this record.
+                    No general information registered for this site.
                   </p>
                 </div>
               )}

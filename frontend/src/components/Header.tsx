@@ -144,7 +144,7 @@ const Header: React.FC = () => {
                 <MenuLink
                   onClick={() => navigate('/dashboard')}
                   icon={<FaBookmark />}
-                  label="My Collection"
+                  label="Dashboard"
                 />
                 <MenuLink
                   onClick={() => navigate('/my-account')}
@@ -214,7 +214,7 @@ const Header: React.FC = () => {
                 >
                   <FaBookmark className="text-gray-400" />
                   <span className="text-[11px] font-black uppercase tracking-widest">
-                    My Collection
+                    Dashboard
                   </span>
                 </Link>
                 <button

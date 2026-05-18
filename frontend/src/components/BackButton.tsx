@@ -31,8 +31,8 @@ const BackButton = ({ className = '', iconSize = 20 }: BackButtonProps) => {
         cursor-pointer overflow-hidden
         ${className}
       `}
-      aria-label="Return to previous record"
-      title="Return to previous record"
+      aria-label="Return to previous page"
+      title="Return to previous page"
     >
       {/* 화살표 애니메이션 컨테이너 */}
       <div className="relative overflow-hidden w-5 h-5 flex items-center justify-center">
