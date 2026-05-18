@@ -80,7 +80,7 @@ const SidePanelButtons: React.FC = () => {
   if (!showButtons) return null;
 
   return (
-    <div className="flex flex-col gap-0 border-t-2 border-black">
+    <div className="shrink-0 flex flex-col gap-0 border-t-2 border-black">
       {/* 관리 도구 레이블 */}
       <div className="bg-black text-white py-1 px-4 self-start text-[9px] font-black uppercase tracking-[0.3em]">
         Contribute

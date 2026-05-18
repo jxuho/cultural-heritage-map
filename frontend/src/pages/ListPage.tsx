@@ -62,7 +62,7 @@ const ListPage: React.FC = () => {
     );
 
   return (
-    <div className="bg-[#f4f4f4] min-h-screen">
+    <div className="bg-[#f4f4f4]">
       {/* 1. Archive Hero Section */}
       <header className="bg-white border-b-2 border-black pt-20 pb-12 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8">

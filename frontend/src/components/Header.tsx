@@ -38,7 +38,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-[100] w-full bg-white/80 backdrop-blur-md border-b border-black font-sans">
+    <header className="sticky top-0 z-[100] w-full shrink-0 bg-white/80 backdrop-blur-md border-b border-black font-sans">
       {/* Bauhaus Accent Bar */}
       <div className="h-[1px] w-full flex bg-gray-200">
         <div className="h-full w-1/3 bg-black/10" />

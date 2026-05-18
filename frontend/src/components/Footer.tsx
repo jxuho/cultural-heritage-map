@@ -1,11 +1,4 @@
-import { useLocation } from 'react-router';
-
 const Footer = () => {
-  const location = useLocation();
-  const isMapPage = location.pathname === '/';
-
-  if (isMapPage) return null;
-
   return (
     <footer className="w-full bg-white border-t border-black py-8 px-8 shrink-0">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-end gap-6">

@@ -45,10 +45,10 @@ const SidePanel = () => {
 
   if (!isSidePanelOpen) return null;
 
-  return (
+return (
     <aside
       ref={detailRef}
-      className="absolute z-30 right-0 top-0 h-full shadow-lg bg-white flex flex-col"
+      className="absolute z-30 right-0 inset-y-0 h-full shadow-lg bg-white flex flex-col overflow-hidden"
       style={{
         width: sidePanelWidth,
         transition: 'width 180ms ease',
@@ -59,7 +59,10 @@ const SidePanel = () => {
     >
       <SidePanelResizer detailRef={detailRef} {...resizer} />
 
-      <SidePanelContent />
+      <div className="flex-1 min-h-0 relative">
+        <SidePanelContent />
+      </div>
+      
       <SidePanelButtons />
     </aside>
   );

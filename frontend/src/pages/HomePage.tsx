@@ -1,32 +1,84 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import SidePanel from '../components/SidePanel/SidePanel.jsx';
 import FilterPanel from '../components/Filter/FilterPanel.jsx';
 import MapContextMenu from '../components/Map/MapContextMenu.jsx';
 import LoadingSpinner from '../components/LoadingSpinner';
+import LandingPage from './LandingPage';
 
 const MapComponent = lazy(() => import('../components/Map/MapComponent.jsx'));
 
 const HomePage = () => {
-  return (
-    <>
-      <Suspense
-        fallback={
-          <div className="h-full w-full flex items-center justify-center bg-gray-50">
-            <LoadingSpinner />
-            <p className="ml-2 text-gray-500">Loading Map Engine...</p>
-          </div>
-        }
-      >
-        <MapComponent />
-      </Suspense>
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [showMap, setShowMap] = useState(false);
+  const navigate = useNavigate();
 
-      <div className="absolute top-4 left-4 z-20">
-        <FilterPanel />
-      </div>
-      <SidePanel />
-      <MapContextMenu />
-    </>
+  useEffect(() => {
+    const hasVisited = sessionStorage.getItem('berlin_portal_visited');
+    if (hasVisited === 'true') {
+      setShowMap(true);
+    }
+    setIsCheckingSession(false);
+  }, []);
+
+  const handleExploreMap = () => {
+    sessionStorage.setItem('berlin_portal_visited', 'true');
+    setShowMap(true);
+  };
+
+  if (isCheckingSession) {
+    return <div className="w-full h-full bg-white" />;
+  }
+
+  return (
+    <div className="relative w-full h-full bg-white overflow-hidden">
+      <AnimatePresence mode="wait">
+        {!showMap ? (
+          <motion.div
+            key="landing"
+            initial={{ opacity: 1, y: 0 }}
+            exit={{
+              opacity: 0,
+              y: '-100vh',
+              transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+            }}
+            className="w-full h-full overflow-y-auto"
+          >
+            <LandingPage
+              onExploreMap={handleExploreMap}
+              onSignIn={() => navigate('/sign-in')}
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="map-interface"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="w-full h-full relative overflow-hidden"
+          >
+            <Suspense
+              fallback={
+                <div className="h-full w-full flex flex-col items-center justify-center bg-white font-mono text-xs uppercase tracking-widest text-black">
+                  <LoadingSpinner />
+                  <p className="mt-4">Initializing Geospatial Map Engine...</p>
+                </div>
+              }
+            >
+              <MapComponent />
+            </Suspense>
+
+            <div className="absolute top-4 left-4 z-20">
+              <FilterPanel />
+            </div>
+            <SidePanel />
+            <MapContextMenu />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
