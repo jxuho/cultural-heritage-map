@@ -45,6 +45,64 @@ const parseBboxParams = (query) => {
   return { minLng, minLat, maxLng, maxLat };
 };
 
+// const getAllCulturalSites = asyncHandler(async (req, res, next) => {
+//   // 1. 페이지네이션 설정
+//   const page = parseInt(req.query.page) || 1;
+//   const limit = parseInt(req.query.limit) || 20000;
+//   const skip = (page - 1) * limit;
+
+//   // 2. 정렬 설정
+//   let sortStr = '-createdAt';
+//   if (req.query.sort) {
+//     sortStr = req.query.sort.split(',').join(' ');
+//   }
+
+//   // 3. 쿼리 필터 구성
+//   const bbox = parseBboxParams(req.query);
+//   const queryFilter = {};
+
+//   if (bbox) {
+//     queryFilter.location = {
+//       $geoWithin: {
+//         $box: [
+//           [bbox.minLng, bbox.minLat],
+//           [bbox.maxLng, bbox.maxLat],
+//         ],
+//       },
+//     };
+//   }
+
+//   // 4. 쿼리 실행 (Promise.all을 사용해 find와 count를 동시에 실행하여 시간 단축)
+//   const [culturalSites, totalResults] = await Promise.all([
+//     CulturalSite.find(queryFilter)
+//       .sort(sortStr)
+//       .skip(skip)
+//       .limit(limit)
+//       .select(
+//         '_id name category location address averageRating reviewCount imageUrl',
+//       )
+//       .hint({ location: '2dsphere', createdAt: -1 })
+//       .lean(),
+
+//     CulturalSite.countDocuments(queryFilter), // count도 인덱스를 타므로 동시에 실행
+//   ]);
+
+//   const totalPages = Math.ceil(totalResults / limit);
+
+//   // 5. 응답 전송
+//   res.status(200).json({
+//     status: 'success',
+//     results: culturalSites.length,
+//     totalResults,
+//     page,
+//     totalPages,
+//     data: {
+//       culturalSites,
+//     },
+//   });
+// });
+
+
 const getAllCulturalSites = asyncHandler(async (req, res, next) => {
   // 1. 페이지네이션 설정
   const page = parseInt(req.query.page) || 1;
@@ -72,24 +130,20 @@ const getAllCulturalSites = asyncHandler(async (req, res, next) => {
     };
   }
 
-  // 4. 쿼리 실행 (Promise.all을 사용해 find와 count를 동시에 실행하여 시간 단축)
-  const [culturalSites, totalResults] = await Promise.all([
-    CulturalSite.find(queryFilter)
-      .sort(sortStr)
-      .skip(skip)
-      .limit(limit)
-      .select(
-        '_id name category location address averageRating reviewCount imageUrl',
-      )
-      .hint({ location: '2dsphere', createdAt: -1 })
-      .lean(),
+  // 4. 쿼리 실행 (Promise.all 제거, 단일 쿼리로 최적화)
+  const culturalSites = await CulturalSite.find(queryFilter)
+    .sort(sortStr)
+    .skip(skip)
+    .limit(limit)
+    .select('_id name category location address averageRating reviewCount imageUrl')
+    .hint({ location: '2dsphere', createdAt: -1 })
+    .lean();
 
-    CulturalSite.countDocuments(queryFilter), // count도 인덱스를 타므로 동시에 실행
-  ]);
-
+  // 5. 전체 개수 계산 (무거운 DB count 연산 대신 메모리 배열 길이로 대체)
+  const totalResults = culturalSites.length;
   const totalPages = Math.ceil(totalResults / limit);
 
-  // 5. 응답 전송
+  // 6. 응답 전송
   res.status(200).json({
     status: 'success',
     results: culturalSites.length,
