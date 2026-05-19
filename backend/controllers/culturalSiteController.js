@@ -78,10 +78,12 @@ const getAllCulturalSites = asyncHandler(async (req, res, next) => {
       .sort(sortStr)
       .skip(skip)
       .limit(limit)
-      .select('_id name category location address averageRating reviewCount imageUrl')
+      .select(
+        '_id name category location address averageRating reviewCount imageUrl',
+      )
       .lean(),
 
-    CulturalSite.countDocuments(queryFilter) // count도 인덱스를 타므로 동시에 실행
+    CulturalSite.countDocuments(queryFilter), // count도 인덱스를 타므로 동시에 실행
   ]);
 
   const totalPages = Math.ceil(totalResults / limit);
