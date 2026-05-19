@@ -81,6 +81,7 @@ const getAllCulturalSites = asyncHandler(async (req, res, next) => {
       .select(
         '_id name category location address averageRating reviewCount imageUrl',
       )
+      .hint({ location: '2dsphere', createdAt: -1 })
       .lean(),
 
     CulturalSite.countDocuments(queryFilter), // count도 인덱스를 타므로 동시에 실행
