@@ -102,7 +102,6 @@ const parseBboxParams = (query) => {
 //   });
 // });
 
-
 const getAllCulturalSites = asyncHandler(async (req, res, next) => {
   // 1. 페이지네이션 설정
   const page = parseInt(req.query.page) || 1;
@@ -135,7 +134,9 @@ const getAllCulturalSites = asyncHandler(async (req, res, next) => {
     .sort(sortStr)
     .skip(skip)
     .limit(limit)
-    .select('_id name category location address averageRating reviewCount imageUrl')
+    .select(
+      '_id name category location address averageRating reviewCount imageUrl',
+    )
     .hint({ location: '2dsphere', createdAt: -1 })
     .lean();
 
