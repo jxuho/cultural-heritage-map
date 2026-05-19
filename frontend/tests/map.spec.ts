@@ -14,12 +14,12 @@ async function navigateToMap(page: Page) {
   // Check map container
   await expect(page.locator('.leaflet-container')).toBeVisible();
 
-// 실제 district layer가 렌더될 때까지 기다리기
-await expect(
-  page.locator('.leaflet-overlay-pane path').first(),
-).toBeAttached({
-  timeout: 30000,
-});
+  // 실제 district layer가 렌더될 때까지 기다리기
+  await expect(page.locator('.leaflet-overlay-pane path').first()).toBeAttached(
+    {
+      timeout: 30000,
+    },
+  );
 }
 
 test.describe('Step-by-Step Map Flow', () => {
@@ -73,9 +73,11 @@ test.describe('Step-by-Step Map Flow', () => {
   }) => {
     // ---Step 1: Initial confirmation ---
     const districtPaths = page.locator('.leaflet-overlay-pane path');
-    await expect.poll(async () => {
-  return await districtPaths.count();
-}).toBeGreaterThan(0);
+    await expect
+      .poll(async () => {
+        return await districtPaths.count();
+      })
+      .toBeGreaterThan(0);
 
     // ---Step 2: Zoom in (enter cluster mode) ---
     const zoomInButton = page.getByRole('button', { name: /Zoom in/i });
