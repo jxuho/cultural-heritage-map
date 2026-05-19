@@ -31,7 +31,7 @@ const culturalSiteSchema = new mongoose.Schema(
       coordinates: {
         type: [Number], // [longitude, latitude]
         required: true,
-        index: '2dsphere', // Indexes for geospatial queries
+        // index: '2dsphere', // Indexes for geospatial queries
         validate: {
           validator: function (v) {
             return (
@@ -130,5 +130,15 @@ const culturalSiteSchema = new mongoose.Schema(
 culturalSiteSchema.index({ averageRating: -1 });
 culturalSiteSchema.index({ reviewCount: -1 });
 culturalSiteSchema.index({ category: 1 });
+
+// 1. 기본 공간 검색 인덱스 (location 전체 객체에 적용)
+culturalSiteSchema.index({ location: '2dsphere' });
+
+// 2. [추천] 공간 검색 후 최신순 정렬(-createdAt)을 위한 복합 인덱스
+// 이 인덱스가 있으면 공간 검색 후 정렬 연산 속도가 0초에 수렴합니다.
+culturalSiteSchema.index({ location: '2dsphere', createdAt: -1 });
+
+// 3. 만약 평점순 정렬(-averageRating)도 자주 쓰신다면 이 복합 인덱스도 유용합니다.
+culturalSiteSchema.index({ location: '2dsphere', averageRating: -1 });
 
 module.exports = mongoose.model('CulturalSite', culturalSiteSchema);

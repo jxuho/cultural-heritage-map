@@ -48,18 +48,16 @@ const parseBboxParams = (query) => {
 const getAllCulturalSites = asyncHandler(async (req, res, next) => {
   // 1. 페이지네이션 설정
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 20000; // 전체 데이터 호출 대응
+  const limit = parseInt(req.query.limit) || 20000;
   const skip = (page - 1) * limit;
 
-  // 2. 정렬 설정 (비정규화된 필드 averageRating, reviewCount 사용 가능)
+  // 2. 정렬 설정
   let sortStr = '-createdAt';
   if (req.query.sort) {
     sortStr = req.query.sort.split(',').join(' ');
   }
 
-  // 3. 쿼리 실행
-  // - 별도의 $lookup이나 $addFields 없이 바로 find()를 사용하여 성능 극대화
-  // - select()를 통해 지도 마커에 불필요한 무거운 필드(description 등) 제외
+  // 3. 쿼리 필터 구성
   const bbox = parseBboxParams(req.query);
   const queryFilter = {};
 
@@ -74,16 +72,18 @@ const getAllCulturalSites = asyncHandler(async (req, res, next) => {
     };
   }
 
-  const culturalSites = await CulturalSite.find(queryFilter)
-    .sort(sortStr)
-    .skip(skip)
-    .limit(limit)
-    .select(
-      '_id name category location address averageRating reviewCount imageUrl',
-    );
+  // 4. 쿼리 실행 (Promise.all을 사용해 find와 count를 동시에 실행하여 시간 단축)
+  const [culturalSites, totalResults] = await Promise.all([
+    CulturalSite.find(queryFilter)
+      .sort(sortStr)
+      .skip(skip)
+      .limit(limit)
+      .select('_id name category location address averageRating reviewCount imageUrl')
+      .lean(),
 
-  // 4. 전체 개수 확인 (페이지네이션용)
-  const totalResults = await CulturalSite.countDocuments(queryFilter);
+    CulturalSite.countDocuments(queryFilter) // count도 인덱스를 타므로 동시에 실행
+  ]);
+
   const totalPages = Math.ceil(totalResults / limit);
 
   // 5. 응답 전송
