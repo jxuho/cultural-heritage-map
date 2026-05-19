@@ -113,7 +113,7 @@ export const ChangeRoleModalContent = ({ user }: { user: any }) => {
             <button
               type="submit"
               className={`
-                flex-[2] py-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all
+                flex-2 py-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all
                 ${selectedRole === user.role 
                   ? 'bg-zinc-200 text-zinc-400 border-2 border-zinc-200 cursor-not-allowed' 
                   : 'bg-black text-white border-2 border-black hover:bg-green-600 hover:border-green-600'}

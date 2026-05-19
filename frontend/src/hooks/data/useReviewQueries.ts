@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createReview,
   deleteReview,
+  fetchAllReviewsForAdmin,
   fetchReviewsByPlaceId,
   getMyReviews,
   updateReview,
@@ -67,6 +68,7 @@ export const useReviewMutation = () => {
       }
     },
     onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['adminReviews'] });
       queryClient.invalidateQueries({ queryKey: ['myReviews'] });
       queryClient.invalidateQueries({
         queryKey: ['reviews', variables.placeId],
@@ -82,5 +84,16 @@ export const useReviewMutation = () => {
       console.error('Review action failed:', error);
       alert(`Review process failed: ${error.message || 'Unknown error'}`);
     },
+  });
+};
+
+/**
+ * [관리자 전용] 전체 리뷰를 조회하는 쿼리 훅
+ */
+export const useAdminAllReviews = (page = 1, limit = 50) => {
+  return useQuery({
+    queryKey: ['adminReviews', page, limit],
+    queryFn: () => fetchAllReviewsForAdmin(page, limit),
+    staleTime: 1000 * 30, // 어드민 데이터는 30초간 stale하지 않다고 가정
   });
 };

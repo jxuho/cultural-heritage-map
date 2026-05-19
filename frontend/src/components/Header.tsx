@@ -9,7 +9,6 @@ import {
   FaArrowRight,
 } from 'react-icons/fa';
 import { Menu, X } from 'lucide-react';
-import useUiStore from '../store/uiStore';
 import useAuthStore from '../store/authStore';
 
 const Header: React.FC = () => {
@@ -18,7 +17,6 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { user, logout, isAuthenticated } = useAuthStore();
-  const { openAccountManager } = useUiStore();
 
   const navItems = [
     { label: 'Map Explorer', path: '/', icon: <FaMapMarkedAlt /> },
@@ -26,21 +24,21 @@ const Header: React.FC = () => {
   ];
 
   /**
-   * [UX 개선] 뷰포트가 md(768px) 미만일 때
-   * 프로필 버튼을 클릭하면 드롭다운 대신 바로 설정 페이지로 이동
+   * [UX Improvement] When the viewport is less than md (768px)
+   * Clicking the profile button takes you directly to the settings page instead of a dropdown.
    */
   const handleProfileClick = (e: React.MouseEvent) => {
     if (window.innerWidth < 768) {
       e.preventDefault();
-      setIsMobileMenuOpen(false); // 메뉴가 열려있다면 닫기
+      setIsMobileMenuOpen(false); // Close the menu if it is open
       navigate('/my-account');
     }
   };
 
   return (
-    <header className="sticky top-0 z-[100] w-full shrink-0 bg-white/80 backdrop-blur-md border-b border-black font-sans">
+    <header className="sticky top-0 z-100 w-full shrink-0 bg-white/80 backdrop-blur-md border-b border-black font-sans">
       {/* Bauhaus Accent Bar */}
-      <div className="h-[1px] w-full flex bg-gray-200">
+      <div className="h-px w-full flex bg-gray-200">
         <div className="h-full w-1/3 bg-black/10" />
         <div className="h-full w-1/3 bg-red-600/10" />
         <div className="h-full w-1/3 bg-amber-500/10" />
@@ -74,7 +72,7 @@ const Header: React.FC = () => {
                   {item.label}
                 </span>
                 {isActive && (
-                  <span className="absolute -bottom-1 left-0 w-4 h-[2px] bg-black" />
+                  <span className="absolute -bottom-1 left-0 w-4 h-0.5 bg-black" />
                 )}
               </Link>
             );
@@ -101,7 +99,7 @@ const Header: React.FC = () => {
         <div className="flex items-center">
           {isAuthenticated ? (
             <div className="relative group">
-              {/* 프로필 버튼: 모바일 클릭 시 /my-account 이동 */}
+              {/* Profile button: Move to /my-account when clicked on mobile */}
               <button
                 onClick={handleProfileClick}
                 className="flex items-center gap-2 md:gap-3 py-2 group cursor-pointer outline-none"
@@ -130,11 +128,11 @@ const Header: React.FC = () => {
                 </div>
               </button>
 
-              {/* Desktop Dropdown: md 이상에서만 호버 시 표시 */}
+              {/* Desktop Dropdown: Displayed on hover only on md and above */}
               <div className="absolute right-0 mt-2 w-56 bg-white border border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,0.05)] py-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 hidden md:block">
                 <div className="px-6 pb-4 border-b border-gray-100 mb-2">
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 font-mono">
-                    Registry Info
+                    User Info
                   </p>
                   <p className="text-[12px] font-medium text-black truncate">
                     {user?.email}
@@ -188,9 +186,9 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* [Mobile] Navigation Overlay: md 미만에서 메뉴 토글 시 표시 */}
+      {/* [Mobile] Navigation Overlay: Displayed when toggling menu below md */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-[81px] left-0 w-full bg-white border-b-2 border-black animate-in slide-in-from-top duration-300 shadow-xl">
+        <div className="md:hidden absolute top-20.25 left-0 w-full bg-white border-b-2 border-black animate-in slide-in-from-top duration-300 shadow-xl">
           <div className="flex flex-col divide-y divide-gray-100">
             {navItems.map((item) => (
               <Link
@@ -238,7 +236,7 @@ const Header: React.FC = () => {
 };
 
 /**
- * Dropdown용 재사용 가능 링크 컴포넌트
+ * Reusable Link Component for Dropdown
  */
 const MenuLink = ({
   onClick,

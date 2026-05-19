@@ -6,15 +6,17 @@ import {
   useMyReviews,
   useReviewMutation,
 } from '../../hooks/data/useReviewQueries';
-import BackButton from '../BackButton';
-import { Calendar, Star, MapPin, ArrowUpDown, Loader2 } from 'lucide-react';
+import { Calendar, Star, MapPin, Loader2 } from 'lucide-react';
+
+type SortCriteria = 'date' | 'name' | 'rating';
+type SortOrder = 'asc' | 'desc';
 
 const MyReviews = () => {
   const currentUser = useAuthStore((state) => state.user);
 
   const [expandedReviewId, setExpandedReviewId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<'createdAt' | 'culturalSiteName' | 'rating'>('createdAt');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortBy, setSortBy] = useState<SortCriteria>('date');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const {
     data: reviews = [],
@@ -59,7 +61,7 @@ const MyReviews = () => {
     sortableReviews.sort((a, b) => {
       let valA, valB;
       switch (sortBy) {
-        case 'culturalSiteName':
+        case 'name':
           valA = a.culturalSite?.name || '';
           valB = b.culturalSite?.name || '';
           break;
@@ -79,12 +81,12 @@ const MyReviews = () => {
     return sortableReviews;
   }, [reviews, sortBy, sortOrder]);
 
-  const handleSortChange = (criteria: typeof sortBy) => {
+  const handleSortChange = (criteria: SortCriteria) => {
     if (sortBy === criteria) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(criteria);
-      setSortOrder('asc');
+      setSortOrder(criteria === 'date' || criteria === 'rating' ? 'desc' : 'asc');
     }
   };
 
@@ -113,37 +115,38 @@ const MyReviews = () => {
         {sortedReviews.map((review) => (
           <div 
             key={review._id} 
-            className={`border-2 border-black transition-all ${expandedReviewId === review._id ? 'bg-white' : 'bg-zinc-50 hover:bg-white'}`}
+            className={`border-2 border-black transition-all ${expandedReviewId === review._id ? 'bg-white' : 'bg-zinc-50 hover:bg-zinc-100'}`}
           >
             <div 
-              className="p-4 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4"
+              className="p-5 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4"
               onClick={() => setExpandedReviewId(expandedReviewId === review._id ? null : review._id)}
             >
               <div className="space-y-1 grow">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mb-1">
                   <div className="bg-black text-white px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider">Site Record</div>
-                  <h3 className="text-sm font-black uppercase tracking-tight break-all">
-                    {review.culturalSite.name || 'Unknown Site'}
-                  </h3>
+                  <span className="text-[10px] font-mono text-zinc-400">#{review._id.slice(-6)}</span>
                 </div>
+                <h3 className="text-lg font-black uppercase tracking-tighter leading-none break-all">
+                  {review.culturalSite.name || 'Unknown Site'}
+                </h3>
                 {review.comment && (
-                  <p className="text-xs font-mono text-gray-600 line-clamp-1 italic">"{review.comment}"</p>
+                  <p className="text-xs font-mono text-zinc-600 line-clamp-1 italic mt-1">"{review.comment}"</p>
                 )}
               </div>
 
-              <div className="flex items-center gap-6 shrink-0">
+              <div className="flex items-center gap-6 shrink-0 justify-between md:justify-end">
                 <div className="flex gap-0.5">
                   {[...Array(5)].map((_, i) => (
                     <StarIcon 
                       key={i} 
                       rating={review.rating} 
                       index={i} 
-                      className="w-3.5 h-3.5" 
+                      className="w-4 h-4" 
                       displayMode="reviewForm" 
                     />
                   ))}
                 </div>
-                <div className="text-[10px] font-mono text-gray-400 border-l border-gray-300 pl-4 uppercase">
+                <div className="text-[10px] font-mono text-zinc-400 border-l border-zinc-300 pl-4 uppercase tracking-wider">
                   {new Date(review.createdAt).toLocaleDateString('en-GB')}
                 </div>
               </div>
@@ -173,34 +176,30 @@ const MyReviews = () => {
   `;
 
   return (
-    <div className="max-w-5xl mx-auto p-6 md:p-12">
-      <div className="flex justify-start mb-8">
-        <BackButton />
-      </div>
-
+    <div className="max-w-5xl mx-auto p-6 md:p-12 min-h-full flex flex-col">
       <header className="mb-12">
         <div className="inline-block bg-black text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] mb-4">
           Community Contributions
         </div>
-        <h1 className="text-5xl md:text-6xl font-black tracking-tighter uppercase leading-none">
+        <h1 className="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-[0.85]">
           My <br /> Reviews
         </h1>
       </header>
 
       {/* Sorting Controls */}
       <div className="flex flex-wrap gap-2 mb-10">
-        <button onClick={() => handleSortChange('createdAt')} className={sortBtnClass(sortBy === 'createdAt')}>
-          <Calendar size={14} /> Date {sortBy === 'createdAt' && (sortOrder === 'asc' ? '↑' : '↓')}
+        <button onClick={() => handleSortChange('date')} className={sortBtnClass(sortBy === 'date')}>
+          <Calendar size={14} /> Date {sortBy === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}
+        </button>
+        <button onClick={() => handleSortChange('name')} className={sortBtnClass(sortBy === 'name')}>
+          <MapPin size={14} /> Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
         </button>
         <button onClick={() => handleSortChange('rating')} className={sortBtnClass(sortBy === 'rating')}>
           <Star size={14} /> Rating {sortBy === 'rating' && (sortOrder === 'asc' ? '↑' : '↓')}
         </button>
-        <button onClick={() => handleSortChange('culturalSiteName')} className={sortBtnClass(sortBy === 'culturalSiteName')}>
-          <MapPin size={14} /> Site {sortBy === 'culturalSiteName' && (sortOrder === 'asc' ? '↑' : '↓')}
-        </button>
       </div>
 
-      <div className="space-y-4">
+      <div className="grow">
         {renderContent()}
       </div>
     </div>

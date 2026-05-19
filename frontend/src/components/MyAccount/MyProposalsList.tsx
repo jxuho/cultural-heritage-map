@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { useMyProposals } from '../../hooks/data/useProposalQueries';
-import BackButton from '../BackButton';
 import { ProposalType } from '../../types/proposal';
 import { Loader2, Clock, CheckCircle2, XCircle, ChevronRight, Hash } from 'lucide-react';
 
@@ -60,10 +59,6 @@ const MyProposalsList = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 md:p-12">
-      <div className="mb-10">
-        <BackButton />
-      </div>
-
       <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div className="inline-block bg-black text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] mb-4">
@@ -74,7 +69,7 @@ const MyProposalsList = () => {
           </h1>
         </div>
 
-        <div className="flex flex-col gap-2 min-w-[200px]">
+        <div className="flex flex-col gap-2 min-w-50">
           <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Filter_Results</label>
           <select
             value={sortOption}
@@ -143,7 +138,7 @@ const MyProposalsList = () => {
                       .filter(([key]) => !(proposal.proposalType === 'create' && key === 'originalTags'))
                       .map(([key, value]) => (
                         <li key={key} className="flex items-start gap-2 text-[11px] font-mono leading-tight">
-                          <span className="font-bold text-black min-w-[80px]">{key}:</span>
+                          <span className="font-bold text-black min-w-20">{key}:</span>
                           <span className="text-zinc-600">{renderProposedValue(key, value, proposal.proposalType)}</span>
                         </li>
                       ))}

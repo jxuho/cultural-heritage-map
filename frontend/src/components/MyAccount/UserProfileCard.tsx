@@ -45,7 +45,7 @@ const UserProfileCard = ({ user }: UserProfileCardProps) => {
         </div>
         
         <div className="grow min-w-0 text-center sm:text-left">
-          <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter leading-none mb-2 break-words">
+          <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter leading-none mb-2 wrap-break-word">
             {username}
           </h2>
           <p className="text-sm font-mono text-zinc-400 mb-3 break-all">{email}</p>
@@ -106,7 +106,7 @@ const UserProfileCard = ({ user }: UserProfileCardProps) => {
         </span>
         
         <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-black mb-3 flex items-center gap-2">
-          <div className="w-8 h-[2px] bg-black"></div> Personal_Statement
+          <div className="w-8 h-0.5 bg-black"></div> Personal_Statement
         </h3>
         <p className="text-sm font-medium italic leading-relaxed text-zinc-700 relative z-10 whitespace-pre-line border-l-2 border-zinc-200 pl-4 py-1">
           {bio.trim() !== '' ? bio : 'Identity statement remains unfiled. Profile verification incomplete.'}

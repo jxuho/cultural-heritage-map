@@ -2,16 +2,24 @@ import { useAllUsers } from '../../hooks/data/useUserQueries';
 import defaultProfileImg from '../../assets/profile_image.svg';
 import UserProfileCard from './UserProfileCard';
 import { useState, useMemo } from 'react';
-import BackButton from '../BackButton';
 import useAuthStore from '../../store/authStore';
-import { Users, SortAsc, ChevronDown, ChevronUp, Loader2, Search, UserCheck } from 'lucide-react';
+import {
+  Users,
+  SortAsc,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  UserCheck,
+} from 'lucide-react';
 
 const UsersManagementPage = () => {
   const { data: users, isLoading, isError, error } = useAllUsers();
   const { user: currentUser } = useAuthStore();
 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<'username' | 'role' | 'createdAt' | 'updatedAt'>('username');
+  const [sortBy, setSortBy] = useState<
+    'username' | 'role' | 'createdAt' | 'updatedAt'
+  >('username');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const handleViewProfile = (userId: string) => {
@@ -31,16 +39,32 @@ const UsersManagementPage = () => {
       let valB: string | number = '';
 
       switch (sortBy) {
-        case 'role': valA = a.role; valB = b.role; break;
-        case 'createdAt': valA = new Date(a.createdAt).getTime(); valB = new Date(b.createdAt).getTime(); break;
-        case 'updatedAt': valA = new Date(a.updatedAt).getTime(); valB = new Date(b.updatedAt).getTime(); break;
-        default: valA = a.username || ''; valB = b.username || ''; break;
+        case 'role':
+          valA = a.role;
+          valB = b.role;
+          break;
+        case 'createdAt':
+          valA = new Date(a.createdAt).getTime();
+          valB = new Date(b.createdAt).getTime();
+          break;
+        case 'updatedAt':
+          valA = new Date(a.updatedAt).getTime();
+          valB = new Date(b.updatedAt).getTime();
+          break;
+        default:
+          valA = a.username || '';
+          valB = b.username || '';
+          break;
       }
 
       if (typeof valA === 'string' && typeof valB === 'string') {
-        return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        return sortOrder === 'asc'
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
       }
-      return sortOrder === 'asc' ? (valA as number) - (valB as number) : (valB as number) - (valA as number);
+      return sortOrder === 'asc'
+        ? (valA as number) - (valB as number)
+        : (valB as number) - (valA as number);
     });
 
     return loggedInUser ? [loggedInUser, ...sortableUsers] : sortableUsers;
@@ -57,31 +81,44 @@ const UsersManagementPage = () => {
 
   const getSortIndicator = (criteria: typeof sortBy) => {
     if (sortBy !== criteria) return null;
-    return sortOrder === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />;
+    return sortOrder === 'asc' ? (
+      <ChevronUp size={14} />
+    ) : (
+      <ChevronDown size={14} />
+    );
   };
 
-  if (isLoading) return (
-    <div className="flex flex-col items-center justify-center h-screen bg-white gap-4">
-      <Loader2 className="w-12 h-12 animate-spin text-black" strokeWidth={3} />
-      <p className="font-black uppercase tracking-[0.3em] text-[10px]">Accessing Personnel Records...</p>
-    </div>
-  );
-
-  if (isError) return (
-    <div className="p-12 text-center h-screen flex flex-col items-center justify-center">
-      <div className="border-4 border-black p-8 bg-red-50 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-        <h2 className="text-2xl font-black uppercase mb-2">Access_Denied</h2>
-        <p className="font-mono text-sm">{error.message || 'Failed to load user database.'}</p>
+  if (isLoading)
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-white gap-4">
+        <Loader2
+          className="w-12 h-12 animate-spin text-black"
+          strokeWidth={3}
+        />
+        <p className="font-black uppercase tracking-[0.3em] text-[10px]">
+          Accessing Personnel Records...
+        </p>
       </div>
-    </div>
-  );
+    );
+
+  if (isError)
+    return (
+      <div className="p-12 text-center h-screen flex flex-col items-center justify-center">
+        <div className="border-4 border-black p-8 bg-red-50 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+          <h2 className="text-2xl font-black uppercase mb-2">Access_Denied</h2>
+          <p className="font-mono text-sm">
+            {error.message || 'Failed to load user database.'}
+          </p>
+        </div>
+      </div>
+    );
 
   return (
-    <div className="min-h-screen bg-zinc-50 p-6 md:p-12">
+    <div className="min-h-screen bg-white p-6 md:p-12">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-12">
+        {/* <div className="mb-12">
           <BackButton />
-        </div>
+        </div> */}
 
         <header className="mb-16 border-b-8 border-black pb-8 flex flex-col md:flex-row justify-between items-end gap-6">
           <div>
@@ -89,11 +126,14 @@ const UsersManagementPage = () => {
               <Users size={14} /> Global Administration
             </div>
             <h1 className="text-6xl md:text-8xl font-black tracking-tighter uppercase leading-[0.8]">
-              User<br />Registry
+              User
+              <br />
+              Registry
             </h1>
           </div>
           <div className="text-right hidden md:block font-mono text-[10px] text-zinc-400 font-bold uppercase tracking-widest leading-relaxed">
-            Total_Entries: {users?.length || 0}<br />
+            Total_Entries: {users?.length || 0}
+            <br />
             Security_Level: Level_4
           </div>
         </header>
@@ -102,22 +142,26 @@ const UsersManagementPage = () => {
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-4">
             <SortAsc size={16} />
-            <span className="text-[10px] font-black uppercase tracking-widest">Sort_Logic:</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">
+              Sort_Logic:
+            </span>
           </div>
           <div className="flex flex-wrap gap-3">
             {[
               { id: 'username', label: 'Username' },
               { id: 'role', label: 'Authority' },
               { id: 'createdAt', label: 'Join Date' },
-              { id: 'updatedAt', label: 'Last Sync' }
+              { id: 'updatedAt', label: 'Last Sync' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => handleSortChange(tab.id as any)}
                 className={`flex items-center gap-2 px-6 py-3 border-2 border-black font-black text-[11px] uppercase tracking-widest transition-all
-                  ${sortBy === tab.id 
-                    ? 'bg-black text-white translate-x-1 -translate-y-1 shadow-[-4px_4px_0px_0px_rgba(253,224,71,1)]' 
-                    : 'bg-white text-black hover:bg-zinc-100'}`}
+                  ${
+                    sortBy === tab.id
+                      ? 'bg-black text-white translate-x-1 -translate-y-1 shadow-[-4px_4px_0px_0px_rgba(253,224,71,1)]'
+                      : 'bg-white text-black hover:bg-zinc-100'
+                  }`}
               >
                 {tab.label} {getSortIndicator(tab.id as any)}
               </button>
@@ -132,8 +176,8 @@ const UsersManagementPage = () => {
             const isOpen = selectedUserId === user._id;
 
             return (
-              <div 
-                key={user._id} 
+              <div
+                key={user._id}
                 className={`border-2 border-black transition-all ${
                   isOpen ? 'bg-white' : 'bg-white hover:bg-zinc-100'
                 } ${isMe ? 'ring-4 ring-yellow-400 ring-offset-2' : ''}`}
@@ -152,20 +196,32 @@ const UsersManagementPage = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="grow min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h2 className="text-xl font-black uppercase tracking-tight truncate">{user.username || 'N/A'}</h2>
-                        {isMe && <span className="text-[9px] font-black bg-black text-white px-1.5 py-0.5">CURRENT_ADMIN</span>}
+                        <h2 className="text-xl font-black uppercase tracking-tight truncate">
+                          {user.username || 'N/A'}
+                        </h2>
+                        {isMe && (
+                          <span className="text-[9px] font-black bg-black text-white px-1.5 py-0.5">
+                            CURRENT_ADMIN
+                          </span>
+                        )}
                       </div>
-                      <p className="text-xs font-mono text-zinc-500 truncate">{user.email}</p>
+                      <p className="text-xs font-mono text-zinc-500 truncate">
+                        {user.email}
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4 w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0">
                     <div className="hidden sm:block text-right">
-                      <p className="text-[9px] font-black uppercase text-zinc-400">Security_Role</p>
-                      <p className="text-xs font-bold uppercase tracking-widest">{user.role}</p>
+                      <p className="text-[9px] font-black uppercase text-zinc-400">
+                        Security_Role
+                      </p>
+                      <p className="text-xs font-bold uppercase tracking-widest">
+                        {user.role}
+                      </p>
                     </div>
                     <button
                       onClick={() => handleViewProfile(user._id)}

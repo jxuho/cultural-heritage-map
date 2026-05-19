@@ -7,17 +7,16 @@ import {
 } from '../../hooks/data/useFavoriteQueries';
 import ErrorMessage from '../ErrorMessage';
 import StarIcon from '../StarIcon';
-import BackButton from '../BackButton';
-import { Loader2, ArrowUpDown, Info, ExternalLink } from 'lucide-react';
+import { Loader2, Calendar, MapPin, Star, ExternalLink } from 'lucide-react';
 
-type SortCriteria = 'name' | 'averageRating' | 'reviewCount';
+type SortCriteria = 'date' | 'name' | 'rating';
 type SortOrder = 'asc' | 'desc';
 
 const FavoriteSites = () => {
   const currentUser = useAuthStore((state) => state.user);
   const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<SortCriteria>('name');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [sortBy, setSortBy] = useState<SortCriteria>('date');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const {
     data: myFavorites,
@@ -54,9 +53,17 @@ const FavoriteSites = () => {
     sortableFavorites.sort((a, b) => {
       let valA, valB;
       switch (sortBy) {
-        case 'averageRating': valA = a.averageRating || 0; valB = b.averageRating || 0; break;
-        case 'reviewCount': valA = a.reviewCount || 0; valB = b.reviewCount || 0; break;
-        default: valA = a.name || ''; valB = b.name || '';
+        case 'rating': 
+          valA = a.averageRating || 0; 
+          valB = b.averageRating || 0; 
+          break;
+        case 'date': 
+          valA = a.createdAt ? new Date(a.createdAt).getTime() : 0; 
+          valB = b.createdAt ? new Date(b.createdAt).getTime() : 0; 
+          break;
+        default: 
+          valA = a.name || ''; 
+          valB = b.name || '';
       }
       if (typeof valA === 'string' && typeof valB === 'string') {
         return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
@@ -71,7 +78,7 @@ const FavoriteSites = () => {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(criteria);
-      setSortOrder('asc');
+      setSortOrder(criteria === 'date' || criteria === 'rating' ? 'desc' : 'asc');
     }
   };
 
@@ -138,7 +145,7 @@ const FavoriteSites = () => {
                           <StarIcon key={i} rating={site.averageRating || 0} index={i} className="w-4 h-4" displayMode="averageRating" />
                         ))}
                       </div>
-                      <span className="font-mono text-sm font-bold">{site.averageRating?.toFixed(1) || '0.0'} ({site.reviewCount})</span>
+                      <span className="font-mono text-sm font-bold">{site.averageRating?.toFixed(1) || '0.0'} ({site.reviewCount || 0})</span>
                     </div>
                   </div>
 
@@ -185,10 +192,6 @@ const FavoriteSites = () => {
 
   return (
     <div className="max-w-5xl mx-auto p-6 md:p-12 min-h-full flex flex-col">
-      <div className="mb-12">
-        <BackButton />
-      </div>
-
       <header className="mb-12">
         <div className="inline-block bg-black text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] mb-4">
           Personal Storage
@@ -198,17 +201,17 @@ const FavoriteSites = () => {
         </h1>
       </header>
 
+      {/* Sorting Controls */}
       <div className="flex flex-wrap gap-2 mb-10">
-        {(['name', 'averageRating', 'reviewCount'] as SortCriteria[]).map((criteria) => (
-          <button 
-            key={criteria}
-            onClick={() => handleSortChange(criteria)} 
-            className={sortBtnClass(sortBy === criteria)}
-          >
-            {criteria === 'averageRating' ? 'Rating' : criteria === 'reviewCount' ? 'Reviews' : 'Name'}
-            {sortBy === criteria && (sortOrder === 'asc' ? '↑' : '↓')}
-          </button>
-        ))}
+        <button onClick={() => handleSortChange('date')} className={sortBtnClass(sortBy === 'date')}>
+          <Calendar size={14} /> Date {sortBy === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}
+        </button>
+        <button onClick={() => handleSortChange('name')} className={sortBtnClass(sortBy === 'name')}>
+          <MapPin size={14} /> Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+        </button>
+        <button onClick={() => handleSortChange('rating')} className={sortBtnClass(sortBy === 'rating')}>
+          <Star size={14} /> Rating {sortBy === 'rating' && (sortOrder === 'asc' ? '↑' : '↓')}
+        </button>
       </div>
 
       <div className="grow">

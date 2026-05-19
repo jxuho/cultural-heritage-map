@@ -2,11 +2,6 @@ import { MdKeyboardArrowRight } from 'react-icons/md';
 import {
   PiUserCircleThin,
   PiTrashThin,
-  PiMapPinLineThin,
-  PiChatCircleTextThin,
-  PiClipboardTextThin,
-  PiUsersThreeThin,
-  PiFileTextThin,
 } from 'react-icons/pi';
 import useAuthStore from '../../store/authStore';
 import useUiStore from '../../store/uiStore';
@@ -60,18 +55,18 @@ const ProfileView = () => {
       {/* Page Header */}
       <header className="mb-12 space-y-2">
         <div className="inline-block bg-black text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em]">
-          Account Dashboard
+          Account Management
         </div>
         <h1 className="text-5xl md:text-6xl font-black tracking-tighter uppercase leading-none">
           User <br /> Profile
         </h1>
       </header>
 
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         
         {/* 1. Main Profile Card (Tall) */}
-        <div className={`${cardClass} md:row-span-2 bg-white`}>
-          <div className="flex flex-col items-center py-8">
+        <div className={`${cardClass} md:row-span-1 bg-white`}>
+          <div className="flex flex-col items-center py-4">
             <div className="w-24 h-24 border-2 border-black overflow-hidden mb-6">
               <img 
                 className="w-full h-full object-cover" 
@@ -90,16 +85,16 @@ const ProfileView = () => {
                 "{user.bio}"
               </p>
             )}
-            <div className="mt-8 px-3 py-1 border border-black text-[9px] font-black uppercase tracking-widest">
+            <div className="mt-6 px-3 py-1 border border-black text-[9px] font-black uppercase tracking-widest">
               Role: {user.role}
             </div>
           </div>
           
           <button
             onClick={signOutHandler}
-            className="mt-12 w-full py-3 bg-black text-white font-black uppercase text-[10px] tracking-[0.3em] hover:bg-zinc-800 transition-colors cursor-pointer"
+            className="mt-8 w-full py-3 bg-black text-white font-black uppercase text-[10px] tracking-[0.3em] hover:bg-zinc-800 transition-colors cursor-pointer"
           >
-            Terminate Session
+            Sign Out
           </button>
         </div>
 
@@ -108,80 +103,19 @@ const ProfileView = () => {
           <div>
             <PiUserCircleThin size={48} className={iconClass} />
             <h3 className={titleClass}>Profile</h3>
-            <p className="text-xs font-mono text-gray-500">Update personal archival information.</p>
+            <p className="text-xs font-mono text-gray-500">Update personal archival information and security details.</p>
           </div>
           <Link to="update-profile" className={linkClass}>
             Edit Profile <MdKeyboardArrowRight size={18} />
           </Link>
         </div>
 
-        {/* 3. Favorite Sites */}
-        <div className={cardClass}>
-          <div>
-            <PiMapPinLineThin size={48} className={iconClass} />
-            <h3 className={titleClass}>Favorites</h3>
-            <p className="text-xs font-mono text-gray-500">Review your bookmarked cultural sites.</p>
-          </div>
-          <Link to="favorite-sites" className={linkClass}>
-            View Favorites <MdKeyboardArrowRight size={18} />
-          </Link>
-        </div>
-
-        {/* 4. Reviews */}
-        <div className={cardClass}>
-          <div>
-            <PiChatCircleTextThin size={48} className={iconClass} />
-            <h3 className={titleClass}>Reviews</h3>
-            <p className="text-xs font-mono text-gray-500">History of submitted community feedback.</p>
-          </div>
-          <Link to="reviews" className={linkClass}>
-            Check Logs <MdKeyboardArrowRight size={18} />
-          </Link>
-        </div>
-
-        {/* 5. User: Proposals / Admin: Management (Conditional) */}
-        {user.role === 'user' ? (
-          <div className={cardClass}>
-            <div>
-              <PiFileTextThin size={48} className={iconClass} />
-              <h3 className={titleClass}>Proposals</h3>
-              <p className="text-xs font-mono text-gray-500">View your submitted site proposals.</p>
-            </div>
-            <Link to="my-proposals" className={linkClass}>
-              My Entries <MdKeyboardArrowRight size={18} />
-            </Link>
-          </div>
-        ) : (
-          <>
-            <div className={cardClass}>
-              <div>
-                <PiClipboardTextThin size={48} className={iconClass} />
-                <h3 className={titleClass}>Proposals</h3>
-                <p className="text-xs font-mono text-gray-500">Review pending user proposals.</p>
-              </div>
-              <Link to="proposals" className={linkClass}>
-                Manage Submissions <MdKeyboardArrowRight size={18} />
-              </Link>
-            </div>
-            <div className={cardClass}>
-              <div>
-                <PiUsersThreeThin size={48} className={iconClass} />
-                <h3 className={titleClass}>Users</h3>
-                <p className="text-xs font-mono text-gray-500">Database user management panel.</p>
-              </div>
-              <Link to="users" className={linkClass}>
-                User Directory <MdKeyboardArrowRight size={18} />
-              </Link>
-            </div>
-          </>
-        )}
-
-        {/* 6. Delete Account (Danger Zone) */}
+        {/* 3. Delete Account (Danger Zone) */}
         <div className={`${cardClass} border-red-500 hover:bg-red-50`}>
           <div>
             <PiTrashThin size={48} className="text-red-500 mb-4" />
             <h3 className={`${titleClass} text-red-500`}>Delete account</h3>
-            <p className="text-xs font-mono text-red-400">Permanently erase account from archive.</p>
+            <p className="text-xs font-mono text-red-400">Permanently erase your identity and account from the system archive.</p>
           </div>
           <Link to="delete-account" className={`${linkClass} border-red-500 text-red-500`}>
             Delete Account <MdKeyboardArrowRight size={18} />

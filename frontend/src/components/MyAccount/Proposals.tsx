@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { useProposalModeration, useProposals } from '../../hooks/data/useProposalQueries';
-import BackButton from '../BackButton';
 import { Loader2, AlertTriangle, Check, X, Info, User, Calendar, ArrowRight } from 'lucide-react';
 
 const Proposals = () => {
@@ -11,8 +10,6 @@ const Proposals = () => {
   const {
     mutate: moderateProposal,
     isPending: isModerationPending,
-    isError: isModerationError,
-    error: moderationError,
   } = useProposalModeration();
 
   const sortedProposals = useMemo(() => {
@@ -82,14 +79,14 @@ const Proposals = () => {
         <AlertTriangle size={28} /> System_Fault_Detected
       </h2>
       <p className="font-mono text-sm mb-6">{error.message}</p>
-      <BackButton />
+      {/* <BackButton /> */}
     </div>
   );
 
   return (
     <div className="max-w-7xl mx-auto p-6 md:p-12">
       <div className="mb-12">
-        <BackButton />
+        {/* <BackButton /> */}
       </div>
 
       <header className="mb-16 border-b-4 border-black pb-8 flex flex-col md:flex-row justify-between items-end gap-8">
@@ -197,7 +194,7 @@ const Proposals = () => {
                     value={adminComment[proposal._id] || ''}
                     onChange={(e) => handleAdminNoteChange(proposal._id, e.target.value)}
                     placeholder="Enter legal or procedural reasoning for this decision..."
-                    className="w-full bg-white border-2 border-black p-3 text-xs font-medium focus:ring-0 focus:outline-none min-h-[80px]"
+                    className="w-full bg-white border-2 border-black p-3 text-xs font-medium focus:ring-0 focus:outline-none min-h-20"
                   />
                 </div>
                 <div className="flex gap-3">

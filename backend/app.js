@@ -26,6 +26,7 @@ const culturalSitesRoutes = require('./routes/culturalSitesRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const proposalRoutes = require('./routes/proposalRoutes');
+const reviewsRoutes = require('./routes/reviewsRoutes');
 
 const { loadCityBoundary } = require('./utils/locationUtils');
 
@@ -83,6 +84,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/v1/cultural-sites', culturalSitesRoutes);
+app.use('/api/v1/reviews', reviewsRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/proposals', proposalRoutes);
