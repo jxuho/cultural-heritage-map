@@ -68,10 +68,10 @@ const migrateDistricts = async () => {
                 postcode: site.address?.postcode || '',
                 district: foundDistrict,
                 city: 'berlin',
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       });
     }
 
@@ -85,10 +85,14 @@ const migrateDistricts = async () => {
       const chunk = bulkOperations.slice(i, i + chunkSize);
       await CulturalSite.bulkWrite(chunk);
       processedCount += chunk.length;
-      console.log(`⏳ Progress: ${processedCount}/${bulkOperations.length} sites updated in Atlas...`);
+      console.log(
+        `⏳ Progress: ${processedCount}/${bulkOperations.length} sites updated in Atlas...`,
+      );
     }
 
-    console.log(`\n✨ Migration Completed! ${bulkOperations.length} sites updated.`);
+    console.log(
+      `\n✨ Migration Completed! ${bulkOperations.length} sites updated.`,
+    );
   } catch (error) {
     console.error('❌ Migration failed:', error);
   } finally {
