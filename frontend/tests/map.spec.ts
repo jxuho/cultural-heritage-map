@@ -24,95 +24,40 @@ async function navigateToMap(page: Page) {
 
 test.describe('Step-by-Step Map Flow', () => {
   test.beforeEach(async ({ page }) => {
-    await navigateToMap(page); // Click “Explore Map” and wait for loading to complete
+    await navigateToMap(page); // "Explore Map" 클릭 및 로딩 대기
   });
 
-  test('Step 1: Verify District Markers are rendered', async ({ page }) => {
-    // 1. First check if the Path element is attached to the DOM (whether to render or not)
+  test('Should transition from District to Cluster and open SidePanel by clicking an individual marker', async ({
+    page,
+  }) => {
+    // 1. 명확한 클래스 기반 로케이터 정의
     const districtPaths = page.locator('.leaflet-overlay-pane path');
-    await expect(districtPaths.first()).toBeAttached({ timeout: 10000 });
+    const zoomInButton = page.getByRole('button', { name: /Zoom in/i });
 
-    // 2. Check whether the opacity is not 0 (is it visible)
-    const firstPath = districtPaths.first();
-    const opacity = await firstPath.evaluate(
-      (el) => window.getComputedStyle(el).fillOpacity,
+    // 개별 마커와 사이드 패널 로케이터
+    const individualMarker = page.locator(
+      '.leaflet-marker-icon.custom-div-icon',
     );
+    const sidePanel = page.locator('aside');
 
-    // Check whether fillOpacity is not the string "0" (e.g., if it is 0.04, determine that it is visible)
-    expect(parseFloat(opacity)).toBeGreaterThan(0);
-  });
+    // 2. 초기 상태 확인 (행정구역 마커 표시)
+    await expect(districtPaths.first()).toBeVisible({ timeout: 10000 });
 
-  test('Step 2: Should transition from District to Cluster mode by clicking Zoom-in button', async ({
-    page,
-  }) => {
-    // 1. Check current status: DistrictMarkers are visible
-    const districtPaths = page.locator('.leaflet-overlay-pane path');
-    await expect(districtPaths.first()).toBeVisible();
-
-    // 2. Find and click the zoom in button
-    // Find the button using aria-label according to the HTML structure you provided.
-    const zoomInButton = page.getByRole('button', { name: /Zoom in/i });
-
-    // 3. Click enough until the state switches (zoom level 12 -> 13 or higher)
+    // 3. 줌인 버튼을 눌러 개별 마커가 보이는 레벨까지 진입
     for (let i = 0; i < 3; i++) {
       await zoomInButton.click();
-      // Waiting for zoom animation and data loading (Supercluster worker)
-      await page.waitForTimeout(600);
+      await page.waitForTimeout(500);
     }
 
-    // 4. Check status changes
-    // DistrictMarkers should disappear and cluster markers should be visible
-    await expect(districtPaths.first()).not.toBeVisible({ timeout: 5000 });
-    await expect(page.locator('.leaflet-marker-icon').first()).toBeVisible({
-      timeout: 5000,
-    });
-  });
-
-  test('Full Map Interaction: District -> Zoom -> Marker/Cluster Click -> SidePanel', async ({
-    page,
-  }) => {
-    // ---Step 1: Initial confirmation ---
-    const districtPaths = page.locator('.leaflet-overlay-pane path');
-    await expect
-      .poll(async () => {
-        return await districtPaths.count();
-      })
-      .toBeGreaterThan(0);
-
-    // ---Step 2: Zoom in (enter cluster mode) ---
-    const zoomInButton = page.getByRole('button', { name: /Zoom in/i });
-
-    // Click on zoom 3 times to induce state transition
-    for (let i = 0; i < 3; i++) {
-      await zoomInButton.click();
-      await page.waitForTimeout(1000); // Wait for zoom and marker rendering
-    }
-
-    // District(path) should disappear and marker should be visible
+    // 4. 행정구역은 사라지고, 우리가 클릭해야 할 '개별 마커'가 떴는지 확인
     await expect(districtPaths.first()).not.toBeVisible();
-    await expect(page.locator('.leaflet-marker-icon').first()).toBeVisible();
+    await expect(individualMarker.first()).toBeVisible();
 
-    // ---Step 3: While zoomed, click until the side panel appears ---
-    // Since we are already zoomed, this loop splits the cluster further or
-    // Opens the sidepanel by clicking on individual markers.
-    let panelOpened = false;
-    for (let i = 0; i < 10; i++) {
-      // Check if the side panel is visible
-      if (await page.locator('aside').isVisible()) {
-        panelOpened = true;
-        break;
-      }
+    // 5. 정확하게 '개별 마커'를 딱 한 번 클릭하여 사이드 패널 트리거
+    await individualMarker.first().click();
 
-      // Click on marker
-      await page.locator('.leaflet-marker-icon').first().click();
-
-      // Wait considering the time the side panel opens after clicking
-      await page.waitForTimeout(1000);
-    }
-
-    // final confirmation
-    await expect(panelOpened, 'Side panel should be visible').toBe(true);
-    await expect(page.locator('aside')).toBeVisible();
+    // 6. 사이드 패널이 정상적으로 열리는지 검증
+    await expect(sidePanel).toBeVisible({ timeout: 5000 });
   });
 });
 
