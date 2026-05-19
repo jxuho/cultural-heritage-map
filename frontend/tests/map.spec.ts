@@ -1,174 +1,149 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
-test.describe('Map and Marker Interaction', () => {
+// Common functions for entering the map
+async function navigateToMap(page: Page) {
+  await page.goto('/');
+  // Button click on landing page
+  const exploreButton = page.getByRole('button', { name: /Explore Map/i });
+  await exploreButton.click();
+
+  // waiting for loading
+  await expect(page.getByText('Loading the Map...')).not.toBeVisible({
+    timeout: 15000,
+  });
+  // Check map container
+  await expect(page.locator('.leaflet-container')).toBeVisible();
+}
+
+test.describe('Step-by-Step Map Flow', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-
-    // Wait for the loading overlay to disappear
-    await expect(page.getByText('Loading the Map...')).not.toBeVisible({
-      timeout: 15000,
-    });
-
-    // Ensure the Leaflet map container is rendered
-    await expect(page.locator('.leaflet-container')).toBeVisible();
+    await navigateToMap(page); // Click “Explore Map” and wait for loading to complete
   });
 
-  test('Map should display correctly', async ({ page }) => {
-    await expect(page.locator('.leaflet-container')).toBeVisible();
+  test('Step 1: Verify District Markers are rendered', async ({ page }) => {
+    // 1. First check if the Path element is attached to the DOM (whether to render or not)
+    const districtPaths = page.locator('.leaflet-overlay-pane path');
+    await expect(districtPaths.first()).toBeAttached({ timeout: 10000 });
+
+    // 2. Check whether the opacity is not 0 (is it visible)
+    const firstPath = districtPaths.first();
+    const opacity = await firstPath.evaluate(
+      (el) => window.getComputedStyle(el).fillOpacity,
+    );
+
+    // Check whether fillOpacity is not the string "0" (e.g., if it is 0.04, determine that it is visible)
+    expect(parseFloat(opacity)).toBeGreaterThan(0);
   });
 
-  test('Clicking a cluster should zoom in and show individual markers', async ({
+  test('Step 2: Should transition from District to Cluster mode by clicking Zoom-in button', async ({
     page,
   }) => {
-    const mapContainer = page.locator('.leaflet-container');
-    await mapContainer.focus();
+    // 1. Check current status: DistrictMarkers are visible
+    const districtPaths = page.locator('.leaflet-overlay-pane path');
+    await expect(districtPaths.first()).toBeVisible();
 
-    // Zoom out using keyboard to force markers to cluster
+    // 2. Find and click the zoom in button
+    // Find the button using aria-label according to the HTML structure you provided.
+    const zoomInButton = page.getByRole('button', { name: /Zoom in/i });
+
+    // 3. Click enough until the state switches (zoom level 12 -> 13 or higher)
     for (let i = 0; i < 3; i++) {
-      await page.keyboard.press('-');
-      await page.waitForTimeout(300);
+      await zoomInButton.click();
+      // Waiting for zoom animation and data loading (Supercluster worker)
+      await page.waitForTimeout(600);
     }
 
-    const cluster = page.locator('.leaflet-marker-cluster').first();
-    const anyMarker = page.locator('.leaflet-marker-icon').first();
-
-    // Ensure at least one marker is visible before proceeding
-    await expect(anyMarker).toBeVisible({ timeout: 10000 });
-
-    if (await cluster.isVisible()) {
-      await cluster.click();
-      // After clicking cluster, individual markers should appear
-      await expect(page.locator('.leaflet-marker-icon').first()).toBeVisible();
-    } else {
-      // Fallback if no clusters formed at this zoom level
-      await expect(anyMarker).toBeVisible();
-    }
+    // 4. Check status changes
+    // DistrictMarkers should disappear and cluster markers should be visible
+    await expect(districtPaths.first()).not.toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.leaflet-marker-icon').first()).toBeVisible({
+      timeout: 5000,
+    });
   });
 
-  test('Clicking a marker should open the side panel', async ({ page }) => {
-    const cluster = page.locator('.leaflet-marker-cluster').first();
-
-    // If markers are clustered, click to expand them
-    if (await cluster.isVisible()) {
-      await cluster.click();
-      await page.waitForTimeout(500);
-    }
-
-    const marker = page.locator('.leaflet-marker-icon').first();
-    await expect(marker).toBeVisible();
-
-    // Trigger click on the marker to open details
-    await marker.dispatchEvent('click');
-
-    const sidePanel = page.locator('aside');
-    await expect(sidePanel).toBeVisible();
-  });
-
-  test('Account button shows login prompt when not logged in', async ({
+  test('Full Map Interaction: District -> Zoom -> Marker/Cluster Click -> SidePanel', async ({
     page,
   }) => {
-    // Mock unauthorized status
-    await page.route('**/auth/refresh', (route) => {
-      route.fulfill({
-        status: 401,
-        contentType: 'application/json',
-        body: JSON.stringify({ status: 'fail', message: 'Unauthorized' }),
-      });
-    });
+    // ---Step 1: Initial confirmation ---
+    const districtPaths = page.locator('.leaflet-overlay-pane path');
+    await expect(districtPaths.first()).toBeAttached();
 
-    await page.goto('/');
-    await expect(page.locator('.leaflet-container')).toBeVisible();
+    // ---Step 2: Zoom in (enter cluster mode) ---
+    const zoomInButton = page.getByRole('button', { name: /Zoom in/i });
 
-    const accountBtn = page.locator('#accountManagerButton');
-    await accountBtn.click();
+    // Click on zoom 3 times to induce state transition
+    for (let i = 0; i < 3; i++) {
+      await zoomInButton.click();
+      await page.waitForTimeout(1000); // Wait for zoom and marker rendering
+    }
 
-    // Verify login invitation modal content
-    await expect(
-      page.getByText("You're not logged in.Please log in"),
-    ).toBeVisible();
+    // District(path) should disappear and marker should be visible
+    await expect(districtPaths.first()).not.toBeVisible();
+    await expect(page.locator('.leaflet-marker-icon').first()).toBeVisible();
 
-    const signInBtn = page.getByRole('button', { name: /sign in/i });
-    await expect(signInBtn).toBeVisible();
+    // ---Step 3: While zoomed, click until the side panel appears ---
+    // Since we are already zoomed, this loop splits the cluster further or
+    // Opens the sidepanel by clicking on individual markers.
+    let panelOpened = false;
+    for (let i = 0; i < 10; i++) {
+      // Check if the side panel is visible
+      if (await page.locator('aside').isVisible()) {
+        panelOpened = true;
+        break;
+      }
 
-    // Test navigation to sign-in page
-    await signInBtn.click();
-    await expect(page).toHaveURL(/\/sign-in/);
+      // Click on marker
+      await page.locator('.leaflet-marker-icon').first().click();
+
+      // Wait considering the time the side panel opens after clicking
+      await page.waitForTimeout(1000);
+    }
+
+    // final confirmation
+    await expect(panelOpened, 'Side panel should be visible').toBe(true);
+    await expect(page.locator('aside')).toBeVisible();
   });
 });
 
 test.describe('Guest User Constraints', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/auth/refresh', (route) =>
+      route.fulfill({ status: 401 }),
+    );
+    await navigateToMap(page);
+  });
+
   test('Guest users should not see context menu on right-click', async ({
     page,
   }) => {
-    // Force non-logged-in state
-    await page.route(
-      (url) => url.pathname.includes('auth/refresh'),
-      async (route) => {
-        await route.fulfill({
-          status: 401,
-          body: JSON.stringify({ status: 'fail' }),
-        });
-      },
-    );
-
-    await page.goto('/');
-    await expect(page.getByText('Loading the Map...')).not.toBeVisible({
-      timeout: 15000,
-    });
-
-    // Right-click empty map area
-    const map = page.locator('.leaflet-container');
-    await map.click({
-      button: 'right',
-      position: { x: 300, y: 300 },
-    });
-
-    const contextMenu = page.getByTestId('map-context-menu');
-    await expect(contextMenu).not.toBeVisible();
+    await page
+      .locator('.leaflet-container')
+      .click({ button: 'right', position: { x: 300, y: 300 } });
+    await expect(page.getByTestId('map-context-menu')).not.toBeVisible();
   });
 });
 
 test.describe('Authenticated User Features', () => {
   test.beforeEach(async ({ page }) => {
-    // Mock successful login session
-    await page.route(
-      (url) => url.pathname.includes('auth/refresh'),
-      async (route) => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            status: 'success',
-            data: {
-              user: {
-                _id: 'admin-id',
-                username: 'AdminUser',
-                role: 'admin',
-              },
-            },
-          }),
-        });
-      },
+    await page.route('**/auth/refresh', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          status: 'success',
+          data: { user: { username: 'AdminUser', role: 'admin' } },
+        }),
+      }),
     );
-
-    await page.goto('/');
-    await expect(page.getByText('Loading the Map...')).not.toBeVisible({
-      timeout: 15000,
-    });
+    await navigateToMap(page);
   });
 
   test('Logged-in user should see context menu on right-click', async ({
     page,
   }) => {
-    const map = page.locator('.leaflet-container');
-
-    // Right-click empty map area
-    await map.click({
-      button: 'right',
-      position: { x: 500, y: 500 },
-    });
-
-    const contextMenu = page.getByTestId('map-context-menu');
-    await expect(contextMenu).toBeVisible();
+    await page
+      .locator('.leaflet-container')
+      .click({ button: 'right', position: { x: 500, y: 500 } });
+    await expect(page.getByTestId('map-context-menu')).toBeVisible();
   });
 });

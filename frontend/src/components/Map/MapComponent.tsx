@@ -343,6 +343,7 @@ const MapComponent = () => {
               boundaries={districtBoundaries}
               stats={displayDistrictStats}
               onDistrictClick={handleDistrictClick}
+              data-testid="district-markers"
             />
           )}
 
@@ -351,6 +352,7 @@ const MapComponent = () => {
             sites={memoizedFilteredSites}
             openSidePanel={handleOpenSidePanel}
             selectedPlace={selectedPlace}
+            data-testid="cultural-markers"
           />
         )}
       </MapContainer>

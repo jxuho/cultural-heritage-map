@@ -361,7 +361,7 @@ const LandingPage = ({ onExploreMap, onSignIn }: LandingPageProps) => {
             onClick={onExploreMap}
             className="w-full sm:w-auto px-10 py-5 border border-black bg-black text-white text-xs font-bold uppercase tracking-[0.25em] flex justify-between sm:justify-start items-center gap-12 transition-all duration-300 hover:bg-white hover:text-black hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] cursor-pointer"
           >
-            <span>Initialize Map Explorer Engine</span>
+            <span>Explore Map</span>
             <span className="text-sm font-normal">→</span>
           </button>
 
