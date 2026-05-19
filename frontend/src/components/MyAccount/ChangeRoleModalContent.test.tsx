@@ -42,10 +42,14 @@ describe('ChangeRoleModalContent', () => {
   test('Shows an alert and closes the modal if the role is not changed', async () => {
     render(<ChangeRoleModalContent user={mockUser} />);
 
-    const submitButton = screen.getByRole('button', { name: /commit_changes/i });
+    const submitButton = screen.getByRole('button', {
+      name: /commit_changes/i,
+    });
     fireEvent.click(submitButton);
 
-    expect(alertMock).toHaveBeenCalledWith('Security Warning: No change in authorization level detected.');
+    expect(alertMock).toHaveBeenCalledWith(
+      'Security Warning: No change in authorization level detected.',
+    );
     expect(mockCloseModal).toHaveBeenCalled();
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
@@ -56,7 +60,9 @@ describe('ChangeRoleModalContent', () => {
     render(<ChangeRoleModalContent user={mockUser} />);
 
     const select = screen.getByLabelText(/assign_new_clearance/i);
-    const submitButton = screen.getByRole('button', { name: /commit_changes/i });
+    const submitButton = screen.getByRole('button', {
+      name: /commit_changes/i,
+    });
 
     fireEvent.change(select, { target: { value: 'admin' } });
     fireEvent.click(submitButton);
@@ -79,7 +85,9 @@ describe('ChangeRoleModalContent', () => {
 
     render(<ChangeRoleModalContent user={mockUser} />);
 
-    expect(screen.getByRole('button', { name: /updating_registry/i })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /updating_registry/i }),
+    ).toBeDisabled();
     expect(screen.getByRole('button', { name: /abort/i })).toBeDisabled();
     expect(screen.getByRole('combobox')).toBeDisabled();
   });
@@ -95,7 +103,9 @@ describe('ChangeRoleModalContent', () => {
 
     render(<ChangeRoleModalContent user={mockUser} />);
 
-    expect(screen.getByText(new RegExp(`CRITICAL_ERROR: ${errorMessage}`, 'i'))).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`CRITICAL_ERROR: ${errorMessage}`, 'i')),
+    ).toBeInTheDocument();
   });
 
   test('Abort button click calls closeModal', () => {
