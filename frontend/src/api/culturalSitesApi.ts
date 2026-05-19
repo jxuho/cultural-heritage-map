@@ -1,5 +1,5 @@
 import axiosInstance from './axiosInstance';
-import { Place } from '../types/place';
+import { DistrictStat, Place } from '../types/place';
 import { ApiResponse } from '@/types/api';
 import { AxiosError } from 'axios';
 
@@ -10,7 +10,7 @@ export const fetchAllCulturalSites = async (
   try {
     const response = await axiosInstance.get<
       ApiResponse<{ culturalSites: Place[] }>
-    >('/cultural-sites', { params: { limit: 1000, ...params } });
+    >('/cultural-sites', { params: { limit: 20000, ...params } });
     return response.data.data.culturalSites || [];
   } catch (error) {
     const err = error as AxiosError;
@@ -43,7 +43,6 @@ export const getNearbyOsm = async (
   lon: number,
 ): Promise<Place[]> => {
   if (!lat || !lon) throw new Error('Latitude and Longitude are required.');
-
   try {
     const response = await axiosInstance.get<
       ApiResponse<{ osmCulturalSites: Place[] }>
@@ -103,3 +102,47 @@ export const deleteCulturalSite = async (
     throw err;
   }
 };
+
+export const fetchDistrictStats = async (): Promise<DistrictStat[]> => {
+  try {
+    const response = await axiosInstance.get<ApiResponse<DistrictStat[]>>(
+      '/cultural-sites/district-stats',
+    );
+    return response.data.data || [];
+  } catch (error) {
+    const err = error as AxiosError;
+    console.error('Error fetching district stats:', err);
+    throw err;
+  }
+};
+
+export interface DistrictBoundaryFeature {
+  type: 'Feature';
+  properties: {
+    name?: string;
+    [key: string]: unknown;
+  };
+  geometry: {
+    type: 'Polygon' | 'MultiPolygon';
+    coordinates: number[][][] | number[][][][];
+  };
+}
+
+export interface DistrictBoundaryGeoJson {
+  type: 'FeatureCollection';
+  features: DistrictBoundaryFeature[];
+}
+
+export const fetchDistrictBoundaries =
+  async (): Promise<DistrictBoundaryGeoJson> => {
+    try {
+      const response = await axiosInstance.get<
+        ApiResponse<{ districtBoundaries: DistrictBoundaryGeoJson }>
+      >('/cultural-sites/district-boundaries');
+      return response.data.data.districtBoundaries;
+    } catch (error) {
+      const err = error as AxiosError;
+      console.error('Error fetching district boundaries:', err);
+      throw err;
+    }
+  };

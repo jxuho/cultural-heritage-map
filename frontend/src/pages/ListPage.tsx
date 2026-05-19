@@ -1,34 +1,15 @@
-import React, { ChangeEvent } from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router';
-import { FaHeart, FaCommentAlt } from 'react-icons/fa';
-
-// Import types and custom hooks
-import { Place } from '../types/place';
 import { useAllCulturalSites } from '../hooks/data/useCulturalSitesQueries';
 import useFilterStore from '../store/filterStore';
 import useUiStore from '../store/uiStore';
-
-// Component import
 import FilterPanel from '../components/Filter/FilterPanel';
-import StarIcon from '../components/StarIcon';
 import GoToTopButton from '../components/GoToTopButton';
-
-/**
- * A helper function that converts category identifiers into readable strings.
- */
-const formatCategoryName = (name: string): string => {
-  if (!name) return '';
-  return name
-    .replace(/_/g, ' ')
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-};
+import InfinitePlaceList from '../components/List/InfinitePlaceList';
+import { ListFilter, Loader2 } from 'lucide-react';
 
 const ListPage: React.FC = () => {
   const navigate = useNavigate();
-
-  // 1. API data fetching
   const {
     data: culturalSites = [],
     isLoading,
@@ -36,190 +17,123 @@ const ListPage: React.FC = () => {
     error,
   } = useAllCulturalSites();
 
-  // 2. Global state management (using individual selection instead of destructuring is advantageous for re-rendering optimization)
-  const selectedCategories = useFilterStore(
-    (state) => state.selectedCategories,
-  );
-  const searchQuery = useFilterStore((state) => state.searchQuery);
-  const sortBy = useFilterStore((state) => state.sortBy);
   const setSortBy = useFilterStore((state) => state.setSortBy);
+  const { searchQuery, selectedCategories, sortBy, getFilteredSites } =
+    useFilterStore();
 
   const openSidePanel = useUiStore((state) => state.openSidePanel);
   const setJumpToPlace = useUiStore((state) => state.setJumpToPlace);
 
-  // 3. Event handler
-  const handleCardClick = (site: Place): void => {
+  const processedSites = useMemo(() => {
+    return getFilteredSites(culturalSites);
+  }, [
+    culturalSites,
+    searchQuery,
+    selectedCategories,
+    sortBy,
+    getFilteredSites,
+  ]);
+
+  const handleCardClick = (site: any) => {
     navigate('/');
     openSidePanel(site);
     setJumpToPlace(site);
   };
 
-  const handleSortChange = (e: ChangeEvent<HTMLSelectElement>): void => {
-    // Asserting with a type defined in Store ('alphabetical' | 'favorites' | 'reviews')
-    setSortBy(e.target.value as 'alphabetical' | 'favorites' | 'reviews');
-  };
-
-  // 4. Loading and error handling
-  if (isLoading) {
+  if (isLoading)
     return (
-      <div className="container mx-auto p-4 text-center mt-10">
-        <h1 className="text-3xl font-bold text-gray-800">Cultural Sites</h1>
-        <p className="mt-4 text-gray-600">Loading cultural sites...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <Loader2 className="w-10 h-10 animate-spin text-black" />
+        <p className="text-[10px] font-black uppercase tracking-[0.3em]">
+          Accessing Archive...
+        </p>
       </div>
     );
-  }
 
-  if (isError) {
+  if (isError)
     return (
-      <div className="container mx-auto p-4 text-center mt-10 text-red-600">
-        <h1 className="text-3xl font-bold text-gray-800">Error</h1>
-        <p className="mt-4">Failed to load cultural sites: {error?.message}</p>
+      <div className="container mx-auto p-12 text-center">
+        <div className="inline-block border-2 border-red-500 p-6">
+          <p className="text-red-500 font-mono font-bold uppercase tracking-tighter">
+            Error :: {error?.message}
+          </p>
+        </div>
       </div>
     );
-  }
-
-  // 5. Filtering and sorting integration logic
-  const query = searchQuery.toLowerCase();
-
-  // filtering
-  let processedSites = culturalSites.filter((site: Place) => {
-    const matchesCategory =
-      selectedCategories.length === 0 ||
-      selectedCategories.includes(site.category);
-
-    const matchesSearch =
-      site.name.toLowerCase().includes(query) ||
-      (site.description && site.description.toLowerCase().includes(query));
-
-    return matchesCategory && matchesSearch;
-  });
-
-  // Alignment (applies defensive code)
-  processedSites.sort((a, b) => {
-    switch (sortBy) {
-      case 'alphabetical':
-        return (a.name || '').localeCompare(b.name || '');
-
-      case 'reviews':
-        // If site.reviewCount is not available, the length of the reviews array can be used as an alternative.
-        const countA = a.reviewCount ?? a.reviews?.length ?? 0;
-        const countB = b.reviewCount ?? b.reviews?.length ?? 0;
-        return countB - countA;
-
-      case 'favorites':
-        return (b.favoritesCount || 0) - (a.favoritesCount || 0);
-
-      default:
-        return 0;
-    }
-  });
 
   return (
-    <div className="container mx-auto p-4 mt-5">
-      {/* control bar */}
-      <div className="flex justify-between items-start mb-4">
-        <div className="text-left">
-          <FilterPanel />
-        </div>
-        <GoToTopButton />
-        <div className="relative">
-          <select
-            value={sortBy}
-            onChange={handleSortChange}
-            className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded-md leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="alphabetical">Sort by Alphabetical</option>
-            <option value="reviews">Sort by Reviews Count</option>
-            <option value="favorites">Sort by Favorites Count</option>
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-            <svg
-              className="fill-current h-4 w-4"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
+    <div className="bg-[#f4f4f4]">
+      {/* 1. Archive Hero Section */}
+      <header className="bg-white border-b-2 border-black pt-20 pb-12 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="space-y-2">
+            <div className="inline-block bg-black text-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">
+              Index: Comprehensive List
+            </div>
+            <h1 className="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-[0.85]">
+              The Berlin <br /> Archive
+            </h1>
+            <p className="text-sm font-mono text-gray-500 pt-4">
+              TOTAL RECORDS_
+              <span className="text-black font-bold">
+                {processedSites.length.toString().padStart(3, '0')}
+              </span>
+            </p>
+          </div>
+
+          {/* Sorting Control */}
+          <div className="relative group shrink-0">
+            <div className="absolute -top-6 left-0 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
+              <ListFilter size={12} /> Sort Criteria
+            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="appearance-none bg-white border-2 border-black px-6 py-3 pr-12 rounded-none font-black uppercase text-xs tracking-widest cursor-pointer focus:bg-black focus:text-white transition-all w-full md:w-64"
             >
-              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 6.757 7.586 5.343 9z" />
-            </svg>
+              <option value="alphabetical">A-Z Index</option>
+              <option value="reviews">Review Density</option>
+              <option value="favorites">Community Rank</option>
+            </select>
+            <div className="absolute right-4 bottom-3.5 pointer-events-none group-focus-within:text-white">
+              <span className="text-[10px]">▼</span>
+            </div>
           </div>
         </div>
-      </div>
-
-      <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          All Cultural Sites List
-        </h1>
-        <p className="text-lg text-gray-600">
-          Showing <strong>{processedSites.length}</strong> cultural sites
-          {selectedCategories.length > 0 &&
-            ` (filtered by ${selectedCategories.map(formatCategoryName).join(', ')})`}
-        </p>
       </header>
 
-      {processedSites.length === 0 ? (
-        <div className="text-center mt-10 text-gray-600">
-          No cultural sites found matching the selected filters.
+      {/* 2. Filter & Interaction Bar */}
+      <nav className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-black px-6 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <FilterPanel />
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {processedSites.map((site) => (
-            <article
-              key={site._id}
-              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col cursor-pointer border border-transparent hover:border-blue-100"
-              onClick={() => handleCardClick(site)}
-            >
-              <h2 className="text-xl font-semibold text-blue-900 mb-2">
-                {site.name}
-              </h2>
+      </nav>
 
-              {/* statistics bar */}
-              <div className="flex flex-wrap items-center text-sm text-gray-700 mb-3 gap-3">
-                {site.averageRating != null && (
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <StarIcon
-                        key={i}
-                        rating={site.averageRating!}
-                        index={i}
-                        className="w-4 h-4"
-                        displayMode="averageRating"
-                        onClick={() => {}} // Prevent essential props errors
-                      />
-                    ))}
-                    <span className="ml-1 font-semibold">
-                      {site.averageRating.toFixed(1)}
-                    </span>
-                  </div>
-                )}
+      {/* 3. Main Content Grid */}
+      <main className="max-w-7xl mx-auto p-6 pb-24">
+        {processedSites.length === 0 ? (
+          <div className="py-40 text-center border-2 border-dashed border-gray-300">
+            <p className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-400">
+              No matching records in archive.
+            </p>
+          </div>
+        ) : (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <InfinitePlaceList
+              items={processedSites}
+              onItemClick={handleCardClick}
+            />
+          </div>
+        )}
+      </main>
 
-                <div className="flex items-center">
-                  <FaCommentAlt className="text-blue-500 mr-1" />
-                  <span>
-                    {site.reviewCount ?? site.reviews?.length ?? 0} Reviews
-                  </span>
-                </div>
-
-                <div className="flex items-center">
-                  <FaHeart className="text-red-500 mr-1" />
-                  <span>{site.favoritesCount || 0} Favorites</span>
-                </div>
-              </div>
-
-              <div className="mt-auto">
-                <p className="text-gray-700 text-sm mb-1">
-                  <strong>Category: </strong>
-                  {formatCategoryName(site.category)}
-                </p>
-                <p className="text-gray-600 text-sm mb-2">{site.address}</p>
-                {site.description && (
-                  <p className="text-gray-800 text-sm line-clamp-3 italic">
-                    {site.description}
-                  </p>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+      {/* Footer Decoration */}
+      <footer className="border-t border-black bg-white p-6 text-center">
+        <p className="text-[9px] font-mono text-gray-400 uppercase tracking-widest">
+          Archival System v3.0 // Updated 2024
+        </p>
+      </footer>
+      <GoToTopButton />
     </div>
   );
 };

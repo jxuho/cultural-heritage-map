@@ -6,6 +6,7 @@ import {
   useDismiss,
   useInteractions,
   FloatingPortal,
+  size,
 } from '@floating-ui/react';
 import FilterButton from './FilterButton';
 import FilterContent from './FilterContent';
@@ -16,7 +17,18 @@ const FilterPanel = () => {
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
-    middleware: [flip(), shift()],
+    middleware: [
+      flip(),
+      shift({ padding: 10 }),
+      size({
+        apply({ availableWidth, availableHeight, elements }) {
+          Object.assign(elements.floating.style, {
+            maxWidth: `${availableWidth - 20}px`,
+            maxHeight: `${Math.max(200, availableHeight - 20)}px`,
+          });
+        },
+      }),
+    ],
     placement: 'bottom-start',
   });
 
@@ -41,7 +53,7 @@ const FilterPanel = () => {
           <FilterContent
             ref={refs.setFloating}
             isOpen={isOpen}
-            floatingStyles={floatingStyles}
+            floatingStyles={{ ...floatingStyles, zIndex: 100 }}
             {...getFloatingProps()}
           />
         </FloatingPortal>

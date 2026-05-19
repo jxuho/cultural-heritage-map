@@ -1,8 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import useFilterStore from '../../store/filterStore.ts';
 import { CULTURAL_CATEGORY } from '../../config/culturalSiteConfig.ts';
 import debounce from 'lodash.debounce';
-import { categoryBorderColors } from '../../config/colors.ts';
+
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { RotateCcw, Search, X } from 'lucide-react';
+import { useAllCulturalSites } from '@/hooks/data/useCulturalSitesQueries.ts';
 
 interface FilterContentProps extends React.HTMLAttributes<HTMLDivElement> {
   isOpen: boolean;
@@ -14,16 +18,20 @@ const FilterContent = React.forwardRef<HTMLDivElement, FilterContentProps>(
     const selectedCategories = useFilterStore(
       (state) => state.selectedCategories,
     );
+    const { data: culturalSites = [] } = useAllCulturalSites();
+    const getFilteredSites = useFilterStore((state) => state.getFilteredSites);
     const toggleCategory = useFilterStore((state) => state.toggleCategory);
-    const searchQuery = useFilterStore((state) => state.searchQuery);
     const setSearchQuery = useFilterStore((state) => state.setSearchQuery);
-    const [localSearchInput, setLocalSearchInput] = React.useState(searchQuery);
+    const searchQuery = useFilterStore((state) => state.searchQuery);
+    const resetFilters = useFilterStore((state) => state.resetFilters);
+    const [localSearchInput, setLocalSearchInput] = useState(searchQuery);
+
+    const filteredCount = useMemo(() => {
+      return getFilteredSites(culturalSites).length;
+    }, [culturalSites, getFilteredSites, selectedCategories, searchQuery]);
 
     const debouncedSetSearchQuery = useMemo(
-      () =>
-        debounce((value) => {
-          setSearchQuery(value);
-        }, 300),
+      () => debounce((value) => setSearchQuery(value), 300),
       [setSearchQuery],
     );
 
@@ -38,104 +46,112 @@ const FilterContent = React.forwardRef<HTMLDivElement, FilterContentProps>(
     const handleClearSearch = () => {
       setLocalSearchInput('');
       setSearchQuery('');
-      debouncedSetSearchQuery.cancel();
     };
 
-    const isPositioned =
-      floatingStyles &&
-      typeof floatingStyles.left === 'number' &&
-      typeof floatingStyles.top === 'number';
+    const handleResetAll = () => {
+      resetFilters();
+      setLocalSearchInput('');
+    };
+
+    const isFiltered = selectedCategories.length > 0 || searchQuery.length > 0;
 
     return (
       <div
         ref={ref}
-        style={floatingStyles}
+        style={{ ...floatingStyles }}
         className={`
-          bg-white shadow-lg rounded-lg p-2
-          transition-opacity duration-300
-          ${
-            isOpen && isPositioned
-              ? 'opacity-100 pointer-events-auto'
-              : 'opacity-0 pointer-events-none'
-          }
+          z-50 bg-white text-black border-2 border-black p-0
+          w-[95vw] sm:w-[550px] 
+          flex flex-col overflow-hidden 
+          ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}
         `}
         {...props}
       >
-        <div className="flex flex-wrap justify-center gap-2 pb-2">
-          {CULTURAL_CATEGORY.map((category) => {
-            const isCategorySelected = selectedCategories.includes(category);
-            // Use the imported categoryBorderColors
-            const categorySpecificBorderColor =
-              categoryBorderColors[category] || categoryBorderColors.other;
-
-            // Define inline style for the border color
-            const buttonBorderStyle = {
-              borderColor: isCategorySelected
-                ? categorySpecificBorderColor
-                : 'transparent',
-              borderWidth: '3px', // Ensure border width is applied
-              borderStyle: 'solid', // Ensure border style is applied
-            };
-
-            return (
-              <button
-                key={category}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleCategory(category);
-                }}
-                // Apply inline style for border
-                style={buttonBorderStyle}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors
-                  ${
-                    isCategorySelected
-                      ? // Keep default background/text and add shadow when selected
-                        `bg-gray-100 text-gray-700 shadow-md`
-                      : // If not selected, use default gray background and no explicit shadow
-                        `bg-gray-100 text-gray-700 hover:bg-gray-200`
-                  }`}
-              >
-                {category
-                  .replace(/_/g, ' ')
-                  .replace(/\b\w/g, (c) => c.toUpperCase())}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="p-2 relative">
-          <input
-            type="text"
-            value={localSearchInput}
-            onChange={handleSearchInputChange}
-            placeholder="Search by name or description..."
-            className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 pr-10"
-          />
-          {localSearchInput && (
+        {/* 1. Header Area (상단 고정) */}
+        <div className="bg-black text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <div className="flex flex-col gap-1">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.4em] leading-none">
+              Filter Criteria
+            </h3>
+            <p className="text-[9px] font-mono opacity-60 uppercase">
+              Current selection yields {filteredCount} matching sites
+            </p>
+          </div>
+          {isFiltered && (
             <button
-              onClick={handleClearSearch}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              aria-label="Clear search"
+              onClick={handleResetAll}
+              className="text-[10px] font-bold uppercase tracking-widest hover:underline flex items-center gap-2"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                ></path>
-              </svg>
+              <RotateCcw className="w-3 h-3" />
+              Reset
             </button>
           )}
         </div>
+
+        <div className="p-8 overflow-y-auto flex-1 custom-scrollbar">
+          {/* 2. Category Selection Area */}
+          <div className="mb-8">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-gray-400">
+              By Classification
+            </h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {CULTURAL_CATEGORY.map((category) => {
+                const isSelected = selectedCategories.includes(category);
+                return (
+                  <button
+                    key={category}
+                    onClick={() => toggleCategory(category)}
+                    className={`
+                      px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-left border transition-all
+                      ${
+                        isSelected
+                          ? 'bg-black text-white border-black'
+                          : 'bg-white text-black border-gray-100 hover:border-black'
+                      }
+                    `}
+                  >
+                    {category.replace(/_/g, ' ')}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 3. Search Area */}
+          <div className="relative">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-gray-400">
+              Keyword Search
+            </h4>
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black group-focus-within:scale-110 transition-transform" />
+              <Input
+                value={localSearchInput}
+                onChange={handleSearchInputChange}
+                placeholder="ENTER SEARCH TERMS..."
+                className={`
+                  pl-12 pr-12 h-14 bg-transparent border-black border-2 rounded-none
+                  font-mono text-sm placeholder:text-gray-200 focus-visible:ring-0
+                  transition-all duration-300
+                `}
+              />
+              {localSearchInput && (
+                <button
+                  onClick={handleClearSearch}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-black hover:scale-125 transition-transform"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Footer Decorative Bar  */}
+        <div className="h-2 bg-black w-full flex-shrink-0" />
       </div>
     );
   },
 );
 
+FilterContent.displayName = 'FilterContent';
 export default FilterContent;

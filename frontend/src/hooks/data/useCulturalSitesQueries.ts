@@ -3,6 +3,7 @@ import {
   useMutation,
   useQueryClient,
   UseQueryOptions,
+  keepPreviousData,
 } from '@tanstack/react-query';
 import {
   fetchAllCulturalSites,
@@ -11,8 +12,11 @@ import {
   createCulturalSite,
   deleteCulturalSite,
   updateCulturalSite,
+  fetchDistrictStats,
+  fetchDistrictBoundaries,
+  DistrictBoundaryGeoJson,
 } from '../../api/culturalSitesApi';
-import { Place } from '../../types/place';
+import { DistrictStat, Place } from '../../types/place';
 import { AxiosError } from 'axios';
 import { ApiResponse } from '@/types/api';
 
@@ -22,11 +26,16 @@ type ApiError = AxiosError<ApiResponse<null>>;
 /**
  * fetch all cultural sites with optional query parameters (e.g., pagination, filters)
  */
-export const useAllCulturalSites = (params?: Record<string, any>) => {
-  return useQuery<Place[], ApiError>({
+export const useAllCulturalSites = (
+  enabled: boolean = true,
+  params?: Record<string, any>,
+) => {
+  return useQuery<Place[], Error>({
     queryKey: ['culturalSites', params],
-    queryFn: () => fetchAllCulturalSites(params),
+    queryFn: () => fetchAllCulturalSites(params), // API 호출 함수
+    enabled, // 여기서 boolean 값을 사용
     staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
   });
 };
 
@@ -132,3 +141,39 @@ export const useDeleteCulturalSite = () => {
     },
   });
 };
+
+// // hooks/data/useCulturalSitesQueries.ts 에 추가
+// export const useDistrictStats = (enabled: boolean) => {
+//   return useQuery({
+//     queryKey: ['districtStats'],
+//     queryFn: () => axios.get('/api/v1/cultural-sites/stats/districts').then(res => res.data.data),
+//     enabled
+//   });
+// };
+
+export const useDistrictStats = (enabled: boolean = true) => {
+  return useQuery<DistrictStat[], Error>({
+    queryKey: ['districtStats'],
+    queryFn: fetchDistrictStats,
+    enabled,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useDistrictBoundaries = (enabled: boolean = true) => {
+  return useQuery<DistrictBoundaryGeoJson, Error>({
+    queryKey: ['districtBoundaries'],
+    queryFn: fetchDistrictBoundaries,
+    enabled,
+    staleTime: 1000 * 60 * 60,
+    gcTime: 1000 * 60 * 60 * 4,
+  });
+};
+
+// export const useDistrictStats = (enabled: boolean) => {
+//   return useQuery({
+//     queryKey: ['districtStats'],
+//     queryFn: fetchDistrictStats,
+//     enabled,
+//   });
+// };

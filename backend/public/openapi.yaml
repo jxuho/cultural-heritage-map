@@ -23,6 +23,11 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    refreshAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Enter your Refresh Token here.
   schemas:
     CulturalSite:
       type: object
@@ -287,6 +292,8 @@ paths:
         - Authentication
       operationId: refreshToken
       description: Issues a new access token using a valid refresh token.
+      security:
+        - refreshAuth: []
       responses:
         200:
           description: New access token issued successfully.
@@ -703,6 +710,112 @@ paths:
           description: Review not found.
         500:
           description: Internal server error.
+
+  /reviews/admin/all:
+    get:
+      summary: Get all reviews for Admin (Admin only)
+      tags:
+        - Reviews
+      operationId: getAllReviewsForAdmin
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number for pagination.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+          description: Number of reviews per page.
+      responses:
+        200:
+          description: Successfully retrieved all reviews with pagination info.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 2
+                  totalResults:
+                    type: integer
+                    example: 100
+                  page:
+                    type: integer
+                    example: 1
+                  totalPages:
+                    type: integer
+                    example: 2
+                  data:
+                    type: object
+                    properties:
+                      reviews:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Review'
+        401:
+          description: Unauthorized if token is missing or invalid.
+        403:
+          description: Forbidden if the user is not an admin.
+        500:
+          description: Internal server error.
+
+  /reviews:
+    get:
+      summary: Get reviews with optional filters (cultural site or user)
+      tags:
+        - Reviews
+      operationId: getAllReviewsFromCulturalSite
+      parameters:
+        - in: query
+          name: culturalSite
+          schema:
+            type: string
+          description: Filter reviews by Cultural Site ObjectId.
+        - in: query
+          name: user
+          schema:
+            type: string
+          description: Filter reviews by User ObjectId.
+      responses:
+        200:
+          description: A list of filtered reviews.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  results:
+                    type: integer
+                    example: 1
+                  data:
+                    type: object
+                    properties:
+                      reviews:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Review'
+        400:
+          description: Invalid Cultural Site ID or User ID format.
+        404:
+          description: Cultural site not found.
+        500:
+          description: Internal server error.
+
+  # 기존의 /cultural-sites/{culturalSiteId}/reviews 경로도 그대로 유지되거나
+  # Express의 mergeParams 등에 의해 위 /reviews 쿼리 스트링 방식으로 통합해 사용하실 수 있습니다.
   /proposals/my-proposals:
     get:
       summary: Get proposals submitted by the current user

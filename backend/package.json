@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js",
+    "start": "nodemon --ignore 'data/*.json' app.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "seed": "node scripts/fetchAndSaveCulturalSites.js && node scripts/importGeojson.js --no-reverse-geocode"
@@ -17,6 +17,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@turf/boolean-point-in-polygon": "^7.3.5",
+    "@turf/helpers": "^7.3.5",
     "@turf/turf": "^7.2.0",
     "axios": "^1.9.0",
     "cookie-parser": "^1.4.7",

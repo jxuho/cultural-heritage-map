@@ -2,32 +2,56 @@ name: Frontend CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./frontend 
+        working-directory: ./frontend
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: 'npm'
-          cache-dependency-path: '**/package-lock.json' 
+          cache-dependency-path: '**/package-lock.json'
 
       - name: Install dependencies
         run: npm install
 
       - name: Check Formatting
-        run: npm run format:check 
+        run: npm run format:check
 
-      - name: Run Tests
+      - name: Run Unit Tests
         run: npm run test:ci
+
+      # --- Playwright E2E Test Steps ---
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run E2E Tests
+        run: npx playwright test
+        env:
+          VITE_MAP_INITIAL_LAT: '52.5163'
+          VITE_MAP_INITIAL_LNG: '13.3777'
+          VITE_MAP_INITIAL_ZOOM: '12'
+          VITE_MAP_MIN_ZOOM: '12'
+          VITE_MAP_BOUND_SW_LAT: '52.338'
+          VITE_MAP_BOUND_SW_LNG: '13.088'
+          VITE_MAP_BOUND_NE_LAT: '52.675'
+          VITE_MAP_BOUND_NE_LNG: '13.761'
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: ./frontend/playwright-report/
+          retention-days: 30

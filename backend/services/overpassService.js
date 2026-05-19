@@ -69,9 +69,9 @@ const queryOverpass = async (query) => {
     const response = await axios.post(OVERPASS_API_URL, query, {
       headers: {
         'Content-Type': 'text/plain',
-        'User-Agent': 'ChemnitzCulturalSitesApp/1.0 (jxuholee@gmail.com)',
+        'User-Agent': 'CulturalHeritageMap/2.0 (jxuholee@gmail.com)',
       },
-      timeout: 60000, // Set timeout to 60 seconds
+      timeout: 120000, // Set timeout to 120 seconds
     });
     return response.data;
   } catch (error) {

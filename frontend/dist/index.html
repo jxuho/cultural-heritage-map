@@ -4,9 +4,26 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chemnitz Culture Finder</title>
-    <script type="module" crossorigin src="/assets/index-CWAr5bYA.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DpfY105U.css">
+    <title>Cultural Heritage Map</title>
+
+    <!-- 1. Preconnect to Backend (Render) -->
+    <!-- Reduces connection setup time for your API and Auth requests -->
+    <link rel="preconnect" href="https://cultural-heritage-map.onrender.com" />
+    <link
+      rel="dns-prefetch"
+      href="https://cultural-heritage-map.onrender.com"
+    />
+
+    <!-- 2. Preconnect to Map Tile Server (OpenStreetMap) -->
+    <!-- Speeds up the loading of map images -->
+    <link rel="preconnect" href="https://a.tile.openstreetmap.org" />
+    <link rel="preconnect" href="https://b.tile.openstreetmap.org" />
+    <link rel="preconnect" href="https://c.tile.openstreetmap.org" />
+    <script type="module" crossorigin src="/assets/index-BBzo9-BN.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/react-vendor-C_fMrTK7.js">
+    <link rel="modulepreload" crossorigin href="/assets/leaflet-vendor-BypeW-uW.js">
+    <link rel="modulepreload" crossorigin href="/assets/ui-vendor-Dya8cApo.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-BHT9m_F5.css">
   </head>
   <body>
     <div id="root"></div>

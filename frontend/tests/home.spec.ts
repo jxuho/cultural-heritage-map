@@ -18,10 +18,17 @@ test.describe('Homepage Test', () => {
     await expect(header).toBeVisible();
   });
 
-  test('Map should be rendered correctly on the screen', async ({ page }) => {
-    // Search by specific class, id, or aria-label of a map component
-    // Example: <div id="map"> or <section aria-label="map">
+  test('Should render map after clicking explore button', async ({ page }) => {
+    // 1. Find and click the ‘Initialize Map Explorer Engine’ button on the landing page.
+    // Make sure the text on the button matches exactly, or choose a clickable element.
+    const exploreButton = page.getByRole('button', { name: /Explore Map/i });
+    await exploreButton.click();
+
+    // 2. After clicking the button, wait until the MapComponent is rendered.
+    // Targets the actual map container that appears after Suspense has finished loading.
     const mapContainer = page.locator('.leaflet-container');
-    await expect(mapContainer).toBeVisible();
+
+    // Wait until the map appears in the DOM and become visible (wait within the default timeout)
+    await expect(mapContainer).toBeVisible({ timeout: 10000 });
   });
 });

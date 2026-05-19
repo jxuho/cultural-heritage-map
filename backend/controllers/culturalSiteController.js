@@ -2,14 +2,19 @@ const CulturalSite = require('../models/CulturalSite');
 const Review = require('../models/Review');
 const User = require('../models/User');
 const ExcludeSourceId = require('../models/ExcludeSourceId');
+const fs = require('fs/promises');
+const path = require('path');
 const asyncHandler = require('../utils/asyncHandler');
 const mongoose = require('mongoose');
 const AppError = require('../utils/AppError');
 const {
   addSourceIdToExclusion,
 } = require('../services/excludeSourceIdService');
-const { isPointInChemnitz, isValidLatLng } = require('../utils/locationUtils');
-const { extendedCulturalSiteQuery } = require('../config/osmData');
+const { isPointInCity, isValidLatLng } = require('../utils/locationUtils');
+const {
+  extendedCulturalSiteQuery,
+  CITY_RELATION_IDS,
+} = require('../config/osmData');
 const { queryOverpass } = require('../services/overpassService');
 const {
   processOsmElementForCulturalSite,
@@ -19,99 +24,77 @@ const {
   CULTURAL_CATEGORY,
 } = require('../config/culturalSiteConfig');
 
-const getAllCulturalSites = asyncHandler(async (req, res, next) => {
-  // 1. Initialize aggregation pipeline
-  let pipeline = [];
+let districtBoundariesCache = null;
 
-  // ---Calculate additional fields in the aggregation pipeline (rating, review count) ---
-  // 2. Join review data to calculate average rating and review count
-  pipeline.push(
-    {
-      $lookup: {
-        from: 'reviews', // Collection name for Review model (lowercase, plural)
-        localField: 'reviews', // 'reviews' field of CulturalSite
-        foreignField: '_id', // '_id' field of Review
-        as: 'reviewsData', // Field name to store joined review data
-      },
-    },
-    {
-      $addFields: {
-        averageRating: { $ifNull: [{ $avg: '$reviewsData.rating' }, 0] },
-        reviewCount: { $size: '$reviewsData' }, // Calculate review count
-      },
-    },
-  );
-
-  // 3. Add sorting functionality (by rating, favorites, review count)
-  // http://localhost:5000/api/v1/cultural-sites?sort=averageRating,-favoritesCount,reviewCount
-  let sortStage = {};
-  if (req.query.sort) {
-    const sortByFields = req.query.sort.split(','); // Split by comma
-    sortByFields.forEach((field) => {
-      field = field.trim();
-      if (field.startsWith('-')) {
-        sortStage[field.substring(1)] = -1; // Descending
-      } else {
-        sortStage[field] = 1; // Ascending
-      }
-    });
-  } else {
-    // Default sort: latest first
-    sortStage = { createdAt: -1 };
+const parseBboxParams = (query) => {
+  const bboxRaw = query.bbox;
+  if (!bboxRaw || typeof bboxRaw !== 'string') {
+    return null;
   }
-  pipeline.push({ $sort: sortStage });
 
-  // 4. Pagination (calculate total count beforehand)
-  // Pattern to get total count and actual data together in an aggregation pipeline (Recommended!)
-  // Currently, the limit is temporarily set to 1000. If exceeded, viewport-based rendering, etc., is required.
+  const values = bboxRaw.split(',').map((value) => Number(value.trim()));
+  if (values.length !== 4 || values.some(Number.isNaN)) {
+    return null;
+  }
+
+  const [minLng, minLat, maxLng, maxLat] = values;
+  if (minLng >= maxLng || minLat >= maxLat) {
+    return null;
+  }
+
+  return { minLng, minLat, maxLng, maxLat };
+};
+
+const getAllCulturalSites = asyncHandler(async (req, res, next) => {
+  // 1. 페이지네이션 설정
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 1000;
+  const limit = parseInt(req.query.limit) || 20000; // 전체 데이터 호출 대응
   const skip = (page - 1) * limit;
 
-  const totalResultsPipeline = [...pipeline]; // Copy current filtering pipeline
-  totalResultsPipeline.push({ $count: 'total' }); // Add stage to count total results
+  // 2. 정렬 설정 (비정규화된 필드 averageRating, reviewCount 사용 가능)
+  let sortStr = '-createdAt';
+  if (req.query.sort) {
+    sortStr = req.query.sort.split(',').join(' ');
+  }
 
-  let totalResultDoc = await CulturalSite.aggregate(totalResultsPipeline);
-  const totalResults = totalResultDoc.length > 0 ? totalResultDoc[0].total : 0;
+  // 3. 쿼리 실행
+  // - 별도의 $lookup이나 $addFields 없이 바로 find()를 사용하여 성능 극대화
+  // - select()를 통해 지도 마커에 불필요한 무거운 필드(description 등) 제외
+  const bbox = parseBboxParams(req.query);
+  const queryFilter = {};
+
+  if (bbox) {
+    queryFilter.location = {
+      $geoWithin: {
+        $box: [
+          [bbox.minLng, bbox.minLat],
+          [bbox.maxLng, bbox.maxLat],
+        ],
+      },
+    };
+  }
+
+  const culturalSites = await CulturalSite.find(queryFilter)
+    .sort(sortStr)
+    .skip(skip)
+    .limit(limit)
+    .select(
+      '_id name category location address averageRating reviewCount imageUrl',
+    );
+
+  // 4. 전체 개수 확인 (페이지네이션용)
+  const totalResults = await CulturalSite.countDocuments(queryFilter);
   const totalPages = Math.ceil(totalResults / limit);
 
-  // Add pagination stages for actual data retrieval
-  pipeline.push({ $skip: skip }, { $limit: limit });
-
-  // 8. Final field selection ($project) -include only necessary fields
-  pipeline.push({
-    $project: {
-      name: 1,
-      description: 1,
-      category: 1,
-      location: 1,
-      address: 1,
-      website: 1,
-      imageUrl: 1,
-      openingHours: 1,
-      licenseInfo: 1,
-      sourceId: 1,
-      favoritesCount: 1,
-      proposedBy: 1,
-      registeredBy: 1,
-      createdAt: 1,
-      updatedAt: 1,
-      averageRating: 1, // Include calculated average rating
-      reviewCount: 1, // Include calculated review count
-    },
-  });
-
-  const culturalSites = await CulturalSite.aggregate(pipeline);
-
+  // 5. 응답 전송
   res.status(200).json({
     status: 'success',
-    results: culturalSites.length, // Number of documents on the current page
-    totalResults: totalResults, // Total number of documents matching all search criteria
-    page: page,
-    totalPages: totalPages,
-    limit: limit,
+    results: culturalSites.length,
+    totalResults,
+    page,
+    totalPages,
     data: {
-      culturalSites: culturalSites,
+      culturalSites,
     },
   });
 });
@@ -189,6 +172,7 @@ const getCulturalSiteById = asyncHandler(async (req, res, next) => {
         registeredBy: { $first: '$registeredBy' },
         createdAt: { $first: '$createdAt' },
         updatedAt: { $first: '$updatedAt' },
+        originalTags: { $first: '$originalTags' },
         // Re-arrange review information (before sorting options)
         reviews: {
           $push: {
@@ -272,6 +256,7 @@ const getCulturalSiteById = asyncHandler(async (req, res, next) => {
         reviews: 1, // Review data is also returned
         averageRating: 1,
         reviewCount: 1,
+        originalTags: 1,
       },
     },
   );
@@ -485,7 +470,7 @@ const deleteCulturalSiteById = asyncHandler(async (req, res, next) => {
  */
 const getNearbyOsmCulturalSites = asyncHandler(async (req, res, next) => {
   const { lon, lat, noReverseGeocode } = req.query; // Added noReverseGeocode query parameter
-
+  const currentCity = process.env.CITY_NAME || 'berlin';
   // Determine the flag for reverse geocoding
   // If noReverseGeocode is 'true' (string), then set performReverseGeocoding to false.
   // Otherwise, it defaults to true.
@@ -505,12 +490,12 @@ const getNearbyOsmCulturalSites = asyncHandler(async (req, res, next) => {
   const parsedLon = parseFloat(lon);
   const radius = 50; // 50m radius (used for Overpass queries)
 
-  // 2. See inside Chemnitz city limits (optional)
+  // 2. See inside ${currentCity} city limits (optional)
   try {
-    if (!isPointInChemnitz(parsedLat, parsedLon)) {
+    if (!isPointInCity(parsedLat, parsedLon, currentCity)) {
       return next(
         new AppError(
-          'Since the input location is not inside the boundary when Chemnitz, the surrounding OSM cultural heritage cannot be searched.',
+          `Since the input location is not inside the boundary when ${currentCity}, the surrounding OSM cultural heritage cannot be searched.`,
           400,
         ),
       );
@@ -525,7 +510,21 @@ const getNearbyOsmCulturalSites = asyncHandler(async (req, res, next) => {
   }
 
   // 3. Create Overpass query
-  const overpassQuery = extendedCulturalSiteQuery(radius, parsedLat, parsedLon);
+  const currentCityAreaId = CITY_RELATION_IDS[currentCity];
+  if (!currentCityAreaId) {
+    return next(
+      new AppError(
+        `OSM area ID for city "${currentCity}" is not defined.`,
+        400,
+      ),
+    );
+  }
+  const overpassQuery = extendedCulturalSiteQuery(
+    currentCityAreaId,
+    radius,
+    parsedLat,
+    parsedLon,
+  );
 
   // 4. Overpass API call
   let osmData;
@@ -612,6 +611,7 @@ const getNearbyOsmCulturalSites = asyncHandler(async (req, res, next) => {
  * Request Body: { ... culturalSiteData (CulturalSite Schema compliant) ... }
  */
 const saveCulturalSiteToDb = asyncHandler(async (req, res, next) => {
+  const currentCity = process.env.CITY_NAME || 'berlin';
   if (!req.user || req.user.role !== 'admin') {
     return next(
       new AppError(
@@ -644,12 +644,12 @@ const saveCulturalSiteToDb = asyncHandler(async (req, res, next) => {
 
   const [parsedLon, parsedLat] = culturalSiteData.location.coordinates;
 
-  // 1. Internal confirmation of Chemnitz city boundary (final verification when saving in DB)
+  // 1. Internal confirmation of ${currentCity} city boundary (final verification when saving in DB)
   try {
-    if (!isPointInChemnitz(parsedLat, parsedLon)) {
+    if (!isPointInCity(parsedLat, parsedLon, currentCity)) {
       return next(
         new AppError(
-          'The entered location is not within the Chemnitz city boundary. Only cultural heritage within Chemnitz can be registered.',
+          `The entered location is not within the ${currentCity} city boundary. Only cultural heritage within ${currentCity} can be registered.`,
           400,
         ),
       );
@@ -723,6 +723,60 @@ const saveCulturalSiteToDb = asyncHandler(async (req, res, next) => {
   }
 });
 
+const getDistrictStats = asyncHandler(async (req, res) => {
+  const stats = await CulturalSite.aggregate([
+    {
+      // active한 사이트만 필터링 (필요시)
+      $match: { active: true },
+    },
+    {
+      // address.district 필드를 기준으로 그룹화
+      $group: {
+        _id: '$address.district',
+        count: { $sum: 1 },
+        // 각 구의 대표 좌표를 하나 가져오거나,
+        // 미리 정의된 구별 중심 좌표를 프론트에서 써도 됩니다.
+      },
+    },
+    { $sort: { count: -1 } },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: stats,
+  });
+});
+
+const getDistrictBoundaries = asyncHandler(async (req, res, next) => {
+  if (!districtBoundariesCache) {
+    const boundaryFilePath = path.join(
+      __dirname,
+      '..',
+      'data',
+      'berlin_district_boundary.geojson',
+    );
+
+    try {
+      const rawGeojson = await fs.readFile(boundaryFilePath, 'utf8');
+      districtBoundariesCache = JSON.parse(rawGeojson);
+    } catch (error) {
+      return next(
+        new AppError(
+          `Failed to load district boundaries: ${error.message}`,
+          500,
+        ),
+      );
+    }
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      districtBoundaries: districtBoundariesCache,
+    },
+  });
+});
+
 module.exports = {
   getAllCulturalSites,
   getCulturalSiteById,
@@ -730,4 +784,6 @@ module.exports = {
   updateCulturalSiteById,
   deleteCulturalSiteById,
   getNearbyOsmCulturalSites,
+  getDistrictStats,
+  getDistrictBoundaries,
 };

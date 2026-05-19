@@ -13,20 +13,127 @@ const { CULTURAL_CATEGORY } = require('../config/culturalSiteConfig');
  * @param {string} sourceId -sourceId of OSM element.
  * @returns {string} Name decided.
  */
+// const determineCulturalSiteName = (tags, sourceId) => {
+//   if (tags.name) {
+//     return tags.name;
+//   } else if (tags.artwork_type) {
+//     return tags.artwork_type;
+//   } else if (tags.description) {
+//     return tags.description;
+//   } else if (tags.tourism) {
+//     return tags.tourism;
+//   } else if (tags.amenity) {
+//     return tags.amenity;
+//   } else {
+//     return `Unnamed Site (ID: ${sourceId})`;
+//   }
+// };
+
 const determineCulturalSiteName = (tags, sourceId) => {
-  if (tags.name) {
-    return tags.name;
-  } else if (tags.artwork_type) {
-    return tags.artwork_type;
-  } else if (tags.description) {
-    return tags.description;
-  } else if (tags.tourism) {
-    return tags.tourism;
-  } else if (tags.amenity) {
-    return tags.amenity;
-  } else {
-    return `Unnamed Site (ID: ${sourceId})`;
+  // 1. Best case: explicit name
+  if (tags.name && tags.name.trim()) {
+    return tags.name.trim();
   }
+
+  // 2. Determine mapped category
+  const category = mapCulturalSiteCategory(tags);
+
+  // Helper
+  const capitalize = (str) =>
+    str?.replace(/_/g, ' ')?.replace(/\b\w/g, (c) => c.toUpperCase());
+
+  // 3. Category-based naming strategy
+  switch (category) {
+    case 'museums_galleries':
+      if (tags.museum) return `${capitalize(tags.museum)} Museum`;
+      if (tags.gallery) return `${capitalize(tags.gallery)} Gallery`;
+      return 'Unnamed Museum or Gallery';
+
+    case 'monument':
+      if (tags.monument_type) {
+        return `${capitalize(tags.monument_type)} Monument`;
+      }
+      return 'Unnamed Monument';
+
+    case 'memorial':
+      if (tags.memorial) {
+        return `${capitalize(tags.memorial)} Memorial`;
+      }
+      return 'Unnamed Memorial';
+
+    case 'castle':
+      return 'Unnamed Castle';
+
+    case 'religious_heritage':
+      if (tags.religion && tags.building) {
+        return `${capitalize(tags.religion)} ${capitalize(tags.building)}`;
+      }
+      if (tags.building) {
+        return capitalize(tags.building);
+      }
+      return 'Unnamed Religious Heritage Site';
+
+    case 'cultural_venues':
+      if (tags.amenity) {
+        return capitalize(tags.amenity);
+      }
+      return 'Unnamed Cultural Venue';
+
+    case 'public_art':
+      if (tags.artwork_type) {
+        return `${capitalize(tags.artwork_type)} Artwork`;
+      }
+      return 'Unnamed Public Artwork';
+
+    case 'archaeological_sites':
+      if (tags.site_type) {
+        return `${capitalize(tags.site_type)} Archaeological Site`;
+      }
+      return 'Unnamed Archaeological Site';
+
+    case 'industrial_heritage':
+      if (tags.highway === 'street_lamp' || tags.amenity === 'street_lamp') {
+        return capitalize('Street Lamp');
+      }
+      return 'Unnamed Industrial Heritage Site';
+
+    case 'heritage_buildings':
+      if (tags.building) {
+        return capitalize(tags.building);
+      }
+      return 'Unnamed Heritage Building';
+
+    case 'gardens_parks':
+      if (tags.leisure) {
+        return capitalize(tags.leisure);
+      }
+      return 'Unnamed Garden or Park';
+
+    case 'historic_ensemble':
+      return 'Historic Ensemble';
+
+    default:
+      break;
+  }
+
+  // 4. Generic fallback priority
+  const fallbackKeys = [
+    'historic',
+    'building',
+    'tourism',
+    'amenity',
+    'artwork_type',
+    'memorial',
+  ];
+
+  for (const key of fallbackKeys) {
+    if (tags[key]) {
+      return capitalize(tags[key]);
+    }
+  }
+
+  // 5. Final fallback
+  return `Unnamed Site (${sourceId})`;
 };
 
 /**
@@ -41,94 +148,60 @@ const determineCulturalSiteDescription = (tags, name) => {
   return description;
 };
 
-// When information is received, a message is displayed
-/**
- * The address of the CulturalSite is determined through OSM element tags or Nominatim reverse geocoding.
- * @param {object} tags -tags object of OSM element.
- * @param {number} lat -Latitude.
- * @param {number} lon -Hardness.
- * @param {string} name -Name of CulturalSite.
- * @param {string} sourceId -sourceId of OSM element.
- * @returns {Promise<string>} Address determined.
- */
 const determineCulturalSiteAddress = async (tags, lat, lon, name, sourceId) => {
-  let address = '';
-  if (tags['addr:street'] && tags['addr:housenumber']) {
-    address = `${tags['addr:street']} ${tags['addr:housenumber']}`;
-  } else if (tags['addr:full']) {
-    address = tags['addr:full'];
-  } else if (tags.address) {
-    address = tags.address;
-  } else if (tags.street && tags.housenumber) {
-    address = `${tags.street} ${tags.housenumber}`;
-  }
-  if (tags['addr:postcode'] && address) address += `, ${tags['addr:postcode']}`;
-  if (tags['addr:city'] && address) address += `, ${tags['addr:city']}`;
-  else if (!address && tags.city) address = tags.city;
+  const cityName = process.env.CITY_NAME || 'berlin';
+  // 기본 주소 객체 구조
+  let addressObj = {
+    fullAddress: '',
+    street: tags['addr:street'] || tags.street || '',
+    houseNumber: tags['addr:housenumber'] || tags.housenumber || '',
+    postcode: tags['addr:postcode'] || '',
+    district: '', // 이후에 공간 연산으로 채울 예정
+    city: (tags['addr:city'] || cityName).toLowerCase(),
+  };
 
-  // If there is no address information, try reverse geocoding through the Nominatim API.
-  if (!address && lat && lon) {
+  // 기존 태그 기반 fullAddress 생성 로직
+  if (addressObj.street && addressObj.houseNumber) {
+    addressObj.fullAddress = `${addressObj.street} ${addressObj.houseNumber}`;
+  } else if (tags['addr:full']) {
+    addressObj.fullAddress = tags['addr:full'];
+  }
+
+  // 주소 정보가 부족할 때만 Nominatim 호출
+  if (!addressObj.fullAddress && lat && lon) {
     try {
       const nominatimResponse = await axios.get(NOMINATIM_API_URL, {
         params: {
-          lat: lat,
-          lon: lon,
+          lat,
+          lon,
           format: 'json',
           'accept-language': 'en',
           zoom: 18,
           addressdetails: 1,
         },
-        headers: {
-          'User-Agent': 'ChemnitzCulturalSitesApp/1.0 (jxuholee@gmail.com)',
-        },
+        headers: { 'User-Agent': 'CulturalHeritageMap/2.0' },
       });
-      const nominatimData = nominatimResponse.data;
+      const addr = nominatimResponse.data.address;
 
-      if (nominatimData && nominatimData.address) {
-        const addr = nominatimData.address;
-        let inferredAddress = '';
+      if (addr) {
+        addressObj.street = addr.road || addr.pedestrian || addressObj.street;
+        addressObj.houseNumber = addr.house_number || addressObj.houseNumber;
+        addressObj.postcode = addr.postcode || addressObj.postcode;
+        // Nominatim이 제공하는 'suburb'나 'city_district'를 district 후보로 사용 가능
+        addressObj.district = addr.suburb || addr.city_district || '';
 
-        // Organize addresses by priority
-        if (addr.road && addr.house_number) {
-          inferredAddress = `${addr.road} ${addr.house_number}`;
-        } else if (addr.road) {
-          inferredAddress = addr.road;
-        } else if (addr.building) {
-          inferredAddress = addr.building;
-        } else if (addr.hamlet) {
-          inferredAddress = addr.hamlet;
-        } else if (addr.village) {
-          inferredAddress = addr.village;
-        } else if (addr.town) {
-          inferredAddress = addr.town;
-        } else if (addr.city) {
-          inferredAddress = addr.city;
-        }
-
-        if (addr.postcode && inferredAddress)
-          inferredAddress += `, ${addr.postcode}`;
-        if (addr.city && inferredAddress && addr.city !== inferredAddress)
-          inferredAddress += `, ${addr.city}`;
-        else if (!inferredAddress && addr.city) inferredAddress = addr.city;
-
-        if (inferredAddress) {
-          address = inferredAddress;
-          console.log(
-            `Inferred address for ${name} (ID: ${sourceId}): ${address}`,
-          );
-        }
+        // fullAddress 조립
+        addressObj.fullAddress = addressObj.houseNumber
+          ? `${addressObj.street} ${addressObj.houseNumber}`
+          : addressObj.street;
       }
-    } catch (nominatimError) {
-      console.warn(
-        `Could not infer address for ${name} (ID: ${sourceId}) at [${lon}, ${lat}]:`,
-        nominatimError.message,
-      );
+    } catch (err) {
+      console.warn(`Address inference failed for ${sourceId}`);
     }
   }
-  return address;
+  return addressObj;
 };
 
-// Determine address without reverse geocodig
 const determineCulturalSiteAddressFromTags = (tags) => {
   let address = '';
   if (tags['addr:street'] && tags['addr:housenumber']) {
@@ -146,41 +219,77 @@ const determineCulturalSiteAddressFromTags = (tags) => {
   return address;
 };
 
-/**
- * Map CulturalSite categories based on OSM element tags.
- * @param {object} tags -tags object of OSM element.
- * @returns {string} Mapped Category.
- * @throws {AppError} -When a valid category cannot be determined.
- */
+// Map OSM tags to our defined cultural heritage categories
 const mapCulturalSiteCategory = (tags) => {
-  // Category mapping (adapted to your desired category list) -new logic applied
-  let mappedCategory = 'other';
-  const amenity = tags.amenity;
-  const tourism = tags.tourism;
-
-  if (amenity && tourism) {
-    // When both amenity and tourism fields exist
-    if (amenity === 'restaurant' || amenity === 'Restaurant') {
-      mappedCategory = 'restaurant'; // First when amenity='restaurant'
-    } else if (tourism === 'artwork' || tourism === 'Artwork') {
-      mappedCategory = 'artwork';
-    }
-  } else if (amenity) {
-    // When only amenity exists
-    mappedCategory = amenity.toLowerCase();
-  } else if (tourism) {
-    // When only tourism exists
-    mappedCategory = tourism.toLowerCase();
+  if (
+    tags['lda:criteria'] === 'Ensemble' ||
+    tags['lda:criteria'] === 'Gesamtanlage' ||
+    tags['lda:criteria'] === 'Flächendenkmal'
+  ) {
+    return 'historic_ensemble';
   }
-
-  const allowedCategories = CULTURAL_CATEGORY; // Use CULTURAL_CATEGORY imported from culturalSiteConfig
-  if (!allowedCategories.includes(mappedCategory)) {
-    mappedCategory = 'other';
+  if (tags.tourism === 'museum' || tags.tourism === 'gallery') {
+    return 'museums_galleries';
   }
-
-  // In this part, we removed the logic that throws an AppError in case of an invalid category.
-  // Changed to map to 'other' instead.
-  return mappedCategory;
+  if (tags.historic === 'monument' || tags.attraction === 'monument') {
+    return 'monument';
+  }
+  if (tags.historic === 'memorial') {
+    return 'memorial';
+  }
+  if (tags.historic === 'castle') {
+    return 'castle';
+  }
+  if (
+    [
+      'church',
+      'cathedral',
+      'chapel',
+      'monastery',
+      'temple',
+      'shrine',
+      'mosque',
+    ].includes(tags.building) ||
+    ['monastery', 'church'].includes(tags.historic) ||
+    tags.amenity === 'place_of_worship'
+  ) {
+    return 'religious_heritage';
+  }
+  if (
+    ['theatre', 'arts_centre'].includes(tags.amenity) ||
+    tags.attraction === 'cultural'
+  ) {
+    return 'cultural_venues';
+  }
+  if (tags.tourism === 'artwork') {
+    return 'public_art';
+  }
+  if (
+    tags.historic === 'archaeological_site' ||
+    tags.historic === 'ruins' ||
+    tags['lda:criteria'] === 'Bodendenkmal'
+  ) {
+    return 'archaeological_sites';
+  }
+  if (tags.highway === 'street_lamp' || tags.amenity === 'street_lamp') {
+    return 'industrial_heritage';
+  }
+  if (
+    tags['lda:criteria'] === 'Baudenkmal' ||
+    tags['heritage:description'] === 'Baudenkmal' ||
+    tags.building ||
+    tags['lda:criteria'] === 'Ensembleteil'
+  ) {
+    return 'heritage_buildings';
+  }
+  if (
+    tags['lda:criteria'] === 'Gartendenkmal' ||
+    tags.leisure === 'garden' ||
+    tags.leisure === 'park'
+  ) {
+    return 'gardens_parks';
+  }
+  return 'other';
 };
 
 /**
@@ -193,6 +302,7 @@ const processOsmElementForCulturalSite = async (
   osmElement,
   performReverseGeocoding = true,
 ) => {
+  const cityName = process.env.CITY_NAME || 'berlin';
   // Added new parameter with default true
   const { type, id, tags } = osmElement;
 
@@ -255,6 +365,15 @@ const processOsmElementForCulturalSite = async (
   const name = determineCulturalSiteName(tags, sourceId);
   const description = determineCulturalSiteDescription(tags, name);
   // Conditionally call determineCulturalSiteAddress based on the flag
+  // const address = performReverseGeocoding
+  //   ? await determineCulturalSiteAddress(
+  //     tags,
+  //     parsedLat,
+  //     parsedLon,
+  //     name,
+  //     sourceId,
+  //   )
+  //   : determineCulturalSiteAddressFromTags(tags); // New helper to only get address from tags
   const address = performReverseGeocoding
     ? await determineCulturalSiteAddress(
         tags,
@@ -263,11 +382,21 @@ const processOsmElementForCulturalSite = async (
         name,
         sourceId,
       )
-    : determineCulturalSiteAddressFromTags(tags); // New helper to only get address from tags
+    : {
+        fullAddress: determineCulturalSiteAddressFromTags(tags),
+        street: tags['addr:street'] || '',
+        houseNumber: tags['addr:housenumber'] || '',
+        postcode: tags['addr:postcode'] || '',
+        district: '', // 초기값은 비워두고 마이그레이션/공간쿼리로 채움
+        city: (tags['addr:city'] || cityName).toLowerCase(),
+      };
   const category = mapCulturalSiteCategory(tags); // Apply changed category mapping logic
 
   // 5. Final confirmation of required fields
   if (!name || !category || isNaN(parsedLat) || isNaN(parsedLon) || !sourceId) {
+    console.error(
+      `Missing Info - Name: ${!!name}, Cat: ${!!category}, Lat: ${!isNaN(parsedLat)}`,
+    );
     throw new AppError(
       'Essential cultural heritage information (name, category, location, sourceId) cannot be extracted from OSM data.',
       400,

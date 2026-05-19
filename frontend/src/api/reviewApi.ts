@@ -114,3 +114,31 @@ export const getMyReviews = async (
     throw err;
   }
 };
+
+/**
+ * [관리자 전용] 시스템 내의 모든 리뷰를 가져옵니다 (페이지네이션 지원)
+ */
+export const fetchAllReviewsForAdmin = async (
+  page = 1,
+  limit = 50,
+): Promise<{ reviews: Review[]; totalResults: number; totalPages: number }> => {
+  try {
+    // app.js에 등록한 /api/v1/reviews 경로를 기준으로 호출합니다.
+    const response = await axiosInstance.get<
+      ApiResponse<{ reviews: Review[] }> & {
+        totalResults: number;
+        totalPages: number;
+      }
+    >(`/reviews/admin/all`, { params: { page, limit } });
+
+    return {
+      reviews: response.data.data.reviews || [],
+      totalResults: response.data.totalResults || 0,
+      totalPages: response.data.totalPages || 0,
+    };
+  } catch (error) {
+    const err = error as AxiosError;
+    console.error('Error fetching all reviews for admin:', err);
+    throw err;
+  }
+};

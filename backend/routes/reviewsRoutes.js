@@ -1,16 +1,24 @@
 const express = require('express');
 const reviewController = require('../controllers/reviewController');
-const authController = require('../controllers/authController'); // Authentication middleware
+const authController = require('../controllers/authController');
 
-// mergeParams: true for the :culturalSiteId/reviews route
-// Route parameter (culturalSiteId in this case) passed from the parent router (culturalSitesRoutes)
-// Merge it into req.params of the child router (reviewsRoutes).
 const router = express.Router({ mergeParams: true });
 
-// View all reviews of a specific cultural property
-router.get('/', reviewController.getAllReviews);
+// admin only: Get full reviews of all cultural assets (GET /api/v1/reviews/admin/all)
+router.get(
+  '/admin/all',
+  authController.protect,
+  authController.restrictTo('admin'),
+  reviewController.getAllReviewsForAdmin,
+);
 
-// Create a review for a specific cultural heritage site
+// View all reviews of a specific cultural property
+router.get('/', reviewController.getAllReviewsFromCulturalSite);
+
+// View single review
+router.get('/:reviewId', reviewController.getReviewById);
+
+// Create review (logged in user and admin)
 router.post(
   '/',
   authController.protect,
@@ -18,10 +26,7 @@ router.post(
   reviewController.createReview,
 );
 
-// View specific reviews of specific cultural heritage sites
-router.get('/:reviewId', reviewController.getReviewById);
-
-// Edit review (user only)
+// Edit review
 router.patch(
   '/:reviewId',
   authController.protect,
