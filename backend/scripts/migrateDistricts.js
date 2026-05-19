@@ -23,7 +23,8 @@ const migrateDistricts = async () => {
     const sites = await CulturalSite.find({});
     console.log(`🚀 Starting migration for ${sites.length} sites...`);
 
-    let updatedCount = 0;
+    // 💡 변경: Atlas로 한 번에 보낼 업데이트 작업들을 담을 배열
+    const bulkOperations = [];
 
     for (const site of sites) {
       const [lon, lat] = site.location.coordinates;
@@ -49,32 +50,45 @@ const migrateDistricts = async () => {
         }
       }
 
-      // 4. 주소 구조 업데이트 (기존 문자열 보존 + 구 추가)
       const oldAddress =
         typeof site.address === 'string'
           ? site.address
           : site.address?.fullAddress || '';
 
-      site.address = {
-        fullAddress: oldAddress,
-        street: site.address?.street || '',
-        houseNumber: site.address?.houseNumber || '',
-        postcode: site.address?.postcode || '',
-        district: foundDistrict, // 찾은 구 이름 삽입
-        city: 'berlin',
-      };
-
-      await site.save();
-      updatedCount++;
-
-      if (updatedCount % 500 === 0) {
-        console.log(
-          `⏳ Progress: ${updatedCount}/${sites.length} sites processed...`,
-        );
-      }
+      // 💡 변경: 개별 site.save() 대신 bulkOperations 배열에 updateOne 명령을 푸시합니다.
+      bulkOperations.push({
+        updateOne: {
+          filter: { _id: site._id },
+          update: {
+            $set: {
+              address: {
+                fullAddress: oldAddress,
+                street: site.address?.street || '',
+                houseNumber: site.address?.houseNumber || '',
+                postcode: site.address?.postcode || '',
+                district: foundDistrict,
+                city: 'berlin',
+              }
+            }
+          }
+        }
+      });
     }
 
-    console.log(`\n✨ Migration Completed! ${updatedCount} sites updated.`);
+    // 💡 변경: 수집된 모든 업데이트 작업을 500개씩 묶어서 대량으로 처리합니다.
+    console.log(`⏳ Sending updates to MongoDB Atlas in bulk...`);
+
+    const chunkSize = 500;
+    let processedCount = 0;
+
+    for (let i = 0; i < bulkOperations.length; i += chunkSize) {
+      const chunk = bulkOperations.slice(i, i + chunkSize);
+      await CulturalSite.bulkWrite(chunk);
+      processedCount += chunk.length;
+      console.log(`⏳ Progress: ${processedCount}/${bulkOperations.length} sites updated in Atlas...`);
+    }
+
+    console.log(`\n✨ Migration Completed! ${bulkOperations.length} sites updated.`);
   } catch (error) {
     console.error('❌ Migration failed:', error);
   } finally {
