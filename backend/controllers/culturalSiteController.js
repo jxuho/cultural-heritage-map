@@ -108,13 +108,7 @@ const getAllCulturalSites = asyncHandler(async (req, res, next) => {
   const limit = parseInt(req.query.limit) || 20000;
   const skip = (page - 1) * limit;
 
-  // 2. 정렬 설정
-  let sortStr = '-createdAt';
-  if (req.query.sort) {
-    sortStr = req.query.sort.split(',').join(' ');
-  }
-
-  // 3. 쿼리 필터 구성
+  // 2. 쿼리 필터 구성
   const bbox = parseBboxParams(req.query);
   const queryFilter = {};
 
@@ -129,22 +123,47 @@ const getAllCulturalSites = asyncHandler(async (req, res, next) => {
     };
   }
 
-  // 4. 쿼리 실행 (Promise.all 제거, 단일 쿼리로 최적화)
-  const culturalSites = await CulturalSite.find(queryFilter)
-    .sort(sortStr)
+  // 3. 쿼리 빌드 단계 시작
+  // 💡 [데이터 다이어트] 지도 마커용으로 불필요한 무거운 객체(address, imageUrl) 제외하여 JSON 변환 속도 극대화
+  const culturalSitesQuery = CulturalSite.find(queryFilter)
     .skip(skip)
     .limit(limit)
-    .select(
-      '_id name category location address averageRating reviewCount imageUrl',
-    )
-    .hint({ location: '2dsphere', createdAt: -1 })
+    .select('_id name category location averageRating reviewCount')
     .lean();
 
-  // 5. 전체 개수 계산 (무거운 DB count 연산 대신 메모리 배열 길이로 대체)
+  // 4. 정렬 및 힌트 동적 처리 (★ 성능 개선의 핵심 부품)
+  const isBulkFetch = limit >= 5000; // 대량 마커 조회인지 여부
+
+  if (bbox) {
+    // A. 공간 검색(BBox)이 있을 때
+    if (isBulkFetch) {
+      // 💡 대량 조회는 인메모리 정렬을 생략해야 0.x초가 나옵니다.
+      culturalSitesQuery.hint({ location: '2dsphere' });
+    } else {
+      // 소량 조회(예: 20개씩 일반 리스트 보기)일 때만 정렬 적용
+      const sortStr = req.query.sort
+        ? req.query.sort.split(',').join(' ')
+        : '-createdAt';
+      culturalSitesQuery
+        .sort(sortStr)
+        .hint({ location: '2dsphere', createdAt: -1 });
+    }
+  } else {
+    // B. 공간 검색이 없을 때 (초기 웜업 전체 조회)
+    // 💡 공간 힌트를 제거하고, 정렬이 필요하다면 일반 createdAt 인덱스를 타게 합니다.
+    const sortStr = req.query.sort
+      ? req.query.sort.split(',').join(' ')
+      : '-createdAt';
+    culturalSitesQuery.sort(sortStr).hint({ createdAt: -1 });
+  }
+
+  // 5. 쿼리 실행
+  const culturalSites = await culturalSitesQuery;
+
+  // 6. 결과 계산 및 응답
   const totalResults = culturalSites.length;
   const totalPages = Math.ceil(totalResults / limit);
 
-  // 6. 응답 전송
   res.status(200).json({
     status: 'success',
     results: culturalSites.length,
