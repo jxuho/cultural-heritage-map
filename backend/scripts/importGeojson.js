@@ -121,11 +121,13 @@ const importGeojson = async (performReverseGeocoding, cityName = 'berlin') => {
  * Find latest data file
  */
 /**
- * @param {string} cityName 
+ * @param {string} cityName
  */
 async function getLatestCulturalSitesFile(cityName = 'berlin') {
   const dataDir = path.join(__dirname, '../data');
-  const fileNamePattern = new RegExp(`^${cityName.toLowerCase()}_cultural_sites_(\\d{13})\\.(geo)?json$`);
+  const fileNamePattern = new RegExp(
+    `^${cityName.toLowerCase()}_cultural_sites_(\\d{13})\\.(geo)?json$`,
+  );
 
   try {
     const files = await fsAsync.readdir(dataDir);
@@ -159,7 +161,7 @@ async function getLatestCulturalSitesFile(cityName = 'berlin') {
 
 async function runScript() {
   const args = process.argv.slice(2);
-  const cityName = args.find(arg => !arg.startsWith('--')) || 'berlin';
+  const cityName = args.find((arg) => !arg.startsWith('--')) || 'berlin';
   const shouldPerformReverseGeocoding = !args.includes('--no-reverse-geocode');
 
   try {

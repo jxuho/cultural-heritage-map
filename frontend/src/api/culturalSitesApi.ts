@@ -103,7 +103,6 @@ export const deleteCulturalSite = async (
   }
 };
 
-
 export const fetchDistrictStats = async (): Promise<DistrictStat[]> => {
   try {
     const response = await axiosInstance.get<ApiResponse<DistrictStat[]>>(
@@ -134,15 +133,16 @@ export interface DistrictBoundaryGeoJson {
   features: DistrictBoundaryFeature[];
 }
 
-export const fetchDistrictBoundaries = async (): Promise<DistrictBoundaryGeoJson> => {
-  try {
-    const response = await axiosInstance.get<
-      ApiResponse<{ districtBoundaries: DistrictBoundaryGeoJson }>
-    >('/cultural-sites/district-boundaries');
-    return response.data.data.districtBoundaries;
-  } catch (error) {
-    const err = error as AxiosError;
-    console.error('Error fetching district boundaries:', err);
-    throw err;
-  }
-};
+export const fetchDistrictBoundaries =
+  async (): Promise<DistrictBoundaryGeoJson> => {
+    try {
+      const response = await axiosInstance.get<
+        ApiResponse<{ districtBoundaries: DistrictBoundaryGeoJson }>
+      >('/cultural-sites/district-boundaries');
+      return response.data.data.districtBoundaries;
+    } catch (error) {
+      const err = error as AxiosError;
+      console.error('Error fetching district boundaries:', err);
+      throw err;
+    }
+  };

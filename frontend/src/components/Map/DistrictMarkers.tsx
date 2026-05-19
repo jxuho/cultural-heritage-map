@@ -95,7 +95,7 @@ const DistrictMarkers = ({
           mouseover: () => {
             const pathLayer = geoLayer as unknown as LeafletPath;
             pathLayer.setStyle(hoverStyle);
-            pathLayer.bringToFront(); 
+            pathLayer.bringToFront();
             tooltip.openTooltip();
           },
           mouseout: () => {

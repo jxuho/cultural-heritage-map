@@ -59,7 +59,12 @@ const ReviewForm = ({
 
       try {
         if (userReview) {
-          await onReviewActionCompleted('update', rating, userReview.rating, comment);
+          await onReviewActionCompleted(
+            'update',
+            rating,
+            userReview.rating,
+            comment,
+          );
         } else {
           await onReviewActionCompleted('create', rating, null, comment);
         }
@@ -72,7 +77,12 @@ const ReviewForm = ({
 
   const handleDelete = useCallback(async () => {
     if (!currentUser || !userReview) return;
-    if (!window.confirm('Archive records for this entry will be removed. Continue?')) return;
+    if (
+      !window.confirm(
+        'Archive records for this entry will be removed. Continue?',
+      )
+    )
+      return;
 
     try {
       await onReviewActionCompleted('delete', null, userReview.rating);
@@ -98,7 +108,9 @@ const ReviewForm = ({
       {/* Rating System */}
       <div className="mb-6 p-4 border border-black bg-[#fdfdfd]">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-tighter text-gray-400">Score</span>
+          <span className="text-[10px] font-bold uppercase tracking-tighter text-gray-400">
+            Score
+          </span>
           <div className="flex gap-1">
             {[...Array(5)].map((_, i) => (
               <StarIcon
@@ -121,9 +133,15 @@ const ReviewForm = ({
         <textarea
           id="reviewComment"
           className="w-full p-4 border border-black rounded-none focus:ring-0 focus:border-black text-sm text-gray-800 placeholder:text-gray-300 bg-white min-h-[120px] resize-none font-serif leading-relaxed"
-          placeholder={currentUser ? "Share your archival findings..." : "Authentication required to contribute."}
+          placeholder={
+            currentUser
+              ? 'Share your archival findings...'
+              : 'Authentication required to contribute.'
+          }
           value={comment}
-          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setComment(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+            setComment(e.target.value)
+          }
           disabled={isSubmitting || !currentUser}
         />
         <div className="absolute bottom-[-1px] right-[-1px] w-4 h-4 bg-black border-t border-l border-white" />
@@ -140,7 +158,9 @@ const ReviewForm = ({
               className="flex-1 flex items-center justify-center gap-2 border border-black text-black hover:bg-red-500 hover:text-white transition-all duration-300 disabled:opacity-30"
             >
               <Trash2 size={16} />
-              <span className="text-[11px] font-black uppercase tracking-widest">Remove</span>
+              <span className="text-[11px] font-black uppercase tracking-widest">
+                Remove
+              </span>
             </button>
           )}
           <button
@@ -151,11 +171,17 @@ const ReviewForm = ({
           >
             {isSubmitting ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white animate-spin rounded-full" />
+            ) : userReview ? (
+              <Edit3 size={16} />
             ) : (
-              userReview ? <Edit3 size={16} /> : <Send size={16} />
+              <Send size={16} />
             )}
             <span className="text-[11px] font-black uppercase tracking-widest">
-              {isSubmitting ? 'Syncing...' : userReview ? 'Update Review' : 'Post Review'}
+              {isSubmitting
+                ? 'Syncing...'
+                : userReview
+                  ? 'Update Review'
+                  : 'Post Review'}
             </span>
           </button>
         </div>

@@ -26,7 +26,10 @@ type ApiError = AxiosError<ApiResponse<null>>;
 /**
  * fetch all cultural sites with optional query parameters (e.g., pagination, filters)
  */
-export const useAllCulturalSites = (enabled: boolean = true, params?: Record<string, any>) => {
+export const useAllCulturalSites = (
+  enabled: boolean = true,
+  params?: Record<string, any>,
+) => {
   return useQuery<Place[], Error>({
     queryKey: ['culturalSites', params],
     queryFn: () => fetchAllCulturalSites(params), // API 호출 함수
@@ -138,7 +141,6 @@ export const useDeleteCulturalSite = () => {
     },
   });
 };
-
 
 // // hooks/data/useCulturalSitesQueries.ts 에 추가
 // export const useDistrictStats = (enabled: boolean) => {

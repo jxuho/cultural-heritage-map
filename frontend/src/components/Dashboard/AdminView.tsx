@@ -255,6 +255,7 @@ const AdminView = () => {
                         width="100%"
                         height="100%"
                         minWidth={0}
+                        minHeight={0}
                       >
                         <LineChart
                           data={reviewTimelineData}
@@ -316,6 +317,7 @@ const AdminView = () => {
                           width="100%"
                           height="100%"
                           minWidth={0}
+                          minHeight={0}
                         >
                           <BarChart data={categoryData} margin={{ bottom: 10 }}>
                             <CartesianGrid
@@ -367,6 +369,7 @@ const AdminView = () => {
                           width="100%"
                           height="100%"
                           minWidth={0}
+                          minHeight={0}
                         >
                           <BarChart
                             data={districtData.slice(0, 6)}

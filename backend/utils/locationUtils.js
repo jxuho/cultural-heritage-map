@@ -11,28 +11,35 @@ let cityBoundaries = {};
  */
 const loadCityBoundary = (cityName = 'berlin') => {
   const cityKey = cityName.toLowerCase();
-  
+
   if (!cityBoundaries[cityKey]) {
     try {
       const boundaryPath = path.join(
         __dirname,
         `../data/${cityKey}_boundary.geojson`, // 파일명이 berlin_boundary.geojson 형태여야 함
       );
-      
+
       if (!fs.existsSync(boundaryPath)) {
-        console.warn(`Boundary file for ${cityName} not found at ${boundaryPath}`);
+        console.warn(
+          `Boundary file for ${cityName} not found at ${boundaryPath}`,
+        );
         return null;
       }
 
       const geojsonData = fs.readFileSync(boundaryPath, 'utf8');
       let boundary = JSON.parse(geojsonData);
 
-      if (boundary.type === 'FeatureCollection' && boundary.features.length > 0) {
+      if (
+        boundary.type === 'FeatureCollection' &&
+        boundary.features.length > 0
+      ) {
         boundary = boundary.features[0];
       }
 
       if (!['Polygon', 'MultiPolygon'].includes(boundary.geometry.type)) {
-        throw new Error(`${cityName} boundary must be a Polygon or MultiPolygon.`);
+        throw new Error(
+          `${cityName} boundary must be a Polygon or MultiPolygon.`,
+        );
       }
 
       cityBoundaries[cityKey] = boundary;

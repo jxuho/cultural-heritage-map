@@ -120,14 +120,17 @@ export const getMyReviews = async (
  */
 export const fetchAllReviewsForAdmin = async (
   page = 1,
-  limit = 50
+  limit = 50,
 ): Promise<{ reviews: Review[]; totalResults: number; totalPages: number }> => {
   try {
     // app.js에 등록한 /api/v1/reviews 경로를 기준으로 호출합니다.
     const response = await axiosInstance.get<
-      ApiResponse<{ reviews: Review[] }> & { totalResults: number; totalPages: number }
+      ApiResponse<{ reviews: Review[] }> & {
+        totalResults: number;
+        totalPages: number;
+      }
     >(`/reviews/admin/all`, { params: { page, limit } });
-    
+
     return {
       reviews: response.data.data.reviews || [],
       totalResults: response.data.totalResults || 0,

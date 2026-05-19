@@ -10,8 +10,6 @@ const singleElementQuery = (osmType, osmId) => {
           out center;`;
 };
 
-
-
 const baseCulturalSiteQuery = (areaId, radius, lat, lon) => {
   const useAround = radius && lat && lon;
   const around = useAround ? `(around:${radius},${lat},${lon})` : '';
@@ -46,8 +44,6 @@ area(${AREA_ID})->.searchArea;
   out center;
   `;
 };
-
-
 
 // const baseCulturalSiteQuery = (areaId, radius, lat, lon) => {
 //   const useAround = radius && lat && lon;
@@ -86,8 +82,6 @@ area(${AREA_ID})->.searchArea;
 //   out center;
 //   `;
 // };
-
-
 
 // const baseCulturalSiteQuery = (areaId, radius, lat, lon) => {
 //   const useAround = radius && lat && lon;
@@ -303,9 +297,6 @@ out center;
 `;
 };
 
-
-
-
 const historicMonumentsQuery = (areaId) => {
   const AREA_ID = 3600000000 + areaId;
 
@@ -328,7 +319,6 @@ nwr["historic"="memorial"](area.searchArea);
 out center;
 `;
 };
-
 
 const historicCastlesRuinsQuery = (areaId) => {
   const AREA_ID = 3600000000 + areaId;
@@ -354,7 +344,6 @@ out center;
 `;
 };
 
-
 const buildingCastleQuery = (areaId) => {
   const AREA_ID = 3600000000 + areaId;
 
@@ -366,7 +355,6 @@ nw["building"="castle"](area.searchArea);
 out center;
 `;
 };
-
 
 const buildingChurchQuery = (areaId) => {
   const AREA_ID = 3600000000 + areaId;
@@ -404,9 +392,6 @@ out center;
 `;
 };
 
-
-
-
 const protectedHeritageQuery = (areaId) => {
   const AREA_ID = 3600000000 + areaId;
 
@@ -422,8 +407,6 @@ area(${AREA_ID})->.searchArea;
 out center;
 `;
 };
-
-
 
 const museumsQuery = (areaId, radius, lat, lon) => {
   const AREA_ID = 3600000000 + areaId;
@@ -469,7 +452,6 @@ out center;
 `;
 };
 
-
 const attractionCulturalQuery = (areaId) => {
   const AREA_ID = 3600000000 + areaId;
 
@@ -494,10 +476,6 @@ out center;
 `;
 };
 
-
-
-
-
 const publicArtQuery = (areaId, radius, lat, lon) => {
   const AREA_ID = 3600000000 + areaId;
   const around = radius && lat && lon ? `(around:${radius},${lat},${lon})` : '';
@@ -513,15 +491,6 @@ area(${AREA_ID})->.searchArea;
 out center;
 `;
 };
-
-
-
-
-
-
-
-
-
 
 module.exports = {
   singleElementQuery,

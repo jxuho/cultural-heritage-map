@@ -25,17 +25,17 @@ const DashboardPage: React.FC = () => {
 
   // 2. When not authenticated (usually handled by Middleware or PrivateRoute, but double defense)
   if (!isAuthenticated || !user) {
-    return <div className="p-8 text-center">Please sign in to access the dashboard.</div>;
+    return (
+      <div className="p-8 text-center">
+        Please sign in to access the dashboard.
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto p-6 space-y-8">
       {/* 3. Branch processing according to role */}
-      {user.role === 'admin' ? (
-        <AdminView />
-      ) : (
-        <UserView />
-      )}
+      {user.role === 'admin' ? <AdminView /> : <UserView />}
     </div>
   );
 };

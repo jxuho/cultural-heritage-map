@@ -188,7 +188,7 @@ const createProposal = asyncHandler(async (req, res, next) => {
           !isPointInCity(
             rawData.location.coordinates[1],
             rawData.location.coordinates[0],
-            currentCity
+            currentCity,
           )
         ) {
           return next(

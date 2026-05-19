@@ -95,9 +95,13 @@ const createReview = asyncHandler(async (req, res, next) => {
   if (!req.body.culturalSite) req.body.culturalSite = req.params.culturalSiteId;
   if (!req.body.user) req.body.user = req.user.id;
 
-  const existingCulturalSite = await CulturalSite.findById(req.body.culturalSite);
+  const existingCulturalSite = await CulturalSite.findById(
+    req.body.culturalSite,
+  );
   if (!existingCulturalSite) {
-    return next(new AppError('No cultural heritages found to leave a review for.', 404));
+    return next(
+      new AppError('No cultural heritages found to leave a review for.', 404),
+    );
   }
 
   const existingReview = await Review.findOne({
@@ -105,7 +109,12 @@ const createReview = asyncHandler(async (req, res, next) => {
     culturalSite: req.body.culturalSite,
   });
   if (existingReview) {
-    return next(new AppError('You have already left a review for this cultural heritage.', 409));
+    return next(
+      new AppError(
+        'You have already left a review for this cultural heritage.',
+        409,
+      ),
+    );
   }
 
   const { culturalSite, user, rating, comment } = req.body;
@@ -122,7 +131,7 @@ const createReview = asyncHandler(async (req, res, next) => {
     await CulturalSite.findByIdAndUpdate(
       culturalSite,
       { $addToSet: { reviews: savedReview._id } },
-      { session, new: true }
+      { session, new: true },
     );
 
     // 3. 먼저 트랜잭션을 커밋하여 DB에 안전하게 반영
@@ -140,7 +149,9 @@ const createReview = asyncHandler(async (req, res, next) => {
     await session.abortTransaction();
     session.endSession();
     console.error('Review creation transaction failed:', error);
-    return next(new AppError('An error occurred while creating your review.', 500));
+    return next(
+      new AppError('An error occurred while creating your review.', 500),
+    );
   }
 });
 
@@ -153,14 +164,16 @@ const updateReviewById = asyncHandler(async (req, res, next) => {
   }
 
   if (review.user.toString() !== req.user.id) {
-    return next(new AppError('You do not have permission to edit this review.', 403));
+    return next(
+      new AppError('You do not have permission to edit this review.', 403),
+    );
   }
 
   // 스키마 훅(post('findOneAndUpdate'))을 작동시키기 위해 옵션을 준수합니다.
   const updatedReview = await Review.findByIdAndUpdate(
     req.params.reviewId,
     req.body,
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   );
 
   res.status(200).json({
@@ -169,7 +182,7 @@ const updateReviewById = asyncHandler(async (req, res, next) => {
   });
 });
 
-// 6. 리뷰 삭제 
+// 6. 리뷰 삭제
 const deleteReviewById = asyncHandler(async (req, res, next) => {
   const { culturalSiteId, reviewId } = req.params;
 
@@ -182,7 +195,9 @@ const deleteReviewById = asyncHandler(async (req, res, next) => {
   // 2. 권한 체크 (본인이 쓴 리뷰거나 어드민인 경우에만 삭제 허용)
   // * req.user.role과 req.user.id가 authController.protect를 통해 들어온다고 가정합니다.
   if (review.user.toString() !== req.user.id && req.user.role !== 'admin') {
-    return next(new AppError('You do not have permission to delete this review.', 403));
+    return next(
+      new AppError('You do not have permission to delete this review.', 403),
+    );
   }
 
   // 트랜잭션 세션 시작
@@ -197,7 +212,7 @@ const deleteReviewById = asyncHandler(async (req, res, next) => {
     await CulturalSite.findByIdAndUpdate(
       culturalSiteId,
       { $pull: { reviews: reviewId } },
-      { session, new: true }
+      { session, new: true },
     );
 
     // 5. 원자적 작업이 완료되었으므로 트랜잭션 커밋 및 세션 종료
@@ -218,7 +233,9 @@ const deleteReviewById = asyncHandler(async (req, res, next) => {
     await session.abortTransaction();
     session.endSession();
     console.error('Review deletion transaction failed:', error);
-    return next(new AppError('An error occurred while deleting the review.', 500));
+    return next(
+      new AppError('An error occurred while deleting the review.', 500),
+    );
   }
 });
 
@@ -228,5 +245,5 @@ module.exports = {
   createReview,
   updateReviewById,
   deleteReviewById,
-  getAllReviewsForAdmin, 
+  getAllReviewsForAdmin,
 };

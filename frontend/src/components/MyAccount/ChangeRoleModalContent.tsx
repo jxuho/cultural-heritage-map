@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import useUiStore from '../../store/uiStore';
 import { useUpdateUserRole } from '../../hooks/data/useUserQueries';
-import { ShieldAlert, X, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
+import {
+  ShieldAlert,
+  X,
+  ChevronRight,
+  Loader2,
+  AlertCircle,
+} from 'lucide-react';
 
 export const ChangeRoleModalContent = ({ user }: { user: any }) => {
   const { closeModal } = useUiStore();
@@ -40,8 +46,8 @@ export const ChangeRoleModalContent = ({ user }: { user: any }) => {
             Auth_Level_Modification
           </h2>
         </div>
-        <button 
-          onClick={closeModal} 
+        <button
+          onClick={closeModal}
           className="hover:text-red-500 transition-colors"
           disabled={isPending}
         >
@@ -51,7 +57,9 @@ export const ChangeRoleModalContent = ({ user }: { user: any }) => {
 
       <div className="p-6 md:p-8">
         <div className="mb-8">
-          <p className="text-[10px] font-black uppercase text-zinc-400 mb-1">Target_Subject</p>
+          <p className="text-[10px] font-black uppercase text-zinc-400 mb-1">
+            Target_Subject
+          </p>
           <h3 className="text-2xl font-black uppercase tracking-tighter italic">
             "{user.username}"
           </h3>
@@ -61,7 +69,9 @@ export const ChangeRoleModalContent = ({ user }: { user: any }) => {
           <div className="mb-6 p-3 bg-red-100 border-2 border-red-600 flex items-start gap-2">
             <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
             <p className="text-[10px] font-bold text-red-600 leading-tight uppercase">
-              CRITICAL_ERROR: {updateUserRoleMutation.error.message || 'Access modification failed.'}
+              CRITICAL_ERROR:{' '}
+              {updateUserRoleMutation.error.message ||
+                'Access modification failed.'}
             </p>
           </div>
         )}
@@ -74,7 +84,7 @@ export const ChangeRoleModalContent = ({ user }: { user: any }) => {
             >
               Assign_New_Clearance
             </label>
-            
+
             <div className="relative group">
               <select
                 id="role-select"
@@ -95,9 +105,10 @@ export const ChangeRoleModalContent = ({ user }: { user: any }) => {
                 <ChevronRight size={20} strokeWidth={3} />
               </div>
             </div>
-            
+
             <p className="text-[9px] font-medium text-zinc-400 leading-relaxed italic">
-              * Caution: Elevating or demoting clearance levels will be logged in the permanent system audit trail.
+              * Caution: Elevating or demoting clearance levels will be logged
+              in the permanent system audit trail.
             </p>
           </div>
 
@@ -114,9 +125,11 @@ export const ChangeRoleModalContent = ({ user }: { user: any }) => {
               type="submit"
               className={`
                 flex-2 py-3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all
-                ${selectedRole === user.role 
-                  ? 'bg-zinc-200 text-zinc-400 border-2 border-zinc-200 cursor-not-allowed' 
-                  : 'bg-black text-white border-2 border-black hover:bg-green-600 hover:border-green-600'}
+                ${
+                  selectedRole === user.role
+                    ? 'bg-zinc-200 text-zinc-400 border-2 border-zinc-200 cursor-not-allowed'
+                    : 'bg-black text-white border-2 border-black hover:bg-green-600 hover:border-green-600'
+                }
               `}
               disabled={isPending}
             >
@@ -135,8 +148,12 @@ export const ChangeRoleModalContent = ({ user }: { user: any }) => {
 
       {/* FOOTER BAR */}
       <div className="bg-zinc-50 px-6 py-2 border-t-2 border-black flex justify-between">
-        <span className="text-[8px] font-mono font-bold text-zinc-400">SESSION_ID: {Math.random().toString(36).substring(7).toUpperCase()}</span>
-        <span className="text-[8px] font-mono font-bold text-zinc-400 tracking-tighter">THE_BERLIN_ARCHIVE_CORE</span>
+        <span className="text-[8px] font-mono font-bold text-zinc-400">
+          SESSION_ID: {Math.random().toString(36).substring(7).toUpperCase()}
+        </span>
+        <span className="text-[8px] font-mono font-bold text-zinc-400 tracking-tighter">
+          THE_BERLIN_ARCHIVE_CORE
+        </span>
       </div>
     </div>
   );

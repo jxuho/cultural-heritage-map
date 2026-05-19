@@ -26,7 +26,10 @@ router.post(
 
 // District metadata for map LOD
 router.get('/district-stats', culturalSitesController.getDistrictStats);
-router.get('/district-boundaries', culturalSitesController.getDistrictBoundaries);
+router.get(
+  '/district-boundaries',
+  culturalSitesController.getDistrictBoundaries,
+);
 
 // Full query + filtering (query: category, name)
 router.get('/', culturalSitesController.getAllCulturalSites);

@@ -62,7 +62,9 @@ const NearbySitesList = ({
               <p className="text-sm text-gray-600">Category: {site.category}</p>
             )}
             {site.address?.fullAddress && (
-              <p className="text-sm text-gray-600">Address: {site.address.fullAddress}</p>
+              <p className="text-sm text-gray-600">
+                Address: {site.address.fullAddress}
+              </p>
             )}
           </li>
         ))}

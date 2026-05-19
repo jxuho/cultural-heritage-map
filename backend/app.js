@@ -119,23 +119,32 @@ mongoose
     // 2. 도시 경계 로드
     try {
       loadCityBoundary(currentCity);
-      console.log(`${currentCity.toUpperCase()} boundary data loaded successfully.`);
+      console.log(
+        `${currentCity.toUpperCase()} boundary data loaded successfully.`,
+      );
     } catch (error) {
       console.error(`Failed to load ${currentCity} boundary data:`, error);
-      // 필수 데이터라면 서버를 끄는 것도 방법이지만, 
+      // 필수 데이터라면 서버를 끄는 것도 방법이지만,
       // 일단 로그만 남기고 진행하도록 유연하게 대처합니다.
     }
     // Run cron scheduler
     cron.schedule(
       '0 0 * * 0',
       async () => {
-        console.log(`Weekly Overpass data update task for ${currentCity} started...`);
+        console.log(
+          `Weekly Overpass data update task for ${currentCity} started...`,
+        );
         try {
           // overpassUpdater 내부에서 currentCity를 받도록 수정되어야 함
           await overpassUpdater(currentCity);
-          console.log(`Weekly Overpass data update task for ${currentCity} completed successfully.`);
+          console.log(
+            `Weekly Overpass data update task for ${currentCity} completed successfully.`,
+          );
         } catch (error) {
-          console.error(`Error during weekly Overpass update for ${currentCity}:`, error);
+          console.error(
+            `Error during weekly Overpass update for ${currentCity}:`,
+            error,
+          );
         }
       },
       {

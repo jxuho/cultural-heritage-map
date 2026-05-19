@@ -1,8 +1,5 @@
 import { MdKeyboardArrowRight } from 'react-icons/md';
-import {
-  PiUserCircleThin,
-  PiTrashThin,
-} from 'react-icons/pi';
+import { PiUserCircleThin, PiTrashThin } from 'react-icons/pi';
 import useAuthStore from '../../store/authStore';
 import useUiStore from '../../store/uiStore';
 import defaultProfileImg from '../../assets/profile_image.svg';
@@ -24,8 +21,12 @@ const ProfileView = () => {
   const signOutHandler = () => {
     openModal(
       <div className="p-4 border-2 border-black bg-white">
-        <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Sign Out?</h3>
-        <p className="text-sm font-mono text-gray-600 mb-6">Are you sure you want to terminate the current session?</p>
+        <h3 className="text-xl font-black uppercase tracking-tighter mb-2">
+          Sign Out?
+        </h3>
+        <p className="text-sm font-mono text-gray-600 mb-6">
+          Are you sure you want to terminate the current session?
+        </p>
         <div className="flex gap-2">
           <button
             onClick={() => {
@@ -37,7 +38,10 @@ const ProfileView = () => {
           >
             Confirm
           </button>
-          <button onClick={closeModal} className="flex-1 py-2 border-2 border-black font-black uppercase text-xs tracking-widest hover:bg-gray-100 cursor-pointer">
+          <button
+            onClick={closeModal}
+            className="flex-1 py-2 border-2 border-black font-black uppercase text-xs tracking-widest hover:bg-gray-100 cursor-pointer"
+          >
             Cancel
           </button>
         </div>
@@ -45,10 +49,13 @@ const ProfileView = () => {
     );
   };
 
-  const cardClass = "group flex flex-col justify-between p-6 bg-white border-2 border-black transition-all hover:bg-zinc-50 relative overflow-hidden";
-  const iconClass = "text-black mb-4 transition-transform group-hover:scale-110 duration-300";
-  const titleClass = "text-2xl font-black uppercase tracking-tighter mb-1";
-  const linkClass = "mt-8 pt-4 border-t-2 border-black flex items-center justify-between font-black uppercase text-[10px] tracking-[0.2em] group-hover:text-black transition-colors";
+  const cardClass =
+    'group flex flex-col justify-between p-6 bg-white border-2 border-black transition-all hover:bg-zinc-50 relative overflow-hidden';
+  const iconClass =
+    'text-black mb-4 transition-transform group-hover:scale-110 duration-300';
+  const titleClass = 'text-2xl font-black uppercase tracking-tighter mb-1';
+  const linkClass =
+    'mt-8 pt-4 border-t-2 border-black flex items-center justify-between font-black uppercase text-[10px] tracking-[0.2em] group-hover:text-black transition-colors';
 
   return (
     <div className="p-6 md:p-12 max-w-7xl mx-auto">
@@ -63,22 +70,23 @@ const ProfileView = () => {
       </header>
 
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        
         {/* 1. Main Profile Card (Tall) */}
         <div className={`${cardClass} md:row-span-1 bg-white`}>
           <div className="flex flex-col items-center py-4">
             <div className="w-24 h-24 border-2 border-black overflow-hidden mb-6">
-              <img 
-                className="w-full h-full object-cover" 
-                src={user.profileImage || defaultProfileImg} 
-                alt="profile" 
+              <img
+                className="w-full h-full object-cover"
+                src={user.profileImage || defaultProfileImg}
+                alt="profile"
               />
             </div>
             <div className="text-center space-y-1">
               <h2 className="text-2xl font-black uppercase tracking-tighter leading-tight break-all">
                 {user.username || user.email.split('@')[0]}
               </h2>
-              <p className="font-mono text-[10px] text-gray-500">{user.email}</p>
+              <p className="font-mono text-[10px] text-gray-500">
+                {user.email}
+              </p>
             </div>
             {user.bio && (
               <p className="mt-6 text-center text-xs font-mono text-gray-400 italic px-4">
@@ -89,7 +97,7 @@ const ProfileView = () => {
               Role: {user.role}
             </div>
           </div>
-          
+
           <button
             onClick={signOutHandler}
             className="mt-8 w-full py-3 bg-black text-white font-black uppercase text-[10px] tracking-[0.3em] hover:bg-zinc-800 transition-colors cursor-pointer"
@@ -103,7 +111,9 @@ const ProfileView = () => {
           <div>
             <PiUserCircleThin size={48} className={iconClass} />
             <h3 className={titleClass}>Profile</h3>
-            <p className="text-xs font-mono text-gray-500">Update personal archival information and security details.</p>
+            <p className="text-xs font-mono text-gray-500">
+              Update personal archival information and security details.
+            </p>
           </div>
           <Link to="update-profile" className={linkClass}>
             Edit Profile <MdKeyboardArrowRight size={18} />
@@ -115,13 +125,18 @@ const ProfileView = () => {
           <div>
             <PiTrashThin size={48} className="text-red-500 mb-4" />
             <h3 className={`${titleClass} text-red-500`}>Delete account</h3>
-            <p className="text-xs font-mono text-red-400">Permanently erase your identity and account from the system archive.</p>
+            <p className="text-xs font-mono text-red-400">
+              Permanently erase your identity and account from the system
+              archive.
+            </p>
           </div>
-          <Link to="delete-account" className={`${linkClass} border-red-500 text-red-500`}>
+          <Link
+            to="delete-account"
+            className={`${linkClass} border-red-500 text-red-500`}
+          >
             Delete Account <MdKeyboardArrowRight size={18} />
           </Link>
         </div>
-
       </div>
     </div>
   );

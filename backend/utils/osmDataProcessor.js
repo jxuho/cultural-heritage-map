@@ -29,8 +29,6 @@ const { CULTURAL_CATEGORY } = require('../config/culturalSiteConfig');
 //   }
 // };
 
-
-
 const determineCulturalSiteName = (tags, sourceId) => {
   // 1. Best case: explicit name
   if (tags.name && tags.name.trim()) {
@@ -42,9 +40,7 @@ const determineCulturalSiteName = (tags, sourceId) => {
 
   // Helper
   const capitalize = (str) =>
-    str
-      ?.replace(/_/g, ' ')
-      ?.replace(/\b\w/g, (c) => c.toUpperCase());
+    str?.replace(/_/g, ' ')?.replace(/\b\w/g, (c) => c.toUpperCase());
 
   // 3. Category-based naming strategy
   switch (category) {
@@ -97,8 +93,8 @@ const determineCulturalSiteName = (tags, sourceId) => {
 
     case 'industrial_heritage':
       if (tags.highway === 'street_lamp' || tags.amenity === 'street_lamp') {
-        return capitalize("Street Lamp");
-      } 
+        return capitalize('Street Lamp');
+      }
       return 'Unnamed Industrial Heritage Site';
 
     case 'heritage_buildings':
@@ -152,7 +148,6 @@ const determineCulturalSiteDescription = (tags, name) => {
   return description;
 };
 
-
 const determineCulturalSiteAddress = async (tags, lat, lon, name, sourceId) => {
   const cityName = process.env.CITY_NAME || 'berlin';
   // 기본 주소 객체 구조
@@ -162,7 +157,7 @@ const determineCulturalSiteAddress = async (tags, lat, lon, name, sourceId) => {
     houseNumber: tags['addr:housenumber'] || tags.housenumber || '',
     postcode: tags['addr:postcode'] || '',
     district: '', // 이후에 공간 연산으로 채울 예정
-    city: (tags['addr:city'] || cityName).toLowerCase()
+    city: (tags['addr:city'] || cityName).toLowerCase(),
   };
 
   // 기존 태그 기반 fullAddress 생성 로직
@@ -176,7 +171,14 @@ const determineCulturalSiteAddress = async (tags, lat, lon, name, sourceId) => {
   if (!addressObj.fullAddress && lat && lon) {
     try {
       const nominatimResponse = await axios.get(NOMINATIM_API_URL, {
-        params: { lat, lon, format: 'json', 'accept-language': 'en', zoom: 18, addressdetails: 1 },
+        params: {
+          lat,
+          lon,
+          format: 'json',
+          'accept-language': 'en',
+          zoom: 18,
+          addressdetails: 1,
+        },
         headers: { 'User-Agent': 'CulturalHeritageMap/2.0' },
       });
       const addr = nominatimResponse.data.address;
@@ -219,7 +221,11 @@ const determineCulturalSiteAddressFromTags = (tags) => {
 
 // Map OSM tags to our defined cultural heritage categories
 const mapCulturalSiteCategory = (tags) => {
-  if (tags['lda:criteria'] === "Ensemble" || tags['lda:criteria'] === "Gesamtanlage" || tags['lda:criteria'] === "Flächendenkmal") {
+  if (
+    tags['lda:criteria'] === 'Ensemble' ||
+    tags['lda:criteria'] === 'Gesamtanlage' ||
+    tags['lda:criteria'] === 'Flächendenkmal'
+  ) {
     return 'historic_ensemble';
   }
   if (tags.tourism === 'museum' || tags.tourism === 'gallery') {
@@ -235,8 +241,17 @@ const mapCulturalSiteCategory = (tags) => {
     return 'castle';
   }
   if (
-    ['church', 'cathedral', 'chapel', 'monastery', 'temple', 'shrine', 'mosque'].includes(tags.building) ||
-    ['monastery', 'church'].includes(tags.historic) || tags.amenity === 'place_of_worship'
+    [
+      'church',
+      'cathedral',
+      'chapel',
+      'monastery',
+      'temple',
+      'shrine',
+      'mosque',
+    ].includes(tags.building) ||
+    ['monastery', 'church'].includes(tags.historic) ||
+    tags.amenity === 'place_of_worship'
   ) {
     return 'religious_heritage';
   }
@@ -249,23 +264,33 @@ const mapCulturalSiteCategory = (tags) => {
   if (tags.tourism === 'artwork') {
     return 'public_art';
   }
-  if (tags.historic === "archaeological_site" || tags.historic === "ruins" || tags['lda:criteria'] === "Bodendenkmal") {
+  if (
+    tags.historic === 'archaeological_site' ||
+    tags.historic === 'ruins' ||
+    tags['lda:criteria'] === 'Bodendenkmal'
+  ) {
     return 'archaeological_sites';
   }
   if (tags.highway === 'street_lamp' || tags.amenity === 'street_lamp') {
     return 'industrial_heritage';
   }
-  if (tags['lda:criteria'] === "Baudenkmal" || tags['heritage:description'] === "Baudenkmal" ||
-    tags.building || tags['lda:criteria'] === "Ensembleteil") {
+  if (
+    tags['lda:criteria'] === 'Baudenkmal' ||
+    tags['heritage:description'] === 'Baudenkmal' ||
+    tags.building ||
+    tags['lda:criteria'] === 'Ensembleteil'
+  ) {
     return 'heritage_buildings';
   }
-  if (tags['lda:criteria'] === 'Gartendenkmal' || tags.leisure === 'garden' || tags.leisure === 'park') {
+  if (
+    tags['lda:criteria'] === 'Gartendenkmal' ||
+    tags.leisure === 'garden' ||
+    tags.leisure === 'park'
+  ) {
     return 'gardens_parks';
   }
   return 'other';
 };
-
-
 
 /**
  * Converts the OSM element object to a data format suitable for the CulturalSite schema.
@@ -350,20 +375,28 @@ const processOsmElementForCulturalSite = async (
   //   )
   //   : determineCulturalSiteAddressFromTags(tags); // New helper to only get address from tags
   const address = performReverseGeocoding
-    ? await determineCulturalSiteAddress(tags, parsedLat, parsedLon, name, sourceId)
+    ? await determineCulturalSiteAddress(
+        tags,
+        parsedLat,
+        parsedLon,
+        name,
+        sourceId,
+      )
     : {
-      fullAddress: determineCulturalSiteAddressFromTags(tags),
-      street: tags['addr:street'] || '',
-      houseNumber: tags['addr:housenumber'] || '',
-      postcode: tags['addr:postcode'] || '',
-      district: '', // 초기값은 비워두고 마이그레이션/공간쿼리로 채움
-      city: (tags['addr:city'] || cityName).toLowerCase()
-    };
+        fullAddress: determineCulturalSiteAddressFromTags(tags),
+        street: tags['addr:street'] || '',
+        houseNumber: tags['addr:housenumber'] || '',
+        postcode: tags['addr:postcode'] || '',
+        district: '', // 초기값은 비워두고 마이그레이션/공간쿼리로 채움
+        city: (tags['addr:city'] || cityName).toLowerCase(),
+      };
   const category = mapCulturalSiteCategory(tags); // Apply changed category mapping logic
 
   // 5. Final confirmation of required fields
   if (!name || !category || isNaN(parsedLat) || isNaN(parsedLon) || !sourceId) {
-    console.error(`Missing Info - Name: ${!!name}, Cat: ${!!category}, Lat: ${!isNaN(parsedLat)}`);
+    console.error(
+      `Missing Info - Name: ${!!name}, Cat: ${!!category}, Lat: ${!isNaN(parsedLat)}`,
+    );
     throw new AppError(
       'Essential cultural heritage information (name, category, location, sourceId) cannot be extracted from OSM data.',
       400,
@@ -378,7 +411,7 @@ const processOsmElementForCulturalSite = async (
       type: 'Point',
       coordinates: [parsedLon, parsedLat],
     },
-    address, 
+    address,
     website: tags.website || tags.url || '',
     imageUrl: tags.image || tags.thumbnail || '',
     openingHours: tags.opening_hours || '',

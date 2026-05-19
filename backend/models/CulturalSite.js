@@ -48,12 +48,12 @@ const culturalSiteSchema = new mongoose.Schema(
       },
     },
     address: {
-      fullAddress: String, 
-      street: String,      
-      houseNumber: String, 
-      postcode: String,    
-      district: String,    
-      city: { type: String, default: 'Berlin' }
+      fullAddress: String,
+      street: String,
+      houseNumber: String,
+      postcode: String,
+      district: String,
+      city: { type: String, default: 'Berlin' },
     },
     website: {
       type: String,
@@ -128,7 +128,7 @@ const culturalSiteSchema = new mongoose.Schema(
 );
 
 culturalSiteSchema.index({ averageRating: -1 });
-culturalSiteSchema.index({ reviewCount: -1 });  
+culturalSiteSchema.index({ reviewCount: -1 });
 culturalSiteSchema.index({ category: 1 });
 
 module.exports = mongoose.model('CulturalSite', culturalSiteSchema);

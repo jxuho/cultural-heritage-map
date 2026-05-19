@@ -9,7 +9,7 @@ router.get(
   '/admin/all',
   authController.protect,
   authController.restrictTo('admin'),
-  reviewController.getAllReviewsForAdmin
+  reviewController.getAllReviewsForAdmin,
 );
 
 // View all reviews of a specific cultural property
@@ -23,7 +23,7 @@ router.post(
   '/',
   authController.protect,
   authController.restrictTo('user', 'admin'),
-  reviewController.createReview
+  reviewController.createReview,
 );
 
 // Edit review
@@ -31,7 +31,7 @@ router.patch(
   '/:reviewId',
   authController.protect,
   authController.restrictTo('user', 'admin'),
-  reviewController.updateReviewById
+  reviewController.updateReviewById,
 );
 
 // Delete review
@@ -39,7 +39,7 @@ router.delete(
   '/:reviewId',
   authController.protect,
   authController.restrictTo('user', 'admin'),
-  reviewController.deleteReviewById
+  reviewController.deleteReviewById,
 );
 
 module.exports = router;

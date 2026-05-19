@@ -9,7 +9,10 @@ interface InfinitePlaceListProps {
 
 const ITEMS_PER_PAGE = 20;
 
-const InfinitePlaceList: React.FC<InfinitePlaceListProps> = ({ items, onItemClick }) => {
+const InfinitePlaceList: React.FC<InfinitePlaceListProps> = ({
+  items,
+  onItemClick,
+}) => {
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -17,17 +20,20 @@ const InfinitePlaceList: React.FC<InfinitePlaceListProps> = ({ items, onItemClic
     setVisibleCount(ITEMS_PER_PAGE);
   }, [items]);
 
-  const loadMore = useCallback((entries: IntersectionObserverEntry[]) => {
-    const target = entries[0];
-    if (target.isIntersecting && visibleCount < items.length) {
-      setVisibleCount((prev) => prev + ITEMS_PER_PAGE);
-    }
-  }, [visibleCount, items.length]);
+  const loadMore = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const target = entries[0];
+      if (target.isIntersecting && visibleCount < items.length) {
+        setVisibleCount((prev) => prev + ITEMS_PER_PAGE);
+      }
+    },
+    [visibleCount, items.length],
+  );
 
   useEffect(() => {
-    const observer = new IntersectionObserver(loadMore, { 
+    const observer = new IntersectionObserver(loadMore, {
       threshold: 0.1,
-      rootMargin: '100px' // 사용자 경험을 위해 미리 로딩
+      rootMargin: '100px', // 사용자 경험을 위해 미리 로딩
     });
     if (observerTarget.current) observer.observe(observerTarget.current);
     return () => observer.disconnect();
@@ -55,9 +61,12 @@ const InfinitePlaceList: React.FC<InfinitePlaceListProps> = ({ items, onItemClic
           </div>
         ))}
       </div>
-      
+
       {/* Modernist Loader */}
-      <div ref={observerTarget} className="h-40 flex flex-col items-center justify-center gap-4">
+      <div
+        ref={observerTarget}
+        className="h-40 flex flex-col items-center justify-center gap-4"
+      >
         {visibleCount < items.length ? (
           <>
             <div className="w-12 h-[1px] bg-black animate-pulse" />

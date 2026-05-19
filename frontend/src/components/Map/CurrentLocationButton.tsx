@@ -11,7 +11,8 @@ const CurrentLocationButton = ({
   const map = useMap();
   const [locMarker, setLocMarker] = useState<CircleMarker | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isLocationOutsideBounds, setIsLocationOutsideBounds] = useState<boolean>(false);
+  const [isLocationOutsideBounds, setIsLocationOutsideBounds] =
+    useState<boolean>(false);
 
   const handleClick = () => {
     if (!navigator.geolocation) return;
@@ -41,12 +42,12 @@ const CurrentLocationButton = ({
           fillColor: '#facc15',
           fillOpacity: 1,
         }).addTo(map);
-        
+
         setLocMarker(marker);
         setIsLoading(false);
       },
       () => setIsLoading(false),
-      { timeout: 5000 }
+      { timeout: 5000 },
     );
   };
 

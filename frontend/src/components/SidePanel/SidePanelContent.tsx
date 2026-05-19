@@ -8,7 +8,7 @@ import SidePanelItems from './SidePanelItems';
 import CreateForm from './CreateForm';
 import UpdateForm from './UpdateForm';
 import UserProfileDisplay from './UserProfileDisplay';
-import { X } from 'lucide-react'; 
+import { X } from 'lucide-react';
 
 const SidePanelContent = () => {
   const isCreateFormOpen = useUiStore((state) => state.isCreateFormOpen);

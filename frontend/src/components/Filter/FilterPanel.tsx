@@ -14,11 +14,11 @@ import FilterContent from './FilterContent';
 const FilterPanel = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-const { refs, floatingStyles, context } = useFloating({
+  const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
     middleware: [
-      flip(), 
+      flip(),
       shift({ padding: 10 }),
       size({
         apply({ availableWidth, availableHeight, elements }) {
@@ -53,7 +53,7 @@ const { refs, floatingStyles, context } = useFloating({
           <FilterContent
             ref={refs.setFloating}
             isOpen={isOpen}
-            floatingStyles={{...floatingStyles, zIndex: 100}}
+            floatingStyles={{ ...floatingStyles, zIndex: 100 }}
             {...getFloatingProps()}
           />
         </FloatingPortal>

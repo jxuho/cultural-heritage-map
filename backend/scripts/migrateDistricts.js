@@ -13,7 +13,10 @@ const migrateDistricts = async () => {
     console.log('✅ Connected to MongoDB');
 
     // 2. 구역 GeoJSON 데이터 로드 (파일 경로는 본인의 환경에 맞게 수정하세요)
-    const districtsPath = path.join(__dirname, '../data/berlin_district_boundary.geojson');
+    const districtsPath = path.join(
+      __dirname,
+      '../data/berlin_district_boundary.geojson',
+    );
     const districtsData = JSON.parse(fs.readFileSync(districtsPath, 'utf8'));
 
     // 3. 모든 사이트 가져오기
@@ -47,22 +50,27 @@ const migrateDistricts = async () => {
       }
 
       // 4. 주소 구조 업데이트 (기존 문자열 보존 + 구 추가)
-      const oldAddress = typeof site.address === 'string' ? site.address : (site.address?.fullAddress || '');
-      
+      const oldAddress =
+        typeof site.address === 'string'
+          ? site.address
+          : site.address?.fullAddress || '';
+
       site.address = {
         fullAddress: oldAddress,
         street: site.address?.street || '',
         houseNumber: site.address?.houseNumber || '',
         postcode: site.address?.postcode || '',
         district: foundDistrict, // 찾은 구 이름 삽입
-        city: 'berlin'
+        city: 'berlin',
       };
 
       await site.save();
       updatedCount++;
 
       if (updatedCount % 500 === 0) {
-        console.log(`⏳ Progress: ${updatedCount}/${sites.length} sites processed...`);
+        console.log(
+          `⏳ Progress: ${updatedCount}/${sites.length} sites processed...`,
+        );
       }
     }
 

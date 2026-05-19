@@ -45,7 +45,7 @@ const SidePanel = () => {
 
   if (!isSidePanelOpen) return null;
 
-return (
+  return (
     <aside
       ref={detailRef}
       className="absolute z-30 right-0 inset-y-0 h-full shadow-lg bg-white flex flex-col overflow-hidden"
@@ -62,7 +62,7 @@ return (
       <div className="flex-1 min-h-0 relative">
         <SidePanelContent />
       </div>
-      
+
       <SidePanelButtons />
     </aside>
   );

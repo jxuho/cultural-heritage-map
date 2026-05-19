@@ -11,7 +11,10 @@ const {
   addSourceIdToExclusion,
 } = require('../services/excludeSourceIdService');
 const { isPointInCity, isValidLatLng } = require('../utils/locationUtils');
-const { extendedCulturalSiteQuery, CITY_RELATION_IDS } = require('../config/osmData');
+const {
+  extendedCulturalSiteQuery,
+  CITY_RELATION_IDS,
+} = require('../config/osmData');
 const { queryOverpass } = require('../services/overpassService');
 const {
   processOsmElementForCulturalSite,
@@ -41,7 +44,6 @@ const parseBboxParams = (query) => {
 
   return { minLng, minLat, maxLng, maxLat };
 };
-
 
 const getAllCulturalSites = asyncHandler(async (req, res, next) => {
   // 1. 페이지네이션 설정
@@ -76,7 +78,9 @@ const getAllCulturalSites = asyncHandler(async (req, res, next) => {
     .sort(sortStr)
     .skip(skip)
     .limit(limit)
-    .select('_id name category location address averageRating reviewCount imageUrl');
+    .select(
+      '_id name category location address averageRating reviewCount imageUrl',
+    );
 
   // 4. 전체 개수 확인 (페이지네이션용)
   const totalResults = await CulturalSite.countDocuments(queryFilter);
@@ -509,10 +513,18 @@ const getNearbyOsmCulturalSites = asyncHandler(async (req, res, next) => {
   const currentCityAreaId = CITY_RELATION_IDS[currentCity];
   if (!currentCityAreaId) {
     return next(
-      new AppError(`OSM area ID for city "${currentCity}" is not defined.`, 400),
+      new AppError(
+        `OSM area ID for city "${currentCity}" is not defined.`,
+        400,
+      ),
     );
   }
-  const overpassQuery = extendedCulturalSiteQuery(currentCityAreaId, radius, parsedLat, parsedLon);
+  const overpassQuery = extendedCulturalSiteQuery(
+    currentCityAreaId,
+    radius,
+    parsedLat,
+    parsedLon,
+  );
 
   // 4. Overpass API call
   let osmData;
@@ -715,23 +727,23 @@ const getDistrictStats = asyncHandler(async (req, res) => {
   const stats = await CulturalSite.aggregate([
     {
       // active한 사이트만 필터링 (필요시)
-      $match: { active: true }
+      $match: { active: true },
     },
     {
       // address.district 필드를 기준으로 그룹화
       $group: {
         _id: '$address.district',
         count: { $sum: 1 },
-        // 각 구의 대표 좌표를 하나 가져오거나, 
+        // 각 구의 대표 좌표를 하나 가져오거나,
         // 미리 정의된 구별 중심 좌표를 프론트에서 써도 됩니다.
-      }
+      },
     },
-    { $sort: { count: -1 } }
+    { $sort: { count: -1 } },
   ]);
 
   res.status(200).json({
     status: 'success',
-    data: stats
+    data: stats,
   });
 });
 
@@ -764,7 +776,6 @@ const getDistrictBoundaries = asyncHandler(async (req, res, next) => {
     },
   });
 });
-
 
 module.exports = {
   getAllCulturalSites,

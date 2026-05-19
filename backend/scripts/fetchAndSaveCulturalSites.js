@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const { baseCulturalSiteQuery,
+const {
+  baseCulturalSiteQuery,
   historicMonumentsQuery,
   historicMemorialQuery,
   historicCastlesRuinsQuery,
@@ -23,8 +24,16 @@ const CULTURAL_QUERY_MAP = [
   // Historic Sites
   { key: 'historic_monuments', fn: historicMonumentsQuery, priority: 'low' },
   { key: 'historic_memorials', fn: historicMemorialQuery, priority: 'high' },
-  { key: 'historic_castles_ruins', fn: historicCastlesRuinsQuery, priority: 'medium' },
-  { key: 'historic_archaeology', fn: historicArchaeologyQuery, priority: 'low' },
+  {
+    key: 'historic_castles_ruins',
+    fn: historicCastlesRuinsQuery,
+    priority: 'medium',
+  },
+  {
+    key: 'historic_archaeology',
+    fn: historicArchaeologyQuery,
+    priority: 'low',
+  },
 
   // Heritage Buildings (heavy → run later)
   { key: 'building_castle', fn: buildingCastleQuery, priority: 'heavy' },
@@ -42,16 +51,27 @@ const CULTURAL_QUERY_MAP = [
   { key: 'cultural_venues', fn: culturalVenuesQuery, priority: 'low' },
 
   // Attractions (medium-heavy depending on city)
-  { key: 'attraction_historic', fn: attractionHistoricQuery, priority: 'medium' },
-  { key: 'attraction_cultural', fn: attractionCulturalQuery, priority: 'medium' },
-  { key: 'attraction_monument', fn: attractionMonumentQuery, priority: 'medium' },
+  {
+    key: 'attraction_historic',
+    fn: attractionHistoricQuery,
+    priority: 'medium',
+  },
+  {
+    key: 'attraction_cultural',
+    fn: attractionCulturalQuery,
+    priority: 'medium',
+  },
+  {
+    key: 'attraction_monument',
+    fn: attractionMonumentQuery,
+    priority: 'medium',
+  },
 
   // Public Art
   { key: 'public_art', fn: publicArtQuery, priority: 'low' },
 ];
 
-
-const sleep = (ms) => new Promise(res => setTimeout(res, ms));
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 // Add jitter to make request times irregular (to help avoid bot detection)
 const jitter = (base) => base + Math.floor(Math.random() * 2000);
@@ -82,7 +102,9 @@ async function retryQuery(fn, args, retries = 5) {
       const baseDelay = isRateLimit ? 20000 : 8000;
       const delay = (i + 1) * baseDelay + jitter(1000);
 
-      console.log(`⏳ ${isRateLimit ? 'Rate Limited' : 'Server Timeout'}. Retry ${i + 1}/${retries} after ${delay}ms`);
+      console.log(
+        `⏳ ${isRateLimit ? 'Rate Limited' : 'Server Timeout'}. Retry ${i + 1}/${retries} after ${delay}ms`,
+      );
       await sleep(delay);
     }
   }
@@ -96,7 +118,7 @@ async function fetchAndSaveCulturalSites(
   areaId = 62422,
   radius,
   lat,
-  lon
+  lon,
 ) {
   console.log(`🚀 Starting import: ${cityName}`);
 
@@ -106,14 +128,16 @@ async function fetchAndSaveCulturalSites(
 
   // Sort by priority
   const sortedQueries = [...CULTURAL_QUERY_MAP].sort(
-    (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]
+    (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority],
   );
 
   for (let i = 0; i < sortedQueries.length; i++) {
     const q = sortedQueries[i];
 
     try {
-      console.log(`📡 [${i + 1}/${sortedQueries.length}] Running: ${q.key} (Priority: ${q.priority})`);
+      console.log(
+        `📡 [${i + 1}/${sortedQueries.length}] Running: ${q.key} (Priority: ${q.priority})`,
+      );
       const data = await retryQuery(queryOverpass, [
         q.fn(areaId, radius, lat, lon),
       ]);
@@ -139,7 +163,6 @@ async function fetchAndSaveCulturalSites(
       //Rest longer after 'heavy' queries with a lot of data.
       const cooldown = q.priority === 'heavy' ? 10000 : 5000;
       await sleep(jitter(cooldown));
-
     } catch (err) {
       console.error(`❌ [FAILED] ${q.key}:`, err.message);
       failed.push({
@@ -187,4 +210,3 @@ if (require.main === module) {
 }
 
 module.exports = fetchAndSaveCulturalSites;
-

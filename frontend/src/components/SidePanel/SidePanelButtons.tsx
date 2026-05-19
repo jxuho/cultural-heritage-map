@@ -23,7 +23,9 @@ const SidePanelButtons: React.FC = () => {
   } = useUiStore();
 
   const deleteCulturalSiteMutation = useDeleteCulturalSite();
-  const { data: selectedPlaceData } = useCulturalSiteDetail(uiSelectedPlace?._id);
+  const { data: selectedPlaceData } = useCulturalSiteDetail(
+    uiSelectedPlace?._id,
+  );
 
   const editThisSiteButtonClickHandler = (): void => {
     if (selectedPlaceData) openUpdateForm(selectedPlaceData);
@@ -47,13 +49,19 @@ const SidePanelButtons: React.FC = () => {
           Permanent Deletion
         </h3>
         <p className="text-[13px] text-gray-500 leading-relaxed text-center mb-8 font-serif italic">
-          Are you sure you want to remove "<span className="text-black font-bold not-italic">{selectedPlaceData.name}</span>" from the digital archive? This operation is irreversible.
+          Are you sure you want to remove "
+          <span className="text-black font-bold not-italic">
+            {selectedPlaceData.name}
+          </span>
+          " from the digital archive? This operation is irreversible.
         </p>
         <div className="flex flex-col gap-2">
           <button
             onClick={async () => {
               try {
-                await deleteCulturalSiteMutation.mutateAsync(selectedPlaceData._id);
+                await deleteCulturalSiteMutation.mutateAsync(
+                  selectedPlaceData._id,
+                );
                 closeModal();
                 handleCloseAndCancel(null);
               } catch (error) {
@@ -75,7 +83,11 @@ const SidePanelButtons: React.FC = () => {
     );
   };
 
-  const showButtons = !!selectedPlaceData && !isCreateFormOpen && !isUpdateFormOpen && !isUserProfileOpen;
+  const showButtons =
+    !!selectedPlaceData &&
+    !isCreateFormOpen &&
+    !isUpdateFormOpen &&
+    !isUserProfileOpen;
 
   if (!showButtons) return null;
 
@@ -93,15 +105,25 @@ const SidePanelButtons: React.FC = () => {
               onClick={editThisSiteButtonClickHandler}
               className="flex-1 flex items-center justify-center gap-3 py-4 bg-white hover:bg-gray-50 text-black transition-all group"
             >
-              <Edit3 size={14} className="group-hover:rotate-12 transition-transform" />
-              <span className="text-[11px] font-black uppercase tracking-widest">Update Record</span>
+              <Edit3
+                size={14}
+                className="group-hover:rotate-12 transition-transform"
+              />
+              <span className="text-[11px] font-black uppercase tracking-widest">
+                Update Record
+              </span>
             </button>
             <button
               onClick={deleteThisSiteButtonClickHandler}
               className="flex-1 flex items-center justify-center gap-3 py-4 bg-white hover:bg-red-50 text-red-600 transition-all group"
             >
-              <Trash2 size={14} className="group-hover:scale-110 transition-transform" />
-              <span className="text-[11px] font-black uppercase tracking-widest">Delete Entry</span>
+              <Trash2
+                size={14}
+                className="group-hover:scale-110 transition-transform"
+              />
+              <span className="text-[11px] font-black uppercase tracking-widest">
+                Delete Entry
+              </span>
             </button>
           </>
         ) : (
@@ -110,7 +132,9 @@ const SidePanelButtons: React.FC = () => {
             className="w-full flex items-center justify-center gap-3 py-5 bg-white hover:bg-gray-50 text-black transition-all group"
           >
             <HelpCircle size={14} />
-            <span className="text-[11px] font-black uppercase tracking-widest">Suggest Revision</span>
+            <span className="text-[11px] font-black uppercase tracking-widest">
+              Suggest Revision
+            </span>
           </button>
         )}
       </div>

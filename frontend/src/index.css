@@ -195,15 +195,17 @@ body {
   background-color: #ffffff !important;
   color: #000000 !important;
   border-bottom: 1px solid #000000 !important;
-  
+
   width: 44px !important;
   height: 44px !important;
-  line-height: 44px !important; 
-  font-size: 22px !important;  
-  
+  line-height: 44px !important;
+  font-size: 22px !important;
+
   font-weight: 800 !important;
   font-family: 'Geist Variable', 'Inter', 'Helvetica', sans-serif !important;
-  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out !important;
+  transition:
+    background-color 0.15s ease-in-out,
+    color 0.15s ease-in-out !important;
 }
 
 .leaflet-touch .leaflet-bar a:last-child {
@@ -274,7 +276,6 @@ body {
 }
 
 .leaflet-bottom.leaflet-right .leaflet-control-zoom {
-  margin-right: 32px !important; 
-  margin-bottom: 32px !important; 
+  margin-right: 32px !important;
+  margin-bottom: 32px !important;
 }
-

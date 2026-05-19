@@ -53,22 +53,26 @@ const FavoriteSites = () => {
     sortableFavorites.sort((a, b) => {
       let valA, valB;
       switch (sortBy) {
-        case 'rating': 
-          valA = a.averageRating || 0; 
-          valB = b.averageRating || 0; 
+        case 'rating':
+          valA = a.averageRating || 0;
+          valB = b.averageRating || 0;
           break;
-        case 'date': 
-          valA = a.createdAt ? new Date(a.createdAt).getTime() : 0; 
-          valB = b.createdAt ? new Date(b.createdAt).getTime() : 0; 
+        case 'date':
+          valA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          valB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           break;
-        default: 
-          valA = a.name || ''; 
+        default:
+          valA = a.name || '';
           valB = b.name || '';
       }
       if (typeof valA === 'string' && typeof valB === 'string') {
-        return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        return sortOrder === 'asc'
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
       }
-      return sortOrder === 'asc' ? (valA as number) - (valB as number) : (valB as number) - (valA as number);
+      return sortOrder === 'asc'
+        ? (valA as number) - (valB as number)
+        : (valB as number) - (valA as number);
     });
     return sortableFavorites;
   }, [myFavorites, sortBy, sortOrder]);
@@ -78,59 +82,88 @@ const FavoriteSites = () => {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(criteria);
-      setSortOrder(criteria === 'date' || criteria === 'rating' ? 'desc' : 'asc');
+      setSortOrder(
+        criteria === 'date' || criteria === 'rating' ? 'desc' : 'asc',
+      );
     }
   };
 
-  const labelClass = "text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1 block";
-  const infoRowClass = "border-b border-zinc-100 py-3 last:border-0";
+  const labelClass =
+    'text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1 block';
+  const infoRowClass = 'border-b border-zinc-100 py-3 last:border-0';
 
   const renderContent = () => {
-    if (!currentUser) return (
-      <div className="py-20 text-center border-2 border-black bg-zinc-50">
-        <p className="font-mono text-xs uppercase font-bold">Access Denied: Please Sign In</p>
-      </div>
-    );
+    if (!currentUser)
+      return (
+        <div className="py-20 text-center border-2 border-black bg-zinc-50">
+          <p className="font-mono text-xs uppercase font-bold">
+            Access Denied: Please Sign In
+          </p>
+        </div>
+      );
 
-    if (isLoadingFavorites) return (
-      <div className="py-20 flex flex-col items-center gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-black" />
-        <p className="text-[10px] font-black uppercase tracking-[0.3em]">Syncing Archive...</p>
-      </div>
-    );
+    if (isLoadingFavorites)
+      return (
+        <div className="py-20 flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-black" />
+          <p className="text-[10px] font-black uppercase tracking-[0.3em]">
+            Syncing Archive...
+          </p>
+        </div>
+      );
 
-    if (isFavoritesError) return <ErrorMessage message={favoritesError?.message || 'Archive sync failed.'} />;
+    if (isFavoritesError)
+      return (
+        <ErrorMessage
+          message={favoritesError?.message || 'Archive sync failed.'}
+        />
+      );
 
-    if (sortedFavorites.length === 0) return (
-      <div className="py-20 text-center border-2 border-dashed border-zinc-300">
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">No bookmark sites found.</p>
-      </div>
-    );
+    if (sortedFavorites.length === 0)
+      return (
+        <div className="py-20 text-center border-2 border-dashed border-zinc-300">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">
+            No bookmark sites found.
+          </p>
+        </div>
+      );
 
     return (
       <div className="grid gap-4">
         {sortedFavorites.map((site) => (
-          <div 
+          <div
             key={site._id}
             className={`border-2 border-black transition-all ${expandedSiteId === site._id ? 'bg-white' : 'bg-zinc-50 hover:bg-zinc-100'}`}
           >
-            <div 
+            <div
               className="flex items-center justify-between p-5 cursor-pointer"
-              onClick={() => setExpandedSiteId(expandedSiteId === site._id ? null : site._id)}
+              onClick={() =>
+                setExpandedSiteId(expandedSiteId === site._id ? null : site._id)
+              }
             >
               <div className="grow">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="bg-black text-white px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider">Indexed</span>
-                  <span className="text-[10px] font-mono text-zinc-400">#{site._id.slice(-6)}</span>
+                  <span className="bg-black text-white px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider">
+                    Indexed
+                  </span>
+                  <span className="text-[10px] font-mono text-zinc-400">
+                    #{site._id.slice(-6)}
+                  </span>
                 </div>
-                <h3 className="text-lg font-black uppercase tracking-tighter leading-none">{site.name}</h3>
+                <h3 className="text-lg font-black uppercase tracking-tighter leading-none">
+                  {site.name}
+                </h3>
               </div>
               <button
                 onClick={(e) => handleFavoriteChange(e, site._id, true)}
                 className={`p-3 border-2 border-black transition-colors ${favoriteMutation.isPending ? 'opacity-20' : 'hover:bg-yellow-400 bg-white'}`}
                 disabled={favoriteMutation.isPending}
               >
-                <BsStarFill className={favoriteMutation.isPending ? 'text-zinc-300' : 'text-black'} />
+                <BsStarFill
+                  className={
+                    favoriteMutation.isPending ? 'text-zinc-300' : 'text-black'
+                  }
+                />
               </button>
             </div>
 
@@ -142,10 +175,19 @@ const FavoriteSites = () => {
                     <div className="flex items-center gap-3">
                       <div className="flex text-black">
                         {[...Array(5)].map((_, i) => (
-                          <StarIcon key={i} rating={site.averageRating || 0} index={i} className="w-4 h-4" displayMode="averageRating" />
+                          <StarIcon
+                            key={i}
+                            rating={site.averageRating || 0}
+                            index={i}
+                            className="w-4 h-4"
+                            displayMode="averageRating"
+                          />
                         ))}
                       </div>
-                      <span className="font-mono text-sm font-bold">{site.averageRating?.toFixed(1) || '0.0'} ({site.reviewCount || 0})</span>
+                      <span className="font-mono text-sm font-bold">
+                        {site.averageRating?.toFixed(1) || '0.0'} (
+                        {site.reviewCount || 0})
+                      </span>
                     </div>
                   </div>
 
@@ -158,20 +200,26 @@ const FavoriteSites = () => {
 
                   <div className={`${infoRowClass} md:col-span-2`}>
                     <label className={labelClass}>Geographic Location</label>
-                    <p className="text-xs font-mono">{site.address?.fullAddress || 'Location data missing'}</p>
+                    <p className="text-xs font-mono">
+                      {site.address?.fullAddress || 'Location data missing'}
+                    </p>
                   </div>
 
                   {site.description && (
                     <div className={`${infoRowClass} md:col-span-2`}>
                       <label className={labelClass}>Archive Description</label>
-                      <p className="text-xs leading-relaxed text-zinc-600 font-serif italic">"{site.description}"</p>
+                      <p className="text-xs leading-relaxed text-zinc-600 font-serif italic">
+                        "{site.description}"
+                      </p>
                     </div>
                   )}
                 </div>
 
                 {site.website && (
-                  <a 
-                    href={site.website} target="_blank" rel="noopener noreferrer"
+                  <a
+                    href={site.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="mt-6 inline-flex items-center gap-2 bg-black text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-colors"
                   >
                     External Link <ExternalLink size={12} />
@@ -203,20 +251,30 @@ const FavoriteSites = () => {
 
       {/* Sorting Controls */}
       <div className="flex flex-wrap gap-2 mb-10">
-        <button onClick={() => handleSortChange('date')} className={sortBtnClass(sortBy === 'date')}>
-          <Calendar size={14} /> Date {sortBy === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}
+        <button
+          onClick={() => handleSortChange('date')}
+          className={sortBtnClass(sortBy === 'date')}
+        >
+          <Calendar size={14} /> Date{' '}
+          {sortBy === 'date' && (sortOrder === 'asc' ? '↑' : '↓')}
         </button>
-        <button onClick={() => handleSortChange('name')} className={sortBtnClass(sortBy === 'name')}>
-          <MapPin size={14} /> Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+        <button
+          onClick={() => handleSortChange('name')}
+          className={sortBtnClass(sortBy === 'name')}
+        >
+          <MapPin size={14} /> Name{' '}
+          {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
         </button>
-        <button onClick={() => handleSortChange('rating')} className={sortBtnClass(sortBy === 'rating')}>
-          <Star size={14} /> Rating {sortBy === 'rating' && (sortOrder === 'asc' ? '↑' : '↓')}
+        <button
+          onClick={() => handleSortChange('rating')}
+          className={sortBtnClass(sortBy === 'rating')}
+        >
+          <Star size={14} /> Rating{' '}
+          {sortBy === 'rating' && (sortOrder === 'asc' ? '↑' : '↓')}
         </button>
       </div>
 
-      <div className="grow">
-        {renderContent()}
-      </div>
+      <div className="grow">{renderContent()}</div>
 
       {favoriteMutation.isPending && (
         <div className="fixed bottom-8 right-8 bg-black text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest animate-pulse border-2 border-white shadow-xl">

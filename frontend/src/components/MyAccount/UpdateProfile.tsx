@@ -50,13 +50,15 @@ const UpdateProfile = () => {
     }
   };
 
-  const submitUpdateProfileHandler = async (e: React.FormEvent<HTMLFormElement>) => {
+  const submitUpdateProfileHandler = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ) => {
     e.preventDefault();
     let isValid = true;
 
     // Validation Logic (Username)
     if (userName.trim() === '' || !nameRegex.test(userName)) {
-      setNameMessage("Invalid username format.");
+      setNameMessage('Invalid username format.');
       setShowMessage((p) => ({ ...p, showNameMessage: true }));
       isValid = false;
     }
@@ -77,16 +79,18 @@ const UpdateProfile = () => {
       updateUser(data.data.user);
       setShowMessage((p) => ({ ...p, changeSuccess: true, apiError: false }));
     } catch (error: any) {
-      setShowMessage((p) => ({ 
-        ...p, 
-        apiError: true, 
-        apiErrorMessage: error.message || 'Update failed.' 
+      setShowMessage((p) => ({
+        ...p,
+        apiError: true,
+        apiErrorMessage: error.message || 'Update failed.',
       }));
     }
   };
 
-  const inputBase = "w-full p-3 border-2 border-black font-mono text-sm focus:bg-zinc-50 outline-none transition-colors rounded-none";
-  const labelBase = "block text-[10px] font-black uppercase tracking-[0.2em] mb-2 text-black";
+  const inputBase =
+    'w-full p-3 border-2 border-black font-mono text-sm focus:bg-zinc-50 outline-none transition-colors rounded-none';
+  const labelBase =
+    'block text-[10px] font-black uppercase tracking-[0.2em] mb-2 text-black';
 
   // --- Success State ---
   if (showMessage.changeSuccess) {
@@ -96,9 +100,14 @@ const UpdateProfile = () => {
           <div className="inline-block bg-black text-white px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.2em] mb-6">
             System Message
           </div>
-          <h1 className="text-3xl font-black uppercase tracking-tighter mb-4">Update <br/>Complete</h1>
+          <h1 className="text-3xl font-black uppercase tracking-tighter mb-4">
+            Update <br />
+            Complete
+          </h1>
           <p className="font-mono text-xs text-gray-500 mb-8">
-            User records for <span className="text-black font-bold">@{userName}</span> have been successfully synchronized with the archive.
+            User records for{' '}
+            <span className="text-black font-bold">@{userName}</span> have been
+            successfully synchronized with the archive.
           </p>
           <button
             className="w-full py-4 bg-black text-white font-black uppercase text-xs tracking-[0.3em] hover:bg-zinc-800 transition-colors cursor-pointer"
@@ -130,7 +139,10 @@ const UpdateProfile = () => {
         </h1>
       </header>
 
-      <form onSubmit={submitUpdateProfileHandler} className="grid grid-cols-1 md:grid-cols-12 gap-12">
+      <form
+        onSubmit={submitUpdateProfileHandler}
+        className="grid grid-cols-1 md:grid-cols-12 gap-12"
+      >
         {/* Left: Avatar */}
         <div className="md:col-span-4 flex flex-col items-center">
           <div className="w-32 h-32 border-2 border-black p-1 bg-white relative group">
@@ -140,11 +152,14 @@ const UpdateProfile = () => {
               className="w-full h-full object-cover filter grayscale hover:grayscale-0 transition-all"
             />
             <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <span className="text-[8px] font-black text-white uppercase bg-black px-1">Static</span>
+              <span className="text-[8px] font-black text-white uppercase bg-black px-1">
+                Static
+              </span>
             </div>
           </div>
           <p className="mt-4 font-mono text-[9px] text-gray-400 text-center uppercase tracking-tighter">
-            Profile images are <br/>managed via provider
+            Profile images are <br />
+            managed via provider
           </p>
         </div>
 
@@ -152,7 +167,9 @@ const UpdateProfile = () => {
         <div className="md:col-span-8 space-y-8">
           {/* Username */}
           <div>
-            <label htmlFor="userName" className={labelBase}>Username ID</label>
+            <label htmlFor="userName" className={labelBase}>
+              Username ID
+            </label>
             <input
               id="userName"
               value={userName}
@@ -161,13 +178,17 @@ const UpdateProfile = () => {
               placeholder="ENTRY_NAME"
             />
             {showMessage.showNameMessage && (
-              <p className="mt-2 text-[10px] font-bold text-red-500 uppercase font-mono italic">! {nameMessage}</p>
+              <p className="mt-2 text-[10px] font-bold text-red-500 uppercase font-mono italic">
+                ! {nameMessage}
+              </p>
             )}
           </div>
 
           {/* Bio */}
           <div>
-            <label htmlFor="bio" className={labelBase}>User Biography</label>
+            <label htmlFor="bio" className={labelBase}>
+              User Biography
+            </label>
             <textarea
               id="bio"
               value={bio}
@@ -181,10 +202,12 @@ const UpdateProfile = () => {
                 {showMessage.showBioMessage ? (
                   <span className="text-red-500 font-bold">Overflow Error</span>
                 ) : (
-                  "Data String Length"
+                  'Data String Length'
                 )}
               </p>
-              <p className={`text-[10px] font-mono ${bio.length > BIO_MAX_LENGTH ? 'text-red-500' : 'text-gray-400'}`}>
+              <p
+                className={`text-[10px] font-mono ${bio.length > BIO_MAX_LENGTH ? 'text-red-500' : 'text-gray-400'}`}
+              >
                 {bio.length}/{BIO_MAX_LENGTH}
               </p>
             </div>

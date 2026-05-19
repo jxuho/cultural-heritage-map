@@ -12,8 +12,8 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest leading-relaxed max-w-[300px]">
-              A digital archive dedicated to preserving and exploring the cultural
-              landscape of Berlin.
+              A digital archive dedicated to preserving and exploring the
+              cultural landscape of Berlin.
             </p>
           </div>
 
@@ -76,7 +76,8 @@ const Footer = () => {
             </a>
           </div>
           <div className="text-[9px] text-gray-400 mt-2 tracking-widest">
-            &copy; {new Date().getFullYear()} ARCHIVE BERLIN. ALL RIGHTS RESERVED.
+            &copy; {new Date().getFullYear()} ARCHIVE BERLIN. ALL RIGHTS
+            RESERVED.
           </div>
         </div>
       </div>

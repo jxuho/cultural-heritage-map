@@ -293,7 +293,7 @@ paths:
       operationId: refreshToken
       description: Issues a new access token using a valid refresh token.
       security:
-        - refreshAuth: [] 
+        - refreshAuth: []
       responses:
         200:
           description: New access token issued successfully.
