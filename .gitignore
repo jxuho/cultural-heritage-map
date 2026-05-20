@@ -47,3 +47,5 @@ frontend/playwright-report/
 frontend/blob-report/
 frontend/playwright/.cache/
 frontend/playwright/.auth/
+
+*.bak
