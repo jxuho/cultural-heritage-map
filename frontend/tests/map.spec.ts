@@ -22,7 +22,7 @@ async function navigateToMap(page: Page) {
   );
 }
 
-test.describe('Step-by-Step Map Flow', () => {
+test.describe('Step-by-Step Map Flow @map', () => {
   test.beforeEach(async ({ page }) => {
     await navigateToMap(page); // "Explore Map" 클릭 및 로딩 대기
   });
@@ -61,7 +61,7 @@ test.describe('Step-by-Step Map Flow', () => {
   });
 });
 
-test.describe('Guest User Constraints', () => {
+test.describe('Guest User Constraints @map', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/auth/refresh', (route) =>
       route.fulfill({ status: 401 }),
@@ -79,7 +79,7 @@ test.describe('Guest User Constraints', () => {
   });
 });
 
-test.describe('Authenticated User Features', () => {
+test.describe('Authenticated User Features @map', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/auth/refresh', (route) =>
       route.fulfill({
