@@ -45,7 +45,6 @@ const parseBboxParams = (query) => {
   return { minLng, minLat, maxLng, maxLat };
 };
 
-
 const getAllCulturalSites = asyncHandler(async (req, res, next) => {
   const bbox = parseBboxParams(req.query);
   const queryFilter = {};
@@ -71,15 +70,15 @@ const getAllCulturalSites = asyncHandler(async (req, res, next) => {
         location: 1,
         address: 1,
         averageRating: 1,
-        reviewCount: 1
-      }
+        reviewCount: 1,
+      },
     },
     {
       $group: {
         _id: null,
-        allSites: { $push: "$$ROOT" }
-      }
-    }
+        allSites: { $push: '$$ROOT' },
+      },
+    },
   ];
 
   const aggregationOptions = bbox ? { hint: { location: '2dsphere' } } : {};
