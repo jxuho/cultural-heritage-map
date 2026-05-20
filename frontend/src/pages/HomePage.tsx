@@ -9,6 +9,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import LandingPage from './LandingPage';
 
 const MapComponent = lazy(() => import('../components/Map/MapComponent.jsx'));
+import { useAllCulturalSites } from '../hooks/data/useCulturalSitesQueries';
 
 const HomePage = () => {
   const [isCheckingSession, setIsCheckingSession] = useState(true);
@@ -22,6 +23,9 @@ const HomePage = () => {
     }
     setIsCheckingSession(false);
   }, []);
+
+  const isPreFetchTarget = !isCheckingSession && !showMap;
+  useAllCulturalSites(isPreFetchTarget);
 
   const handleExploreMap = () => {
     sessionStorage.setItem('berlin_portal_visited', 'true');

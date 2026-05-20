@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router';
 import { motion, Variants } from 'framer-motion';
 
 interface LandingPageProps {
@@ -7,8 +6,6 @@ interface LandingPageProps {
 }
 
 const LandingPage = ({ onExploreMap, onSignIn }: LandingPageProps) => {
-  const navigate = useNavigate();
-
   // Strict geometric motion types for Framer Motion + TypeScript
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
