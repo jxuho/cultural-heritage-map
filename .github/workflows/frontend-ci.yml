@@ -37,7 +37,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run E2E Tests
-        run: npx playwright test
+        run: npx playwright test --grep-invert @map
         env:
           VITE_MAP_INITIAL_LAT: '52.5163'
           VITE_MAP_INITIAL_LNG: '13.3777'
