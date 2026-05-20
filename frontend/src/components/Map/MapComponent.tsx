@@ -30,10 +30,11 @@ import { DistrictBoundaryFeature } from '../../api/culturalSitesApi';
 
 import { Place } from '@/types/place.ts';
 import { preloadIcons } from '../../utils/iconFactory.tsx';
+import { MAP_CONFIG } from '../../config/mapConfig.ts';
 
-const DISTRICT_LOD_ZOOM = 12;
-const CLUSTER_LOD_ZOOM = 13;
-const WARMUP_DELAY_MS = 1200;
+const DISTRICT_LOD_ZOOM = MAP_CONFIG.lod.districtZoom;
+const CLUSTER_LOD_ZOOM = MAP_CONFIG.lod.clusterZoom;
+const WARMUP_DELAY_MS = MAP_CONFIG.delays.warmupMs;
 
 const MapEventsHandler = () => {
   const openContextMenu = useUiStore((state) => state.openContextMenu);
@@ -115,19 +116,14 @@ const MapComponent = () => {
   const [isWarmupEnabled, setIsWarmupEnabled] = useState(false);
   const [isWarmupCompleted, setIsWarmupCompleted] = useState(false);
 
-  const initialLat = parseFloat(
-    import.meta.env.VITE_MAP_INITIAL_LAT || '52.5163',
-  );
-  const initialLng = parseFloat(
-    import.meta.env.VITE_MAP_INITIAL_LNG || '13.3777',
-  );
-  const initialZoom = parseInt(import.meta.env.VITE_MAP_INITIAL_ZOOM || '12');
-  const minZoom = parseInt(import.meta.env.VITE_MAP_MIN_ZOOM || '12');
-
-  const swLat = parseFloat(import.meta.env.VITE_MAP_BOUND_SW_LAT || '52.338');
-  const swLng = parseFloat(import.meta.env.VITE_MAP_BOUND_SW_LNG || '13.088');
-  const neLat = parseFloat(import.meta.env.VITE_MAP_BOUND_NE_LAT || '52.675');
-  const neLng = parseFloat(import.meta.env.VITE_MAP_BOUND_NE_LNG || '13.761');
+  const {
+    initial: { lat: initialLat, lng: initialLng, zoom: initialZoom },
+    minZoom,
+    bounds: {
+      sw: { lat: swLat, lng: swLng },
+      ne: { lat: neLat, lng: neLng },
+    },
+  } = MAP_CONFIG.berlin;
 
   const openSidePanel = useUiStore((state) => state.openSidePanel);
   const handleOpenSidePanel = useCallback(
