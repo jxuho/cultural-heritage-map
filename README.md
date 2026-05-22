@@ -35,13 +35,6 @@ The primary focus of this iteration was addressing performance bottlenecks — b
 | **Best Practices** | 100 | 100 |
 | **SEO** | 100 | 100 |
 
-While our Desktop environment achieves an excellent score of **96**, the Mobile environment currently stands at **70**. This performance discrepancy is a common occurrence in Lighthouse auditing due to the following technical factors:
-
-1. **Emulated Hardware & CPU Throttling**
-   Lighthouse evaluates the Mobile score by simulating a budget Android device (typically equivalent to a Moto G Power) with **4x CPU throttling**. The complex JavaScript execution and rendering processes of our heritage map feature require more processing power, which naturally causes a bottleneck on emulated lower-end mobile hardware compared to a powerful desktop CPU.
-
-2. **Network Throttling Simulation**
-   The Mobile audit applies a simulated **Slow 4G network** profile. Because our application initially fetches maps, historical data, and related assets, the slower network speed stretches our **First Contentful Paint (FCP) to 3.1s** and **Largest Contentful Paint (LCP) to 6.7s** on mobile, whereas the desktop benefits from high-speed, unthrottled connections.
 
 ---
 
