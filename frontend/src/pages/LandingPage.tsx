@@ -3,9 +3,14 @@ import { motion, Variants } from 'framer-motion';
 interface LandingPageProps {
   onExploreMap: () => void;
   onSignIn: () => void;
+  onAnimationComplete: () => void;
 }
 
-const LandingPage = ({ onExploreMap, onSignIn }: LandingPageProps) => {
+const LandingPage = ({
+  onExploreMap,
+  onSignIn,
+  onAnimationComplete,
+}: LandingPageProps) => {
   // Strict geometric motion types for Framer Motion + TypeScript
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -33,7 +38,13 @@ const LandingPage = ({ onExploreMap, onSignIn }: LandingPageProps) => {
   };
 
   return (
-    <div className="w-full bg-[#FFFFFF] text-[#000000] relative select-none font-sans">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      onAnimationComplete={onAnimationComplete}
+      className="w-full bg-[#FFFFFF] text-[#000000] relative select-none font-sans"
+    >
       {/* Bauhaus Accent Top Border */}
       <div className="absolute top-0 left-0 w-full h-[3px] flex opacity-20 z-50">
         <div className="bg-black w-1/3 h-full"></div>
@@ -43,12 +54,7 @@ const LandingPage = ({ onExploreMap, onSignIn }: LandingPageProps) => {
 
       <main className="container mx-auto px-6 pt-32 pb-32 max-w-7xl flex flex-col justify-between">
         {/* 1. HERO SECTION */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="w-full flex flex-col items-start mb-24"
-        >
+        <div className="w-full flex flex-col items-start mb-24">
           <motion.div
             variants={itemVariants}
             className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-4"
@@ -104,7 +110,7 @@ const LandingPage = ({ onExploreMap, onSignIn }: LandingPageProps) => {
               </span>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
 
         {/* 2. PERFORMANCE METRICS GRID */}
         <motion.div
@@ -368,7 +374,7 @@ const LandingPage = ({ onExploreMap, onSignIn }: LandingPageProps) => {
           </button>
         </motion.div>
       </main>
-    </div>
+    </motion.div>
   );
 };
 

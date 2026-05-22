@@ -14,6 +14,7 @@ import { useAllCulturalSites } from '../hooks/data/useCulturalSitesQueries';
 const HomePage = () => {
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [showMap, setShowMap] = useState(false);
+  const [isAnimationDone, setIsAnimationDone] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,7 +25,7 @@ const HomePage = () => {
     setIsCheckingSession(false);
   }, []);
 
-  const isPreFetchTarget = !isCheckingSession && !showMap;
+  const isPreFetchTarget = !isCheckingSession && !showMap && isAnimationDone;
   useAllCulturalSites(isPreFetchTarget);
 
   const handleExploreMap = () => {
@@ -53,6 +54,7 @@ const HomePage = () => {
             <LandingPage
               onExploreMap={handleExploreMap}
               onSignIn={() => navigate('/sign-in')}
+              onAnimationComplete={() => setIsAnimationDone(true)}
             />
           </motion.div>
         ) : (
