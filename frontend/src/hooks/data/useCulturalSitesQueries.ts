@@ -34,7 +34,8 @@ export const useAllCulturalSites = (
     queryKey: ['culturalSites', params],
     queryFn: () => fetchAllCulturalSites(params), 
     enabled, 
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
     placeholderData: keepPreviousData,
   });
 };
