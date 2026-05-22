@@ -21,15 +21,17 @@ The primary focus of this iteration was addressing performance bottlenecks — b
 ## 📊 Lighthouse Scores (Production)
 
 > Measured on the live deployment. 
-<img width="442" height="97" alt="Lighthouse desktop" src="https://github.com/user-attachments/assets/ad50240b-9259-4a9d-b7ad-ca9be1c89b90" />
+<img width="442" height="97" alt="Lighthouse desktop" src="https://github.com/user-attachments/assets/b59be200-91e2-4084-ba7c-fb2b0b7de8bf" />
+
 <br/>
-<img width="442" height="97" alt="Lighthouse mobile" src="https://github.com/user-attachments/assets/f6db58de-97db-405a-8ed8-e68c7c32de79" />
+<img width="442" height="97" alt="Lighthouse mobile" src="https://github.com/user-attachments/assets/51cff568-08a0-4cb1-b0ae-d89276fc7b53" />
+
 
 
 | Category | Desktop | Mobile |
 | :--- | :--- | :--- |
-| **Performance** | 96 | 72 |
-| **Accessibility** | 100 | 100 |
+| **Performance** | 99 | 83 |
+| **Accessibility** | 89 | 93 |
 | **Best Practices** | 100 | 100 |
 | **SEO** | 100 | 100 |
 
@@ -279,17 +281,23 @@ The complete pruned dataset for 17k records is approximately **4MB** — negligi
 
 ---
 
-### 5. Prefetching Flow
 
-Data was originally fetched after navigating to `MapPage`, causing a ~1.5s blank map with a loading spinner if the user zoomed in immediately. This was resolved by hoisting the fetch to the entry gateway (`HomePage`):
+### 5. Prefetching Flow (LOD & Animation Pipeline)
 
+Data was originally fetched after navigating to `MapPage`, causing a ~1.5s blank map with a loading spinner if the user zoomed in immediately. This was resolved by hoisting the fetch execution to the entry gateway (`HomePage`) and piping it directly into the Framer Motion layout lifecycle via the `onAnimationComplete` event boundary:
 ```
 User lands on HomePage
-  └── Background fetch begins (TanStack Query prefetch)
-        └── User reads landing page (~2–3s)
-              └── User clicks "Explore Map"
-                    └── Data already cached → markers initialize immediately, no spinner
+└── Layout animation triggers (Staggered UI entry)
+└── Animation completes (onAnimationComplete callback fires)
+└── Background fetch begins (Asynchronous TanStack Query prefetch)
+└── User reads landing metrics (~2–3s)
+└── User clicks "Explore Map"
+└── Data already cached → markers initialize immediately, no spinner
 ```
+By decoupling the data stream from component mounting and binding it instead to the UI layout finish line, the application avoids competing with the main thread during initial heavy hydration. 
+
+This optimization directly addresses resource contention on mobile devices, protecting the core visual frame rate (60fps) while guaranteeing instant marker initialization upon view change. As a direct result, **Lighthouse Mobile Performance scores improved from 72 to 83**, reducing Total Blocking Time (TBT) and First Contentful Paint (FCP) latency.
+
 
 ---
 
