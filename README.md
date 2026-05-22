@@ -1,16 +1,14 @@
 # 🏛️ Berlin Cultural Heritage Map 
 
-[![Frontend - Vercel](https://img.shields.io/badge/Frontend-Vercel-black?style=flat-square&logo=vercel)](https://cultural-heritage-map.vercel.app/)
-[![Backend - Render](https://img.shields.io/badge/Backend-Render-blue?style=flat-square&logo=render)](https://cultural-heritage-map.onrender.com/)
-![TypeScript](https://img.shields.io/badge/Frontend-TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)
-![JavaScript](https://img.shields.io/badge/Backend-JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
-![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)
-![Express](https://img.shields.io/badge/Express.js-000000?style=flat-square&logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)
-![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white)
-![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat-square&logo=playwright&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
-![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat-square&logo=github-actions&logoColor=white)
+## 🛠️ Tech Stack & Deployment
+
+| Category | Tech |
+| :--- | :--- |
+| **Deployment** | [![Vercel](https://img.shields.io/badge/Frontend_Vercel-000000?style=flat-square&logo=vercel&logoColor=white)](https://cultural-heritage-map.vercel.app/) [![Render](https://img.shields.io/badge/Backend_Render-46E3B7?style=flat-square&logo=render&logoColor=white)](https://cultural-heritage-map.onrender.com/) |
+| **Frontend** | ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white) |
+| **Backend** | ![Express](https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=black) ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white) |
+| **DevOps & CI/CD** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat-square&logo=github-actions&logoColor=white) |
+| **Testing** | ![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white) ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat-square&logo=playwright&logoColor=white) |
 
 This web application visualizes **17,535 cultural heritage sites across Berlin**.
 
@@ -23,13 +21,25 @@ The primary focus of this iteration was addressing performance bottlenecks — b
 ## 📊 Lighthouse Scores (Production)
 
 > Measured on the live deployment. 
+<img width="442" height="97" alt="Lighthouse desktop" src="https://github.com/user-attachments/assets/ad50240b-9259-4a9d-b7ad-ca9be1c89b90" />
+<br/>
+<img width="442" height="97" alt="Lighthouse mobile" src="https://github.com/user-attachments/assets/f6db58de-97db-405a-8ed8-e68c7c32de79" />
+
 
 | Category | Desktop | Mobile |
 | :--- | :--- | :--- |
-| **Performance** | 96 | 71 |
+| **Performance** | 96 | 72 |
 | **Accessibility** | 100 | 100 |
 | **Best Practices** | 100 | 100 |
 | **SEO** | 100 | 100 |
+
+While our Desktop environment achieves an excellent score of **96**, the Mobile environment currently stands at **70**. This performance discrepancy is a common occurrence in Lighthouse auditing due to the following technical factors:
+
+1. **Emulated Hardware & CPU Throttling**
+   Lighthouse evaluates the Mobile score by simulating a budget Android device (typically equivalent to a Moto G Power) with **4x CPU throttling**. The complex JavaScript execution and rendering processes of our heritage map feature require more processing power, which naturally causes a bottleneck on emulated lower-end mobile hardware compared to a powerful desktop CPU.
+
+2. **Network Throttling Simulation**
+   The Mobile audit applies a simulated **Slow 4G network** profile. Because our application initially fetches maps, historical data, and related assets, the slower network speed stretches our **First Contentful Paint (FCP) to 3.1s** and **Largest Contentful Paint (LCP) to 6.7s** on mobile, whereas the desktop benefits from high-speed, unthrottled connections.
 
 ---
 
