@@ -32,8 +32,8 @@ export const useAllCulturalSites = (
 ) => {
   return useQuery<Place[], Error>({
     queryKey: ['culturalSites', params],
-    queryFn: () => fetchAllCulturalSites(params), 
-    enabled, 
+    queryFn: () => fetchAllCulturalSites(params),
+    enabled,
     staleTime: 1000 * 60 * 10,
     gcTime: 1000 * 60 * 30,
     placeholderData: keepPreviousData,
