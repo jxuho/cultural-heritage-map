@@ -32,8 +32,8 @@ export const useAllCulturalSites = (
 ) => {
   return useQuery<Place[], Error>({
     queryKey: ['culturalSites', params],
-    queryFn: () => fetchAllCulturalSites(params), // API 호출 함수
-    enabled, // 여기서 boolean 값을 사용
+    queryFn: () => fetchAllCulturalSites(params), 
+    enabled, 
     staleTime: 1000 * 60 * 5,
     placeholderData: keepPreviousData,
   });
