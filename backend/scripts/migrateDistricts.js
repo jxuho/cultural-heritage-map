@@ -12,22 +12,28 @@ const CulturalSite = require('../models/CulturalSite');
 const migrateDistricts = async () => {
   try {
     // ⚠️ 내부의 mongoose.connect(...) 구문은 app.js와 중복되므로 과감히 제거합니다!
-    
+
     const districtsPath = path.join(
       __dirname,
       '../data/berlin_district_boundary.geojson',
     );
-    
+
     if (!fs.existsSync(districtsPath)) {
-      console.log('⚠️ 구역 경계 GeoJSON 파일이 없어 마이그레이션을 건너뜁니다.');
+      console.log(
+        '⚠️ 구역 경계 GeoJSON 파일이 없어 마이그레이션을 건너뜁니다.',
+      );
       return;
     }
-    
+
     const districtsData = JSON.parse(fs.readFileSync(districtsPath, 'utf8'));
     const sites = await CulturalSite.find({});
-    
+
     // 만약 이미 마이그레이션이 되어 있는 상태라면 굳이 돌릴 필요가 없으므로 체크 로직 추가 (선택)
-    if (sites.length > 0 && sites[0].address?.district && sites[0].address.district !== 'Unknown') {
+    if (
+      sites.length > 0 &&
+      sites[0].address?.district &&
+      sites[0].address.district !== 'Unknown'
+    ) {
       console.log('✅ 이미 구역 마이그레이션이 완료되어 있습니다. 패스합니다.');
       return;
     }
@@ -90,10 +96,14 @@ const migrateDistricts = async () => {
       const chunk = bulkOperations.slice(i, i + chunkSize);
       await CulturalSite.bulkWrite(chunk);
       processedCount += chunk.length;
-      console.log(`⏳ Progress: ${processedCount}/${bulkOperations.length} sites updated...`);
+      console.log(
+        `⏳ Progress: ${processedCount}/${bulkOperations.length} sites updated...`,
+      );
     }
 
-    console.log(`\n✨ District Migration Completed! ${bulkOperations.length} sites updated.`);
+    console.log(
+      `\n✨ District Migration Completed! ${bulkOperations.length} sites updated.`,
+    );
   } catch (error) {
     console.error('❌ District Migration failed:', error);
   }

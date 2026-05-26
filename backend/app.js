@@ -118,10 +118,10 @@ mongoose
     }
 
     // boundary load
-    // 1. 현재 타겟 도시 설정 (기본값: berlin)
+    // 1. Set current target city (default: berlin)
     const currentCity = process.env.CITY_NAME || 'berlin';
 
-    // 2. 도시 경계 로드
+    // 2. city ​​border load
     try {
       loadCityBoundary(currentCity);
       console.log(
@@ -129,8 +129,6 @@ mongoose
       );
     } catch (error) {
       console.error(`Failed to load ${currentCity} boundary data:`, error);
-      // 필수 데이터라면 서버를 끄는 것도 방법이지만,
-      // 일단 로그만 남기고 진행하도록 유연하게 대처합니다.
     }
     // Run cron scheduler
     cron.schedule(
@@ -140,7 +138,6 @@ mongoose
           `Weekly Overpass data update task for ${currentCity} started...`,
         );
         try {
-          // overpassUpdater 내부에서 currentCity를 받도록 수정되어야 함
           await overpassUpdater(currentCity);
           console.log(
             `Weekly Overpass data update task for ${currentCity} completed successfully.`,
@@ -158,7 +155,7 @@ mongoose
       },
     );
     console.log('Overpass data update scheduled for every Sunday 00:00.');
-    
+
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
