@@ -80,7 +80,10 @@ cp backend/.env.example backend/.env   # Configure your environment variables
 docker-compose up --build
 ```
 
-> **Auto-Seeding:** If the database is empty on initial startup, the backend automatically seeds it with 17,500+ Berlin cultural heritage sites via the Overpass API.
+💡 Automated Data Pipeline (Initial Startup): > If the database is empty on initial startup, the backend automatically triggers an idempotent data pipeline:
+  1. seedIfEmpty(): Fetches 17,500+ Berlin cultural heritage sites via the Overpass API (or local GeoJSON backups).
+  2. migrateDistricts(): Sequentially executes a bulk write operation (bulkWrite) using @turf polygon calculations to map each site to its corresponding Berlin administrative district.
+  3. Server Ready: Once the data configuration is fully finalized, the Express server initializes.
 
 ---
 
@@ -402,6 +405,7 @@ JWT_REFRESH_COOKIE_EXPIRES_IN=7
 GOOGLE_CLIENT_ID=your_google_oauth_client_id
 GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
 GOOGLE_CALLBACK_URL=http://localhost:5000/api/v1/auth/google/callback
+CITY_NAME=berlin
 ```
 
 **Step 2: Start Containers**
