@@ -53,8 +53,10 @@ const seedIfEmpty = async () => {
     await importGeojson(false, 'berlin');
 
     console.log('✅ Seeding process completed successfully.');
+    return true; 
   } catch (err) {
     console.error('❌ Error during conditional seeding:', err);
+    return false;
   }
 };
 

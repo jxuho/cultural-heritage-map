@@ -1,12 +1,49 @@
 services:
+  # 1. Database Service (MongoDB with Replica Set)
   mongodb:
     image: mongo:latest
     container_name: mongodb_dev
-    hostname: localhost
     ports:
       - "27017:27017"
     command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27017'}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Backend Service
+  backend:
+    build:
+      context: ./backend 
+      dockerfile: Dockerfile
+    container_name: backend_dev
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app        
+      - /app/node_modules
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/your_db_name?replicaSet=rs0
+      - NODE_ENV=development
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  # 3. Frontend Service
+  frontend:
+    build:
+      context: ./frontend 
+      dockerfile: Dockerfile
+    container_name: frontend_dev
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000 
+    depends_on:
+      - backend
+
 volumes:
   mongo_data:

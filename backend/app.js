@@ -31,6 +31,7 @@ const reviewsRoutes = require('./routes/reviewsRoutes');
 const { loadCityBoundary } = require('./utils/locationUtils');
 
 const seedIfEmpty = require('./utils/seedIfEmpty');
+const migrateDistricts = require('./scripts/migrateDistricts');
 
 // cron-related files (scheduling)
 const cron = require('node-cron');
@@ -109,7 +110,11 @@ mongoose
     console.log('Connected to MongoDB');
 
     if (process.env.NODE_ENV !== 'production') {
-      await seedIfEmpty();
+      const isSeeded = await seedIfEmpty();
+      if (isSeeded) {
+        console.log('🔄 Starting District Migration Check...');
+        await migrateDistricts();
+      }
     }
 
     // boundary load
@@ -153,7 +158,7 @@ mongoose
       },
     );
     console.log('Overpass data update scheduled for every Sunday 00:00.');
-
+    
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
