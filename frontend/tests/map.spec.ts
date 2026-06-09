@@ -1,105 +1,184 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page, Locator } from '@playwright/test';
 
-// Common functions for entering the map
-async function navigateToMap(page: Page) {
-  await page.goto('/');
-  // Button click on landing page
-  const exploreButton = page.getByRole('button', { name: /Explore Map/i });
-  await exploreButton.click();
+const AUTH_REFRESH_ENDPOINT = '**/auth/refresh';
 
-  // waiting for loading
-  await expect(page.getByText('Loading the Map...')).not.toBeVisible({
-    timeout: 15000,
-  });
-  // Check map container
-  await expect(page.locator('.leaflet-container')).toBeVisible();
+const SELECTORS = {
+  map: '.leaflet-container',
+  districtLayerPath: '.leaflet-overlay-pane path',
+  individualMarker: '.leaflet-marker-icon.custom-div-icon',
+  sidePanel: 'aside',
+} as const;
 
-  // 실제 district layer가 렌더될 때까지 기다리기
-  await expect(page.locator('.leaflet-overlay-pane path').first()).toBeAttached(
-    {
-      timeout: 30000,
-    },
-  );
+const TEST_POINTS = {
+  contextMenu: { x: 500, y: 500 },
+} as const;
+
+type MockUser = {
+  username: string;
+  role: 'admin' | 'user';
+};
+
+function mapContainer(page: Page): Locator {
+  return page.locator(SELECTORS.map);
 }
 
-test.describe('Step-by-Step Map Flow @map', () => {
-  test.beforeEach(async ({ page }) => {
-    await navigateToMap(page); // "Explore Map" 클릭 및 로딩 대기
+function districtPaths(page: Page): Locator {
+  return page.locator(SELECTORS.districtLayerPath);
+}
+
+function individualMarkers(page: Page): Locator {
+  return page.locator(SELECTORS.individualMarker);
+}
+
+function sidePanel(page: Page): Locator {
+  return page.locator(SELECTORS.sidePanel);
+}
+
+function contextMenu(page: Page): Locator {
+  return page.getByTestId('map-context-menu');
+}
+
+async function mockGuestUser(page: Page): Promise<void> {
+  await page.route(AUTH_REFRESH_ENDPOINT, async (route) => {
+    await route.fulfill({
+      status: 401,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'fail',
+        message: 'Unauthorized',
+      }),
+    });
+  });
+}
+
+async function mockAuthenticatedUser(page: Page, user: MockUser): Promise<void> {
+  await page.route(AUTH_REFRESH_ENDPOINT, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'success',
+        data: { user },
+      }),
+    });
+  });
+}
+
+async function navigateToMap(page: Page): Promise<void> {
+  await page.goto('/');
+
+  await test.step('Enter the map from the landing page', async () => {
+    await page.getByRole('button', { name: /explore map/i }).click();
   });
 
-  test('Should transition from District to Cluster and open SidePanel by clicking an individual marker', async ({
-    page,
-  }) => {
-    // 1. 명확한 클래스 기반 로케이터 정의
-    const districtPaths = page.locator('.leaflet-overlay-pane path');
-    const zoomInButton = page.getByRole('button', { name: /Zoom in/i });
+  await test.step('Wait until the map is loaded', async () => {
+    await expect(page.getByText('Loading the Map...')).toBeHidden({
+      timeout: 15_000,
+    });
 
-    // 개별 마커와 사이드 패널 로케이터
-    const individualMarker = page.locator(
-      '.leaflet-marker-icon.custom-div-icon',
-    );
-    const sidePanel = page.locator('aside');
+    await expect(mapContainer(page)).toBeVisible();
 
-    // 2. 초기 상태 확인 (행정구역 마커 표시)
-    await expect(districtPaths.first()).toBeVisible({ timeout: 10000 });
+    await expect(
+      districtPaths(page).first(),
+      'Expected district layer to be rendered after map loading',
+    ).toBeVisible({
+      timeout: 30_000,
+    });
+  });
+}
 
-    // 3. 줌인 버튼을 눌러 개별 마커가 보이는 레벨까지 진입
-    for (let i = 0; i < 3; i++) {
-      await zoomInButton.click();
-      await page.waitForTimeout(500);
+async function zoomInUntilIndividualMarkersAreVisible(page: Page): Promise<void> {
+  const zoomInButton = page.getByRole('button', { name: /zoom in/i });
+  const maxZoomAttempts = 5;
+
+  for (let attempt = 0; attempt < maxZoomAttempts; attempt++) {
+    if (await individualMarkers(page).first().isVisible()) {
+      return;
     }
 
-    // 4. 행정구역은 사라지고, 우리가 클릭해야 할 '개별 마커'가 떴는지 확인
-    await expect(districtPaths.first()).not.toBeVisible();
-    await expect(individualMarker.first()).toBeVisible();
+    await zoomInButton.click();
 
-    // 5. 정확하게 '개별 마커'를 딱 한 번 클릭하여 사이드 패널 트리거
-    await individualMarker.first().click();
+    await expect(
+      mapContainer(page),
+      'Expected map to remain visible after zooming',
+    ).toBeVisible();
+  }
 
-    // 6. 사이드 패널이 정상적으로 열리는지 검증
-    await expect(sidePanel).toBeVisible({ timeout: 5000 });
+  await expect(
+    individualMarkers(page).first(),
+    `Expected individual markers to appear after ${maxZoomAttempts} zoom attempts`,
+  ).toBeVisible({
+    timeout: 10_000,
   });
-});
+}
 
-test.describe('Guest User Constraints @map', () => {
+async function openMapContextMenu(page: Page): Promise<void> {
+  await mapContainer(page).click({
+    button: 'right',
+    position: TEST_POINTS.contextMenu,
+  });
+}
+
+test.describe('Map flow @map', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/auth/refresh', (route) =>
-      route.fulfill({ status: 401 }),
-    );
     await navigateToMap(page);
   });
 
-  test('Guest users should not see context menu on right-click', async ({
+  test('opens the side panel when an individual marker is clicked', async ({
     page,
   }) => {
-    await page
-      .locator('.leaflet-container')
-      .click({ button: 'right', position: { x: 300, y: 300 } });
-    await expect(page.getByTestId('map-context-menu')).not.toBeVisible();
+    await test.step('Given district markers are visible initially', async () => {
+      await expect(districtPaths(page).first()).toBeVisible();
+      await expect(sidePanel(page)).toBeHidden();
+    });
+
+    await test.step('When the user zooms in until individual markers appear', async () => {
+      await zoomInUntilIndividualMarkersAreVisible(page);
+    });
+
+    await test.step('Then district layer disappears and individual markers are visible', async () => {
+      await expect(districtPaths(page).first()).toBeHidden();
+      await expect(individualMarkers(page).first()).toBeVisible();
+    });
+
+    await test.step('When the user clicks an individual marker', async () => {
+      await individualMarkers(page).first().click();
+    });
+
+    await test.step('Then the side panel opens', async () => {
+      await expect(sidePanel(page)).toBeVisible({
+        timeout: 5_000,
+      });
+    });
   });
 });
 
-test.describe('Authenticated User Features @map', () => {
+test.describe('Guest user constraints @map', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/auth/refresh', (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          status: 'success',
-          data: { user: { username: 'AdminUser', role: 'admin' } },
-        }),
-      }),
-    );
+    await mockGuestUser(page);
     await navigateToMap(page);
   });
 
-  test('Logged-in user should see context menu on right-click', async ({
-    page,
-  }) => {
-    await page
-      .locator('.leaflet-container')
-      .click({ button: 'right', position: { x: 500, y: 500 } });
-    await expect(page.getByTestId('map-context-menu')).toBeVisible();
+  test('does not show the map context menu on right-click', async ({ page }) => {
+    await openMapContextMenu(page);
+
+    await expect(contextMenu(page)).toBeHidden();
+  });
+});
+
+test.describe('Authenticated user features @map', () => {
+  test.beforeEach(async ({ page }) => {
+    await mockAuthenticatedUser(page, {
+      username: 'AdminUser',
+      role: 'admin',
+    });
+
+    await navigateToMap(page);
+  });
+
+  test('shows the map context menu on right-click', async ({ page }) => {
+    await openMapContextMenu(page);
+
+    await expect(contextMenu(page)).toBeVisible();
   });
 });
