@@ -12,7 +12,7 @@ test.describe('Homepage Test', () => {
     await expect(page).toHaveTitle(/Cultural Heritage Map/);
 
     // Check for presence of header or specific text
-    const header = page.getByRole('banner'); 
+    const header = page.getByRole('banner');
     await expect(header).toBeVisible();
   });
 

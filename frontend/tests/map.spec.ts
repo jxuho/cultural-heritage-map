@@ -51,7 +51,10 @@ async function mockGuestUser(page: Page): Promise<void> {
   });
 }
 
-async function mockAuthenticatedUser(page: Page, user: MockUser): Promise<void> {
+async function mockAuthenticatedUser(
+  page: Page,
+  user: MockUser,
+): Promise<void> {
   await page.route(AUTH_REFRESH_ENDPOINT, async (route) => {
     await route.fulfill({
       status: 200,
@@ -87,7 +90,9 @@ async function navigateToMap(page: Page): Promise<void> {
   });
 }
 
-async function zoomInUntilIndividualMarkersAreVisible(page: Page): Promise<void> {
+async function zoomInUntilIndividualMarkersAreVisible(
+  page: Page,
+): Promise<void> {
   const zoomInButton = page.getByRole('button', { name: /zoom in/i });
   const maxZoomAttempts = 5;
 
@@ -159,7 +164,9 @@ test.describe('Guest user constraints @map', () => {
     await navigateToMap(page);
   });
 
-  test('does not show the map context menu on right-click', async ({ page }) => {
+  test('does not show the map context menu on right-click', async ({
+    page,
+  }) => {
     await openMapContextMenu(page);
 
     await expect(contextMenu(page)).toBeHidden();
