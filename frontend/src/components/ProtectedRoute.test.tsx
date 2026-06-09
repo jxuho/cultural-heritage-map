@@ -49,6 +49,7 @@ describe('ProtectedRoute', () => {
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
 
+  // 네거티브 테스트: 인증되지 않은 사용자는 /sign-in으로 리디렉션됩니다.
   test('Redirect unauthenticated users to /sign-in', () => {
     (useAuthStore as any).mockReturnValue({
       isAuthenticated: false,
@@ -71,6 +72,19 @@ describe('ProtectedRoute', () => {
     expect(screen.getByText('Home Page')).toBeInTheDocument();
   });
 
+  // 엣지 케이스 테스트: requiredRole이 존재하지만 사용자 역할이 없는 경우 홈으로 리디렉션됩니다.
+  test('If requiredRole exists but user role is missing, redirect to home.', () => {
+    (useAuthStore as any).mockReturnValue({
+      isAuthenticated: true,
+      loading: false,
+      user: {},
+    });
+
+    renderWithRouter({ requiredRole: 'admin' });
+    expect(screen.getByText('Home Page')).toBeInTheDocument();
+  });
+
+  // 포지티프 테스트: 인증되고 역할이 일치하는 사용자는 자식 컴포넌트를 렌더링합니다.
   test('If authenticated and the roles match, render the child component.', () => {
     (useAuthStore as any).mockReturnValue({
       isAuthenticated: true,
