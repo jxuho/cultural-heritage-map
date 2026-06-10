@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:ci": "vitest run",
+    "test:ci": "vitest run --reporter=default --reporter=junit --outputFile.junit=./vitest-report/junit.xml",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
     "format": "prettier --write .",

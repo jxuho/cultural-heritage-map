@@ -32,6 +32,15 @@ jobs:
       - name: Run Unit Tests
         run: npm run test:ci
 
+      - name: Upload Vitest Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vitest-report
+          path: ./frontend/vitest-report/
+          if-no-files-found: warn
+          retention-days: 30
+
       # --- Playwright E2E Test Steps ---
       - name: Install Playwright Browser
         run: npx playwright install chromium --with-deps
