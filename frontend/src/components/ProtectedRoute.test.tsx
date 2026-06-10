@@ -45,7 +45,6 @@ describe('ProtectedRoute', () => {
     });
 
     renderWithRouter();
-    // Assuming that there is 'loading-spinner' or a specific text inside the LoadingSpinner
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   });
 
