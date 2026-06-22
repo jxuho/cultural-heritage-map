@@ -1,32 +1,65 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FaArrowUp } from 'react-icons/fa';
+
+const VISIBILITY_THRESHOLD = 300;
+
+const getScrollableParent = (element: HTMLElement | null) => {
+  let parent = element?.parentElement;
+
+  while (parent) {
+    const { overflowY } = window.getComputedStyle(parent);
+    const canScroll = /(auto|scroll|overlay)/.test(overflowY);
+
+    if (canScroll && parent.scrollHeight > parent.clientHeight) {
+      return parent;
+    }
+
+    parent = parent.parentElement;
+  }
+
+  return window;
+};
+
+const isWindow = (
+  scrollTarget: HTMLElement | Window,
+): scrollTarget is Window => {
+  return scrollTarget === window;
+};
+
+const getScrollTop = (scrollTarget: HTMLElement | Window) => {
+  return isWindow(scrollTarget) ? scrollTarget.scrollY : scrollTarget.scrollTop;
+};
 
 const GoToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
-
-  const toggleVisibility = () => {
-    // 윈도우 스크롤 외에도 컨테이너 스크롤 대응을 위해 체크
-    if (window.scrollY > 300) {
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
-    }
-  };
+  const buttonContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToTop = () => {
-    window.scrollTo({
+    const scrollTarget = getScrollableParent(buttonContainerRef.current);
+
+    scrollTarget.scrollTo({
       top: 0,
       behavior: 'smooth',
     });
   };
 
   useEffect(() => {
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
+    const scrollTarget = getScrollableParent(buttonContainerRef.current);
+    const toggleVisibility = () => {
+      setIsVisible(getScrollTop(scrollTarget) > VISIBILITY_THRESHOLD);
+    };
+
+    toggleVisibility();
+    scrollTarget.addEventListener('scroll', toggleVisibility, {
+      passive: true,
+    });
+
+    return () => scrollTarget.removeEventListener('scroll', toggleVisibility);
   }, []);
 
   return (
     <div
+      ref={buttonContainerRef}
       className={`fixed bottom-8 right-8 z-[1000] transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
     >
       <button

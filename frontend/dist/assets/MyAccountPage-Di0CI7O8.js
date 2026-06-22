@@ -1,0 +1,1 @@
+import{j as o}from"./index-oxHGIh_S.js";import{O as t}from"./react-vendor-C_fMrTK7.js";import{G as m}from"./GoToTopButton-C9papO_1.js";import"./leaflet-vendor-gaosQjZ_.js";import"./ui-vendor-Dya8cApo.js";const i=()=>o.jsxs("div",{className:"w-full p-4 md:p-12 mx-auto max-w-420",children:[o.jsx(t,{}),o.jsx(m,{})]});export{i as default};

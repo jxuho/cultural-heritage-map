@@ -130,7 +130,7 @@ const ListPage: React.FC = () => {
       {/* Footer Decoration */}
       <footer className="border-t border-black bg-white p-6 text-center">
         <p className="text-[9px] font-mono text-gray-400 uppercase tracking-widest">
-          Archival System v3.0 // Updated 2024
+          Archival System v3.0 // Updated 2026
         </p>
       </footer>
       <GoToTopButton />
