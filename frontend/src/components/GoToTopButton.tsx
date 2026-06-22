@@ -60,7 +60,7 @@ const GoToTopButton = () => {
   return (
     <div
       ref={buttonContainerRef}
-      className={`fixed bottom-8 right-8 z-[1000] transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+      className={`fixed bottom-8 right-8 z-1000 transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
     >
       <button
         onClick={scrollToTop}

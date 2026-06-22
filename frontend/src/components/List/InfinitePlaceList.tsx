@@ -69,7 +69,7 @@ const InfinitePlaceList: React.FC<InfinitePlaceListProps> = ({
       >
         {visibleCount < items.length ? (
           <>
-            <div className="w-12 h-[1px] bg-black animate-pulse" />
+            <div className="w-12 h-px bg-black animate-pulse" />
             <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-black animate-pulse">
               Retrieving Archives
             </p>
