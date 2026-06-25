@@ -172,7 +172,7 @@ docker-compose up --build
 
 **Icon Caching via Flyweight Pattern (`iconFactory.ts`)**
 
-Rendering 17k markers repeatedly triggered `ReactDOMServer.renderToString` per marker, causing severe CPU load. Category icons are now cached in singleton-style pools (`iconCache`, `selectedIconCache`) and reused by reference. This reduced serialization calls from 17,000 to ~20 (categories × 2) — a **99.9% reduction**.
+Rendering 17k markers repeatedly triggered `ReactDOMServer.renderToString` per marker, causing severe CPU load. Category icons are now cached in singleton-style pools (`iconCache`, `selectedIconCache`) and reused by reference. This reduced serialization calls from 17,000 to ~26 (categories × 2) — a **99.9% reduction**.
 
 **Supercluster Spatial Indexing**
 
