@@ -195,9 +195,6 @@ CPU-heavy computations are fully decoupled from the main UI thread:
                └── Web Worker (cluster.worker.ts): R-Tree indexing + multi-zoom cluster calculations
 ```
 
-- **Frame Rate Protection via rAF:** High-frequency map events (rapid panning) are throttled with `requestAnimationFrame`, ensuring at most one data update per frame (60 FPS target).
-- **Debounce Guard:** A 300ms `lodash.debounce` at the end of the calculation chain ensures the final accurate cluster state is always rendered after panning stops.
-
 ---
 
 ### 3. Backend Query Optimization Pipeline
