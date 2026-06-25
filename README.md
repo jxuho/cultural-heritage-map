@@ -174,14 +174,13 @@ docker-compose up --build
 
 Rendering 17k markers repeatedly triggered `ReactDOMServer.renderToString` per marker, causing severe CPU load. Category icons are now cached in singleton-style pools (`iconCache`, `selectedIconCache`) and reused by reference. This reduced serialization calls from 17,000 to ~20 (categories × 2) — a **99.9% reduction**.
 
-**Component Isolation & Reference Integrity (`CulturalSiteMarkers.tsx`)**
-
-The full marker array is wrapped in `useMemo` to prevent recalculation on unrelated UI changes (e.g., toggling the sidebar). Individual markers use `React.memo` with a custom comparator that restricts re-renders to changes in `isSelected` or the site's own data — the remaining 16,999 elements skip virtual DOM diffing entirely.
-
 **Supercluster Spatial Indexing**
 
 Standard React lifecycle-based clustering performs a full O(n) scan per map interaction. Supercluster pre-computes an R-Tree index across all zoom levels (0–18) at startup, reducing viewport queries to O(log n). Active DOM marker count stays between **100–300** at all times regardless of total dataset size.
 
+**Viewport-Scoped Marker Rendering (`CulturalSiteMarkers.tsx`)**
+
+Supercluster runs inside a Web Worker and returns only the clusters or individual markers needed for the current map bounds and zoom level. This prevents React from creating the full 17k marker tree on every map interaction. Individual visible markers are still isolated with `React.memo`, so selection changes only re-render affected marker components.
 ---
 
 ### 2. Thread Offloading & Frame Rate Control
