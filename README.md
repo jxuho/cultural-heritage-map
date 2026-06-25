@@ -181,6 +181,7 @@ Standard React lifecycle-based clustering performs a full O(n) scan per map inte
 **Viewport-Scoped Marker Rendering (`CulturalSiteMarkers.tsx`)**
 
 Supercluster runs inside a Web Worker and returns only the clusters or individual markers needed for the current map bounds and zoom level. This prevents React from creating the full 17k marker tree on every map interaction. Individual visible markers are still isolated with `React.memo`, so selection changes only re-render affected marker components.
+
 ---
 
 ### 2. Thread Offloading & Frame Rate Control
