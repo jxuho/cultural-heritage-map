@@ -6,9 +6,9 @@
   },
   "main": "index.js",
   "scripts": {
-    "dev": "node app.js",
+    "dev": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --ignore 'data/*.json' app.js",
+    "start": "nodemon --ignore 'data/*.json' server.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "seed": "node scripts/fetchAndSaveCulturalSites.js && node scripts/importGeojson.js --no-reverse-geocode"

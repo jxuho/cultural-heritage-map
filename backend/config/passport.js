@@ -3,6 +3,19 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User'); // Get User model
 
+const hasGoogleOAuthConfig =
+  process.env.GOOGLE_CLIENT_ID &&
+  process.env.GOOGLE_CLIENT_SECRET &&
+  process.env.GOOGLE_CALLBACK_URL;
+
+if (!hasGoogleOAuthConfig) {
+  console.warn(
+    'Google OAuth strategy was not registered because Google OAuth environment variables are missing.',
+  );
+  module.exports = passport;
+  return;
+}
+
 // Google OAuth 2.0 Strategy Settings
 passport.use(
   new GoogleStrategy(
